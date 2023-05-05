@@ -1,7 +1,7 @@
 import socket
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("0.0.0.0", 8080))
+sock.connect(("167.71.43.13", 8080))
 
 def sendRealTime(): 
     sock.send(ord('<').to_bytes(1, 'little'))#start of msg 0
