@@ -4,7 +4,7 @@ from mysql.connector import Error
 import pandas as pd
 from datetime import datetime
 
-HOST = socket.gethostname()
+HOST = '167.71.43.13'
 PORT = 8080  
 IP = socket.gethostbyname(HOST)
 
