@@ -61,7 +61,7 @@ def multi_threaded_client(connection):
         if not data:
             break
         if data[0] == 60:
-            print(data.decode('utf-8'))
+            print(data)
             print(data[1])
             if data[1] == 0:
                 if data[len(data) - 1] == 62:
