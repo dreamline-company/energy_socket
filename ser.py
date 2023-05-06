@@ -59,11 +59,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.listen()
     conn, addr = s.accept()
     with conn:
+        count = 0
         print(f"Connected by {addr}")
-        while True:
+        while 200 < count:
             data = conn.recv(1024)
             if not data:
                 break
             print(data)
             print(data)
             conn.sendall(b"OK!Recv")
+            count = count + 1
+        s.close()
