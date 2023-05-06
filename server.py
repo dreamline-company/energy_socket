@@ -48,7 +48,7 @@ def insert_controller_data(data):
     cnx = create_server_connection("db-mysql-fra1-01434-do-user-13902982-0.b.db.ondigitalocean.com", "doadmin", "AVNS_YJZHKISaSzqXCi6aSRo")
     cursor = cnx.cursor()
     insert_controller = ("INSERT INTO controller "
-                "(controller_id, current_a, current_b, current_c, timestamp) "
+                "(controller_id, vs, temp_cpu, temp, timestamp) "
                 "VALUES (%s, %s, %s, %s, %s)")
     # Insert new employee
     cursor.execute(insert_controller, data)
