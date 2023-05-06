@@ -15,7 +15,7 @@ def sendRealTime():
     sock.send(ord('>').to_bytes(1, 'little'))#end of msg 8
     
 def sendCtrl():
-    sock.send(ord('<').to_bytes(1, 'little'))#start of msg 0
+    sock.send(ord('<<>>').to_bytes(1, 'little'))#start of msg 0
     sock.send(int('1',16).to_bytes(1, 'little'))#type of msg 1
     sock.send(int('4',16).to_bytes(1, 'little'))#controller_id 2
     sock.send(int('3',16).to_bytes(1, 'little'))#current_a 3
