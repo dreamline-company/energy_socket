@@ -3,6 +3,7 @@ import mysql.connector
 from mysql.connector import Error
 import pandas as pd
 from datetime import datetime
+from _thread import *
 
 HOST = '167.71.43.13'
 PORT = 8080  
