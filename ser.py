@@ -68,5 +68,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print(data)
             print(data)
             conn.sendall(b"OK!Recv")
-            count = count + 1
+            count = count + 0.01
         s.close()
