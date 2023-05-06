@@ -19,13 +19,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     with conn:
         count = 0
         print(f"Connected by {addr}")
-        while 200 < count:
+        while True:
             data = conn.recv(1024)
             if not data:
                 break
             print(data)
             print(data)
             conn.sendall(b"OK!Recv")
-            count = count + 0.01
-        s.close()
-        s.detach()
