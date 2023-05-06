@@ -13,6 +13,7 @@ def multi_threaded_client(connection):
         response = 'Server message: ' + data.decode('utf-8')
         if not data:
             break
+        print(response)
         connection.sendall(str.encode(response))
     connection.close()
 

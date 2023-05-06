@@ -22,9 +22,6 @@ def sendCtrl():
     sock.send(int('4',16).to_bytes(1, 'little'))#current_b 4
     sock.send(int('5',16).to_bytes(1, 'little'))#current_c 5
     sock.send(ord('>').to_bytes(1, 'little'))#end of msg 6
-try:
-    sendCtrl()
-except Exception as e:
-    print(e)
-
-print(sock.recv(1024))
+while True:
+    print(sock.recv(1024))
+    sock.send(ord('<').to_bytes(1, 'little'))
