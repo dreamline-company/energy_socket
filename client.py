@@ -23,5 +23,8 @@ def sendCtrl():
     sock.send(int('5',16).to_bytes(1, 'little'))#current_c 5
     sock.send(ord('>').to_bytes(1, 'little'))#end of msg 6
 while True:
-    print(sock.recv(1024))
+    print('a')
     sock.send(ord('<').to_bytes(1, 'little'))
+
+    print(sock.recv(1024))
+    

@@ -6,7 +6,7 @@ from datetime import datetime
 from _thread import *
 
 HOST = '167.71.43.13'
-PORT = 8080  
+PORT = 8081 
 IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
 ThreadCount = 0
