@@ -5,8 +5,9 @@ import pandas as pd
 from datetime import datetime
 from _thread import *
 
-HOST = '167.71.43.13'
-PORT = 8081 
+HOSTNAME = socket.gethostname()
+HOST = socket.gethostbyname(HOSTNAME)
+PORT = 8070 
 IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
 ThreadCount = 0
