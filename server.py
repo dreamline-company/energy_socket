@@ -11,6 +11,8 @@ IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
 ThreadCount = 0
 
+MAX_LEN_PACKET = 255
+
 print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
 
@@ -60,25 +62,29 @@ def multi_threaded_client(connection):
         data = connection.recv(1024)
         if not data:
             break
-        if data[0] == 60:
+        checkStartAndEndSymbol = (data[0] == 60 and data[len(data) - 1] == 62)
+        checkValidTypePacket = data[1] in range(1,3)
+        if checkStartAndEndSymbol and checkValidTypePacket and len(data) <= MAX_LEN_PACKET:
+            #< -
+            #1 - 
+            #2 -
+            #> - 
             print(data)
             print(data[1])
-            if data[1] == 0:
-                if data[len(data) - 1] == 62:
-                    calc = data[len(data) - 2]
-                    for i in range (len(data) - 8):
-                        calc |= data[6 + i] << (8 ** (i+1))
-                    #register to dec data[4] << 8 | data[5]
-                    s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
-                    print('iamhere')
-                    insert_realtime_data(s)
-            elif data[1] == 1:
-                if data[len(data) - 1] == 62:
-                    #register to dec data[4] << 8 | data[5]
-                    now = datetime.now()
-                    formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
-                    s = (data[2], data[3], data[4], data[5], formatted_date, data[3], data[4], data[5], formatted_date)
-                    insert_controller_data(s)
+            if data[1] == 1:
+                calc = data[len(data) - 2]
+                for i in range (len(data) - 8):
+                    calc |= data[6 + i] << (8 ** (i+1))
+                #register to dec data[4] << 8 | data[5]
+                s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
+                print('iamhere')
+                insert_realtime_data(s)
+            elif data[1] == 2:
+                #register to dec data[4] << 8 | data[5]
+                now = datetime.now()
+                formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
+                s = (data[2], data[3], data[4], data[5], formatted_date, data[3], data[4], data[5], formatted_date)
+                insert_controller_data(s)
         connection.sendall(b"OK!Recv")
     connection.close()
             
