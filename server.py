@@ -29,7 +29,6 @@ def create_server_connection(host_name, user_name, user_password):
             port=25060,
             ssl_ca='/Users/amirkhanorazbay/Downloads/ca-certificate (1).crt'
         )
-        print("MySQL Database connection successful")
     except Error as err:
         print(f"Error: '{err}'")
 
@@ -39,7 +38,6 @@ def insert_realtime_data(data):
     cnx = create_server_connection("db-mysql-fra1-01434-do-user-13902982-0.b.db.ondigitalocean.com", "doadmin", "AVNS_YJZHKISaSzqXCi6aSRo")
     cursor = cnx.cursor()
     insert_realtime = "INSERT INTO realtime (controller_id, slave_id, register, value) VALUES (%s, %s, %s, %s)"
-    print(data)
     # Insert new employee
     cursor.execute(insert_realtime, data)
     # Make sure data is committed to the database
@@ -60,37 +58,35 @@ def insert_controller_data(data):
     
 def multi_threaded_client(connection, address):
     while True:
-        global data
         try:
             data = connection.recv(1024)
+        
+            if not data:
+                break
+            print('Data in bytes:', data)
+            check_start_and_end_symbol = (data[0] == 60 and data[len(data) - 1] == 62)
+            check_valid_type_packet = data[1] in range(1,3)
+            if check_start_and_end_symbol and check_valid_type_packet and len(data) <= MAX_LEN_PACKET:
+                #< -
+                #1 - 
+                #2 -
+                #> - 
+                if data[1] == 1:
+                    calc = data[len(data) - 2]
+                    for i in range (len(data) - 8):
+                        calc |= data[6 + i] << (8 ** (i+1))
+                    #register to dec data[4] << 8 | data[5]
+                    s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
+                    insert_realtime_data(s)
+                elif data[1] == 2:
+                    #register to dec data[4] << 8 | data[5]
+                    now = datetime.now()
+                    formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
+                    s = (data[2], data[3], data[4], data[5], formatted_date, data[3], data[4], data[5], formatted_date)
+                    insert_controller_data(s)
+            connection.sendall(b"OK!Recv")
         except ConnectionResetError:
-            print(address, ' is reset connection')
-            break
-        if not data:
-            break
-        checkStartAndEndSymbol = (data[0] == 60 and data[len(data) - 1] == 62)
-        checkValidTypePacket = data[1] in range(1,3)
-        if checkStartAndEndSymbol and checkValidTypePacket and len(data) <= MAX_LEN_PACKET:
-            #< -
-            #1 - 
-            #2 -
-            #> - 
-            print(data)
-            if data[1] == 1:
-                calc = data[len(data) - 2]
-                for i in range (len(data) - 8):
-                    calc |= data[6 + i] << (8 ** (i+1))
-                #register to dec data[4] << 8 | data[5]
-                s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
-                print('iamhere')
-                insert_realtime_data(s)
-            elif data[1] == 2:
-                #register to dec data[4] << 8 | data[5]
-                now = datetime.now()
-                formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
-                s = (data[2], data[3], data[4], data[5], formatted_date, data[3], data[4], data[5], formatted_date)
-                insert_controller_data(s)
-        connection.sendall(b"OK!Recv")
+            print(address, 'is reset connection')
     connection.close()
             
 try:
