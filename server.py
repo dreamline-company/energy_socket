@@ -58,9 +58,13 @@ def insert_controller_data(data):
     cursor.close()
     cnx.close()
     
-def multi_threaded_client(connection):
+def multi_threaded_client(connection, address):
     while True:
-        data = connection.recv(1024)
+        global data
+        try:
+            data = connection.recv(1024)
+        except ConnectionResetError:
+            print(address, ' is reset connection')
         if not data:
             break
         checkStartAndEndSymbol = (data[0] == 60 and data[len(data) - 1] == 62)
@@ -71,7 +75,6 @@ def multi_threaded_client(connection):
             #2 -
             #> - 
             print(data)
-            print(data[1])
             if data[1] == 1:
                 calc = data[len(data) - 2]
                 for i in range (len(data) - 8):
@@ -93,13 +96,11 @@ try:
     ServerSideSocket.bind((HOST, PORT))
 except socket.error as e:
     print(str(e))
-print('Socket is listening..')
-ServerSideSocket.listen(5)
+print('Socket is started')
+ServerSideSocket.listen()
 
 while True:
     Client, address = ServerSideSocket.accept()
-    print('Connected to: ' + address[0] + ':' + str(address[1]))
-    start_new_thread(multi_threaded_client, (Client, ))
+    print('Connection from: ' + address[0] + ':' + str(address[1]))
+    start_new_thread(multi_threaded_client, (Client, address))
     ThreadCount += 1
-    print('Thread Number: ' + str(ThreadCount))
-ServerSideSocket.close()
