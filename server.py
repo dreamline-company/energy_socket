@@ -65,6 +65,7 @@ def multi_threaded_client(connection, address):
             data = connection.recv(1024)
         except ConnectionResetError:
             print(address, ' is reset connection')
+            break
         if not data:
             break
         checkStartAndEndSymbol = (data[0] == 60 and data[len(data) - 1] == 62)
