@@ -11,4 +11,4 @@ COPY . /server
 
 EXPOSE 8070
 
-CMD ["python3", "/server/server.py"]
+CMD ["python3", "-u", "/server/server.py"]
