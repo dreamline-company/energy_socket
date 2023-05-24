@@ -54,7 +54,7 @@ def insert_regular_table_data(data):
     main_var = ["object_number", "timestamp_ctr", "timestamp", "temperature", "voltage", "temperature_cpu", "restart_number", "cell_number"]
     discrete_block_prefix = "input_state_"
     discrete_block_columns = [discrete_block_prefix + str(i) for i in range(1,33)]
-    micom_registers = ["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
+    micom_registers = "0140" #["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
     register_data_columns = ['reg_' + register + '_data' for register in micom_registers]
     register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
     combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
