@@ -77,16 +77,26 @@ def multi_threaded_client(connection, address):
             if not data:
                 break
             
-            print('Data in bytes:', data)
+            print('Data in bytes:', data, 'With length of ', len(data))
             
             check_start_and_end_symbol = (data[0] == START_CHARACTER and data[len(data) - 1] == END_CHARACTER)
             check_valid_type_packet = data[1] in range(1,3)
             
             if check_start_and_end_symbol and check_valid_type_packet and len(data) <= MAX_LEN_PACKET:
                 if data[1] == 1:
-                    
-                    s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
-                    insert_realtime_data(s)
+                    now = datetime.now()
+                    object_number = data[2] << 8 | data[3]
+                    temp = data[4]
+                    voltage = data[5]
+                    temp_cpu = data[6]
+                    if data[8] < 256:
+                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], data[8]) + tuple(data[9:41])
+                        print(s)
+                        insert_realtime_data(s)
+                    else:
+                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], data[8]) + tuple(data[9:21])
+                        print(s)
+                        insert_realtime_data(s)
                 elif data[1] == 2:
                     #register to dec data[4] << 8 | data[5]
                     now = datetime.now()
