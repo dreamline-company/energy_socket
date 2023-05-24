@@ -97,7 +97,7 @@ def multi_threaded_client(connection, address):
                         print(s)
                         insert_realtime_data(s)
                     else:
-                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], data[8] << 8 | data[9]) + tuple(data[10:21])
+                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9]))
                         print(s)
                         insert_realtime_data(s)
                 elif data[1] == 2:
