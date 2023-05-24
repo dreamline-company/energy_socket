@@ -7,7 +7,7 @@ WORKDIR /server/
 COPY requirements.txt /server/requirements.txt
 RUN pip3 install -r /server/requirements.txt
 
-COPY . /server
+COPY server.py /server
 
 EXPOSE 8070
 
