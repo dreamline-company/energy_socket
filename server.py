@@ -95,11 +95,11 @@ def multi_threaded_client(connection, address):
                     voltage = data[5]
                     temp_cpu = data[6]
                     if data[8] << 8 | data[9] < 256:
-                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9])) + tuple(bin(data[10])) + tuple([int(i) for i in bin(data[11])[2:]]) + tuple([int(i) for i in bin(data[12])[2:]]) + tuple([int(i) for i in bin(data[13])[2:]])
+                        s = (hex(object_number), now, now, temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9])) + tuple(bin(data[10])) + tuple([int(i) for i in bin(data[11])[2:]]) + tuple([int(i) for i in bin(data[12])[2:]]) + tuple([int(i) for i in bin(data[13])[2:]])
                         print(s)
                         insert_realtime_data(s)
                     else:
-                        s = (hex(object_number), now, now, data[3], temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9]), data[10])
+                        s = (hex(object_number), now, now, temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9]), data[10])
                         print(s)
                         insert_realtime_data(s)
                 elif data[1] == 2:
