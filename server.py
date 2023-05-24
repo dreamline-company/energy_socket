@@ -50,27 +50,29 @@ def insert_realtime_data(data):
 def insert_regular_table_data(data): 
     cnx = create_server_connection("104.248.131.153", "root", "my-secret-pw")
     cursor = cnx.cursor()
-        
-    main_var = ["object_number", "timestamp_ctr", "timestamp", "temperature", "voltage", "temperature_cpu", "restart_number", "cell_number"]
-    discrete_block_prefix = "input_state_"
-    discrete_block_columns = [discrete_block_prefix + str(i) for i in range(1,33)]
-    micom_registers = "0140" #["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
-    register_data_columns = ['reg_' + register + '_data' for register in micom_registers]
-    register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
-    combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
-    regular_table_columns = main_var
-    if data[8] < 256:
-        regular_table_columns += discrete_block_columns
-    else:
-        regular_table_columns += combine_data_value_columns
-    insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * len(regular_table_columns)  + ')'
-        
-    # Insert new employee
-    cursor.execute(insert_controller_sql_statement, data)
-    # Make sure data is committed to the database
-    cnx.commit()
-    cursor.close()
-    cnx.close()
+    try :
+        main_var = ["object_number", "timestamp_ctr", "timestamp", "temperature", "voltage", "temperature_cpu", "restart_number", "cell_number"]
+        discrete_block_prefix = "input_state_"
+        discrete_block_columns = [discrete_block_prefix + str(i) for i in range(1,33)]
+        micom_registers = "0140" #["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
+        register_data_columns = ['reg_' + register + '_data' for register in micom_registers]
+        register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
+        combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
+        regular_table_columns = main_var
+        if data[8] < 256:
+            regular_table_columns += discrete_block_columns
+        else:
+            regular_table_columns += combine_data_value_columns
+        insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * len(regular_table_columns)  + ')'
+            
+        # Insert new employee
+        cursor.execute(insert_controller_sql_statement, data)
+        # Make sure data is committed to the database
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+    except Exception as e:
+        print(e)
     
 def multi_threaded_client(connection, address):
     while True:
