@@ -58,8 +58,11 @@ def insert_regular_table_data(data):
     register_data_columns = ['reg_' + register + '_data' for register in micom_registers]
     register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
     combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
-    regular_table_columns = main_var + discrete_block_columns + combine_data_value_columns
-
+    regular_table_columns = main_var
+    if data[8] < 256:
+        regular_table_columns += discrete_block_columns
+    else:
+        regular_table_columns += combine_data_value_columns
     insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * len(regular_table_columns)  + ')'
         
     # Insert new employee
