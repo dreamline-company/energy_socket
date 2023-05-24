@@ -28,7 +28,7 @@ def create_server_connection(host_name, user_name, user_password):
             host=host_name,
             user=user_name,
             passwd=user_password,
-            database='defaultdb',
+            database='sys',
             port=3306,
         )
     except Error as err:
@@ -84,10 +84,7 @@ def multi_threaded_client(connection, address):
             
             if check_start_and_end_symbol and check_valid_type_packet and len(data) <= MAX_LEN_PACKET:
                 if data[1] == 1:
-                    calc = data[len(data) - 2]
-                    for i in range (len(data) - 8):
-                        calc |= data[6 + i] << (8 ** (i+1))
-                    #register to dec data[4] << 8 | data[5]
+                    
                     s = (data[2], data[3], hex(data[4] << 8 | data[5]), calc)
                     insert_realtime_data(s)
                 elif data[1] == 2:
