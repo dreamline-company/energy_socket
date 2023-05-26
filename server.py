@@ -8,7 +8,7 @@ import itertools
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
-PORT = 8070 
+PORT = 8070
 IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
 ThreadCount = 0
@@ -20,6 +20,11 @@ END_CHARACTER = 62
 print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
 
+def get_binary(data):
+    list_of_bits = []
+    for i in data:
+        list_of_bits += [int(i) for i in  f'{i:08b}']
+    return tuple(list_of_bits)
 
 def create_server_connection(host_name, user_name, user_password):
     connection = None
@@ -59,20 +64,20 @@ def insert_regular_table_data(data):
         register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
         combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
         regular_table_columns = main_var
-        if data[8] < 256:
+        if int(data[8]) < 256:
             regular_table_columns += discrete_block_columns
         else:
             regular_table_columns += combine_data_value_columns
-        insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * len(regular_table_columns)  + ')'
-            
+        insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
         # Insert new employee
         cursor.execute(insert_controller_sql_statement, data)
         # Make sure data is committed to the database
         cnx.commit()
         cursor.close()
         cnx.close()
-    except Exception as e:
-        print(e)
+        print('Inserted with successs')
+    except Exception as err:
+        print(err)
     
 def multi_threaded_client(connection, address):
     while True:
@@ -83,7 +88,6 @@ def multi_threaded_client(connection, address):
                 break
             
             print('Data in bytes:', data, 'With length of ', len(data))
-            
             check_start_and_end_symbol = (data[0] == START_CHARACTER and data[len(data) - 1] == END_CHARACTER)
             check_valid_type_packet = data[1] in range(1,3)
             
@@ -94,14 +98,12 @@ def multi_threaded_client(connection, address):
                     temp = data[4]
                     voltage = data[5]
                     temp_cpu = data[6]
-                    if data[8] << 8 | data[9] < 256:
-                        s = (hex(object_number), now, now, temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9])) + tuple(bin(data[10])) + tuple([int(i) for i in bin(data[11])[2:]]) + tuple([int(i) for i in bin(data[12])[2:]]) + tuple([int(i) for i in bin(data[13])[2:]])
-                        print(s)
-                        insert_realtime_data(s)
+                    if (data[8] << 8 | data[9]) < 256:
+                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], hex(data[8] << 8 | data[9])) + get_binary(data[10:14])
+                        insert_regular_table_data(s)
                     else:
-                        s = (hex(object_number), now, now, temp, voltage, temp_cpu, data[7], hex(data[8] << 8 | data[9]), data[10])
-                        print(s)
-                        insert_realtime_data(s)
+                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], hex(data[8] << 8 | data[9]), data[10])
+                        insert_regular_table_data(s)
                 elif data[1] == 2:
                     #register to dec data[4] << 8 | data[5]
                     now = datetime.now()
