@@ -92,14 +92,14 @@ def multi_threaded_client(connection, address):
             check_valid_type_packet = data[1] in range(1,3)
             
             if check_start_and_end_symbol and check_valid_type_packet and len(data) <= MAX_LEN_PACKET:
+                now = datetime.now()
+                object_number = data[2] << 8 | data[3]
                 if data[1] == 1:
-                    now = datetime.now()
-                    object_number = data[2] << 8 | data[3]
                     temp = data[4]
                     voltage = data[5]
                     temp_cpu = data[6]
                     if (data[8] << 8 | data[9]) < 256:
-                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], hex(data[8] << 8 | data[9])) + get_binary(data[10:14])
+                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], hex(data[8] << 8 | data[9])), get_binary(data[10:14])
                         insert_regular_table_data(s)
                     else:
                         s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], hex(data[8] << 8 | data[9]), data[10])
