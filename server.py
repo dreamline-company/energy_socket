@@ -69,6 +69,9 @@ def insert_regular_table_data(data):
         else:
             regular_table_columns += combine_data_value_columns
         insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
+        print(len(data))
+        print(len(regular_table_columns))
+        print(insert_controller_sql_statement)
         # Insert new employee
         cursor.execute(insert_controller_sql_statement, data)
         # Make sure data is committed to the database
@@ -106,6 +109,7 @@ def multi_threaded_client(connection, address):
                         insert_regular_table_data(s)
                     else:
                         s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, data[10], data[10])
+                        print(s)
                         insert_regular_table_data(s)
                 elif data[1] == 2:
                     #register to dec data[4] << 8 | data[5]
