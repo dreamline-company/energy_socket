@@ -44,7 +44,7 @@ def create_server_connection(host_name, user_name, user_password):
 def insert_realtime_data(data): 
     cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
     cursor = cnx.cursor()
-    insert_realtime = "INSERT INTO realtime (controller_id, slave_id, register, value) VALUES (%s, %s, %s, %s)"
+    insert_realtime = "INSERT INTO dreamline_regular_data (controller_id, slave_id, register, value) VALUES (%s, %s, %s, %s)"
     # Insert new employee
     cursor.execute(insert_realtime, data)
     # Make sure data is committed to the database
@@ -68,7 +68,7 @@ def insert_regular_table_data(data):
             regular_table_columns += discrete_block_columns
         else:
             regular_table_columns += combine_data_value_columns
-        insert_controller_sql_statement = 'INSERT INTO regular_table (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
+        insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
         # Insert new employee
         cursor.execute(insert_controller_sql_statement, data)
         # Make sure data is committed to the database
