@@ -78,6 +78,7 @@ def insert_regular_table_data(data):
         print('Inserted with successs')
     except Exception as err:
         print(err)
+        print(err.with_traceback)
     
 def multi_threaded_client(connection, address):
     while True:
