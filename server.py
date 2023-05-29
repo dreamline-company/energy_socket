@@ -79,6 +79,7 @@ def insert_regular_table_data(data):
     except Exception as err:
         print(err)
         print(err.with_traceback)
+        print(err.__traceback__)
     
 def multi_threaded_client(connection, address):
     while True:
