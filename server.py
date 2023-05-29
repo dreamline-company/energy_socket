@@ -70,7 +70,9 @@ def insert_regular_table_data(data):
             regular_table_columns += combine_data_value_columns
         insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
         print(len(data))
+        print(data)
         print(len(regular_table_columns))
+        print(regular_table_columns)
         print(insert_controller_sql_statement)
         # Insert new employee
         cursor.execute(insert_controller_sql_statement, data)
