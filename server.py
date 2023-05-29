@@ -64,7 +64,7 @@ def insert_regular_table_data(data):
         register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
         combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
         regular_table_columns = main_var
-        if int(data[8],16) < 256:
+        if int(data[7],16) < 256:
             regular_table_columns += discrete_block_columns
         else:
             regular_table_columns += combine_data_value_columns
