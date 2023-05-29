@@ -23,7 +23,7 @@ print(f"IP Address: {IP}")
 def get_binary(data):
     list_of_bits = []
     for i in data:
-        list_of_bits += [int(i) for i in  f'{i:08b}']
+        list_of_bits += [int(j) for j in  f'{i:08b}']
     return tuple(list_of_bits)
 
 def create_server_connection(host_name, user_name, user_password):
