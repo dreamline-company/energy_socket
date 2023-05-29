@@ -42,7 +42,7 @@ def create_server_connection(host_name, user_name, user_password):
     return connection
 
 def insert_realtime_data(data): 
-    cnx = create_server_connection("104.248.131.153", "root", "my-secret-pw")
+    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
     cursor = cnx.cursor()
     insert_realtime = "INSERT INTO realtime (controller_id, slave_id, register, value) VALUES (%s, %s, %s, %s)"
     # Insert new employee
@@ -53,7 +53,7 @@ def insert_realtime_data(data):
     cnx.close()
 
 def insert_regular_table_data(data): 
-    cnx = create_server_connection("104.248.131.153", "root", "my-secret-pw")
+    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
     cursor = cnx.cursor()
     try :
         main_var = ["object_number", "timestamp_ctr", "timestamp", "temperature", "voltage", "temperature_cpu", "restart_number", "cell_number"]
