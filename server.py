@@ -102,7 +102,7 @@ def multi_threaded_client(connection, address):
                     temp_cpu = data[6]
                     cell_number = hex(data[8] << 8 | data[9])
                     if (data[8] << 8 | data[9]) < 256:
-                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, get_binary(data[10:14]))
+                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number) +  get_binary(data[10:14])
                         insert_regular_table_data(s)
                     else:
                         s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, data[10])
