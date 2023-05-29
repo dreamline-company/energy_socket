@@ -105,7 +105,7 @@ def multi_threaded_client(connection, address):
                         s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number) +  get_binary(data[10:14])
                         insert_regular_table_data(s)
                     else:
-                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, data[10])
+                        s = (hex(object_number), now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, data[10], data[10])
                         insert_regular_table_data(s)
                 elif data[1] == 2:
                     #register to dec data[4] << 8 | data[5]
