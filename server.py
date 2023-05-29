@@ -68,7 +68,7 @@ def insert_regular_table_data(data):
             regular_table_columns += discrete_block_columns
         else:
             regular_table_columns += combine_data_value_columns
-        insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(regular_table_columns) - 1)  + '%s)'
+        insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(data) - 1)  + '%s)'
         print(len(data))
         print(data)
         print(len(regular_table_columns))
