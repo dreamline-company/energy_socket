@@ -268,30 +268,33 @@ def multi_threaded_client(connection, address):
                         print("Insert Fail")
 
                     for i in range(number_of_cells):
-                        index_of_start_symbol = received_data.index(123, end_index)
-                        index_of_end_symbol = received_data.index(
-                            125, index_of_start_symbol + 1
-                        )
-
-                        cell_number = received_data[index_of_start_symbol + 1]
-                        cell_data = (
-                            (cell_number,)
-                            + get_binary(
-                                received_data[
-                                    index_of_start_symbol
-                                    + 2 : index_of_start_symbol
-                                    + 3
-                                ]
+                        try:
+                            index_of_start_symbol = received_data.index(123, end_index)
+                            index_of_end_symbol = received_data.index(
+                                125, index_of_start_symbol + 1
                             )
-                            + (reg_msg_id,)
-                        )
-                        print(cell_data)
-                        insert_result = insert_cell_table_data(cell_data)
-                        if insert_result == 0:
-                            print("Insert Success")
-                        else:
-                            print("Insert Fail")
-                        end_index = index_of_end_symbol
+
+                            cell_number = received_data[index_of_start_symbol + 1]
+                            cell_data = (
+                                (cell_number,)
+                                + get_binary(
+                                    received_data[
+                                        index_of_start_symbol
+                                        + 2 : index_of_start_symbol
+                                        + 3
+                                    ]
+                                )
+                                + (reg_msg_id,)
+                            )
+                            print(cell_data)
+                            insert_result = insert_cell_table_data(cell_data)
+                            if insert_result == 0:
+                                print("Insert Success")
+                            else:
+                                print("Insert Fail")
+                            end_index = index_of_end_symbol
+                        except ValueError:
+                            print("End of message")
             connection.sendall(b"OK!Recv")
         except ConnectionResetError:
             print(address, "is reset connection")
