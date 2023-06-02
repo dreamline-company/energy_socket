@@ -21,8 +21,7 @@ Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
 import socket
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone, timedelta
 from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
@@ -236,7 +235,7 @@ def multi_threaded_client(connection, address):
                 and check_valid_type_packet
                 and length_received_data <= MAX_LEN_PACKET
             ):
-                now = datetime.now(pytz.timezone("asian/almaty"))
+                now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
                 message_type = received_data[1]
                 object_number = received_data[3] << 8 | received_data[2]
                 datetime_from_ctr, end_index = get_datetime_index(received_data)
