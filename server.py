@@ -294,7 +294,7 @@ def multi_threaded_client(connection, address):
                                 print("Insert Fail")
                             end_index = index_of_end_symbol
                         except ValueError:
-                            print("End of message")
+                            pass
             connection.sendall(b"OK!Recv")
         except ConnectionResetError:
             print(address, "is reset connection")
