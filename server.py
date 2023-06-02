@@ -42,6 +42,23 @@ print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
 
 
+def get_temp_volt(data, start_index):
+    result = ()
+    for i in range(start_index, start_index + 3 * 2, 2):
+        result += (float(data[i + 1] << 8 | data[i]) / DIVIDER_FOR_FLOAT_VALUES,)
+    result += (start_index + 3 * 2,)
+    return result
+
+
+def get_datetime_index(data):
+    index_of_start_symbol = data.index(124)
+    index_of_end_symbol = data.index(124, index_of_start_symbol + 1)
+    return (
+        (data[index_of_start_symbol + 1 : index_of_end_symbol]).decode(),
+        index_of_end_symbol,
+    )
+
+
 def get_binary(data):
     """
     The get_binary function in the provided code converts
@@ -102,7 +119,7 @@ def create_server_connection(host_name, user_name, user_password):
     return connection
 
 
-def insert_regular_table_data(regular_data, cell_data):
+def insert_regular_table_data(regular_data):
     """
     The insert_regular_table_data() function connects
     to a MySQL server and inserts the received data into two database tables,
@@ -119,7 +136,7 @@ def insert_regular_table_data(regular_data, cell_data):
         "voltage",
         "temperature_cpu",
         "restart_number",
-        "cell_number",
+        "number_of_cells",
         "timestamp",
     ]
 
@@ -137,6 +154,23 @@ def insert_regular_table_data(regular_data, cell_data):
     cursor.execute("SELECT LAST_INSERT_ID()")
     msg_id = cursor.fetchall()[0][0]
 
+    # Make sure data is committed to the database
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return msg_id
+
+
+def insert_cell_table_data(cell_data):
+    """
+    The insert_regular_table_data() function connects
+    to a MySQL server and inserts the received data into two database tables,
+    namely dreamline_regular_data and cell_table.
+    It constructs the SQL statements dynamically based on the data received.
+    """
+    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
+    cursor = cnx.cursor()
+
     discrete_block_prefix = "input_state_"
     discrete_block_columns = [discrete_block_prefix + str(i + 1) for i in range(0, 8)]
     micom_registers = [
@@ -152,12 +186,7 @@ def insert_regular_table_data(regular_data, cell_data):
         data + ", " + value
         for (data, value) in zip(register_data_columns, register_value_columns)
     ]
-    if True:
-        regular_table_columns += discrete_block_columns
-    else:
-        regular_table_columns += combine_data_value_columns
 
-    cell_data += (msg_id,)
     insert_controller_sql_statement = (
         "INSERT INTO cell_table (cell_number,"
         + ", ".join(discrete_block_columns)
@@ -209,21 +238,16 @@ def multi_threaded_client(connection, address):
                 now = datetime.now()
                 message_type = received_data[1]
                 object_number = received_data[3] << 8 | received_data[2]
-                datetime_from_ctr = (received_data[4:30]).decode()
-                temperature = (
-                    float(received_data[31] << 8 | received_data[30])
-                    / DIVIDER_FOR_FLOAT_VALUES
+                datetime_from_ctr, end_index = get_datetime_index(received_data)
+                temperature, voltage, temperature_cpu, end_index = get_temp_volt(
+                    received_data, end_index + 1
                 )
-                voltage = (
-                    float(received_data[33] << 8 | received_data[32])
-                    / DIVIDER_FOR_FLOAT_VALUES
+                restart_number = (
+                    received_data[end_index + 1] << 8 | received_data[end_index]
                 )
-                temperature_cpu = (
-                    float(received_data[35] << 8 | received_data[34])
-                    / DIVIDER_FOR_FLOAT_VALUES
-                )
-                restart_number = received_data[37] << 8 | received_data[36]
-                cell_number = received_data[38]
+                number_of_cells = received_data[end_index + 2]
+                end_index = end_index + 2
+
                 regular_data = (
                     object_number,
                     datetime_from_ctr,
@@ -231,18 +255,43 @@ def multi_threaded_client(connection, address):
                     voltage,
                     temperature_cpu,
                     restart_number,
-                    cell_number,
+                    number_of_cells,
                     now,
                 )
-                cell_data = (cell_number,) + get_binary(received_data[39:40])
+
                 print(regular_data)
-                print(cell_data)
                 if message_type == 1:
-                    insert_result = insert_regular_table_data(regular_data, cell_data)
-                    if insert_result == 0:
+                    reg_msg_id = insert_regular_table_data(regular_data)
+                    if reg_msg_id:
                         print("Insert Success")
                     else:
                         print("Insert Fail")
+
+                    for i in range(number_of_cells):
+                        index_of_start_symbol = received_data.index(123, end_index)
+                        index_of_end_symbol = received_data.index(
+                            125, index_of_start_symbol + 1
+                        )
+
+                        cell_number = received_data[index_of_start_symbol + 1]
+                        cell_data = (
+                            (cell_number,)
+                            + get_binary(
+                                received_data[
+                                    index_of_start_symbol
+                                    + 2 : index_of_start_symbol
+                                    + 3
+                                ]
+                            )
+                            + (reg_msg_id,)
+                        )
+                        print(cell_data)
+                        insert_result = insert_cell_table_data(cell_data)
+                        if insert_result == 0:
+                            print("Insert Success")
+                        else:
+                            print("Insert Fail")
+                        end_index = index_of_end_symbol
             connection.sendall(b"OK!Recv")
         except ConnectionResetError:
             print(address, "is reset connection")

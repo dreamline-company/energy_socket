@@ -51,12 +51,13 @@ cursor = cnx.cursor()
 main_var = [
     "id INT AUTO_INCREMENT PRIMARY KEY",
     "object_number int NOT NULL",
+    "object_name VARCHAR(64) NOT NULL",
     "timestamp_ctr datetime NOT NULL",
     "temperature FLOAT NOT NULL",
     "voltage FLOAT NOT NULL",
     "temperature_cpu FLOAT NOT NULL",
     "restart_number int NOT NULL",
-    "cell_number int NOT NULL",
+    "number_of_cells int NOT NULL",
     "timestamp datetime NOT NULL",
 ]
 
