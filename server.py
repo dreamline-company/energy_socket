@@ -42,6 +42,21 @@ print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
 
 
+def get_object_name(object_number):
+    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
+    cursor = cnx.cursor()
+    cursor.execute(
+        f"SELECT object_name FROM object_table WHERE object_number={object_number}"
+    )
+    object_name = cursor.fetchall()[0][0]
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+    return object_name
+
+
 def get_temp_volt(data, start_index):
     result = ()
     for i in range(start_index, start_index + 3 * 2, 2):
@@ -131,6 +146,7 @@ def insert_regular_table_data(regular_data):
 
     main_var = [
         "object_number",
+        "object_name",
         "timestamp_ctr",
         "temperature",
         "voltage",
@@ -238,6 +254,7 @@ def multi_threaded_client(connection, address):
                 now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
                 message_type = received_data[1]
                 object_number = received_data[3] << 8 | received_data[2]
+                object_name = get_object_name(object_number)
                 datetime_from_ctr, end_index = get_datetime_index(received_data)
                 temperature, voltage, temperature_cpu, end_index = get_temp_volt(
                     received_data, end_index + 1
@@ -250,6 +267,7 @@ def multi_threaded_client(connection, address):
 
                 regular_data = (
                     object_number,
+                    object_name,
                     datetime_from_ctr,
                     temperature,
                     voltage,
@@ -258,8 +276,6 @@ def multi_threaded_client(connection, address):
                     number_of_cells,
                     now,
                 )
-
-                print(regular_data)
                 if message_type == 1:
                     reg_msg_id = insert_regular_table_data(regular_data)
                     if reg_msg_id:
@@ -286,7 +302,6 @@ def multi_threaded_client(connection, address):
                                 )
                                 + (reg_msg_id,)
                             )
-                            print(cell_data)
                             insert_result = insert_cell_table_data(cell_data)
                             if insert_result == 0:
                                 print("Insert Success")

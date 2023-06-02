@@ -19,7 +19,7 @@ import socket
 from datetime import datetime
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("192.168.0.63", 8070))
+sock.connect(("localhost", 8070))
 
 
 def send_ctrl():
@@ -32,7 +32,7 @@ def send_ctrl():
     now = datetime.now()
     sock.send(ord("<").to_bytes(1, "little"))  # start symbol idx 0
     sock.send(int("1").to_bytes(1, "little"))  # type of msg 1
-    sock.send(int("0x12AB", 16).to_bytes(2, "little"))  # object_number 2,3
+    sock.send(int("0x1", 16).to_bytes(2, "little"))  # object_number 2,3
     sock.send(ord("|").to_bytes(1, "little"))  # start symbol idx 0
     sock.send(str(now).encode())  #
     sock.send(ord("|").to_bytes(1, "little"))  # start symbol idx 0
