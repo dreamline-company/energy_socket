@@ -1,39 +1,99 @@
+"""
+The code you provided appears to be a server-side script 
+that listens for incoming connections on a specified IP address and port.
+It creates a socket using the socket module, 
+binds it to the specified IP and port, 
+and listens for incoming connections.
+
+Once a connection is established, 
+the script starts a new thread using the _thread.start_new_thread() function 
+to handle the client's requests concurrently. 
+
+The script continuously listens for new client connections in an infinite loop, 
+creating a new thread for each connection.
+
+It's worth noting that the code provided lacks proper error handling 
+and termination conditions for the server. 
+In a real-world scenario, you should handle exceptions, 
+close connections properly, and implement a way to stop the server gracefully.
+
+Author: Amirkhan Orazbay
+Date: 02.06.2023
+"""
 import socket
+from datetime import datetime
+from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
-import pandas as pd
-from datetime import datetime
-from _thread import *
-import itertools
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
 PORT = 8070
 IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
-ThreadCount = 0
 
+THREAD_COUNT = 0
 MAX_LEN_PACKET = 255
 START_CHARACTER = 60
 END_CHARACTER = 62
+DIVIDER_FOR_FLOAT_VALUES = 10.0
 
 print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
 
+
 def get_binary(data):
+    """
+    The get_binary function in the provided code converts
+    a sequence of integers into a tuple of binary values.
+
+    The function takes a parameter data,
+    which is expected to be an iterable containing integers.
+    It initializes an empty list called list_of_bits to store the binary values.
+
+    For each element, it converts the integer i
+    to its binary representation using the f"{i:08b}" formatting syntax.
+    The :08b specifies that the binary representation
+    should have a width of 8 digits, padded with zeros if necessary.
+
+    The resulting binary representation is then
+    converted into a list of integers using a list comprehension.
+
+    Each character in the binary string is
+    converted to an integer using the int() function.
+
+    Finally, the function returns a tuple of the binary
+    values by passing list_of_bits to the tuple() function.
+    """
+
     list_of_bits = []
     for i in data:
-        list_of_bits += [int(j) for j in  f'{i:08b}']
+        list_of_bits += [int(j) for j in f"{i:08b}"]
     return tuple(list_of_bits)
 
+
 def create_server_connection(host_name, user_name, user_password):
+    """
+    The create_server_connection function in the provided
+    code establishes a connection to a MySQL database
+    server using the mysql.connector module.
+
+    If the connection is successful, the connection
+    object is assigned to the connection variable.
+    Otherwise, if an error occurs during the connection
+    attempt, an Error object is raised, and an error message is printed.
+
+    Finally, the function returns the connection object,
+    whether it is a valid connection or None if the connection attempt failed.
+    """
+
     connection = None
     try:
         connection = mysql.connector.connect(
             host=host_name,
             user=user_name,
             passwd=user_password,
-            database='sys',
+            database="sys",
             port=3306,
         )
     except Error as err:
@@ -41,92 +101,163 @@ def create_server_connection(host_name, user_name, user_password):
 
     return connection
 
-def insert_realtime_data(data): 
+
+def insert_regular_table_data(regular_data, cell_data):
+    """
+    The insert_regular_table_data() function connects
+    to a MySQL server and inserts the received data into two database tables,
+    namely dreamline_regular_data and cell_table.
+    It constructs the SQL statements dynamically based on the data received.
+    """
     cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
     cursor = cnx.cursor()
-    insert_realtime = "INSERT INTO dreamline_regular_data (controller_id, slave_id, register, value) VALUES (%s, %s, %s, %s)"
-    # Insert new employee
-    cursor.execute(insert_realtime, data)
+
+    main_var = [
+        "object_number",
+        "timestamp_ctr",
+        "temperature",
+        "voltage",
+        "temperature_cpu",
+        "restart_number",
+        "cell_number",
+        "timestamp",
+    ]
+
+    regular_table_columns = main_var
+    insert_controller_sql_statement = (
+        "INSERT INTO dreamline_regular_data ("
+        + ", ".join(regular_table_columns)
+        + ") VALUES ("
+        + "%s," * (len(regular_data) - 1)
+        + "%s)"
+    )
+
+    cursor.execute(insert_controller_sql_statement, regular_data)
+    cnx.commit()
+    cursor.execute("SELECT LAST_INSERT_ID()")
+    msg_id = cursor.fetchall()[0][0]
+
+    discrete_block_prefix = "input_state_"
+    discrete_block_columns = [discrete_block_prefix + str(i + 1) for i in range(0, 8)]
+    micom_registers = [
+        "0140"
+    ]  # ["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
+    register_data_columns = [
+        "reg_" + register + "_data" for register in micom_registers
+    ]
+    register_value_columns = [
+        "reg_" + register + "_value" for register in micom_registers
+    ]
+    combine_data_value_columns = [
+        data + ", " + value
+        for (data, value) in zip(register_data_columns, register_value_columns)
+    ]
+    if True:
+        regular_table_columns += discrete_block_columns
+    else:
+        regular_table_columns += combine_data_value_columns
+
+    cell_data += (msg_id,)
+    insert_controller_sql_statement = (
+        "INSERT INTO cell_table (cell_number,"
+        + ", ".join(discrete_block_columns)
+        + ",reg_msg_id) VALUES ("
+        + "%s," * (len(cell_data) - 1)
+        + "%s)"
+    )
+    cursor.execute(insert_controller_sql_statement, cell_data)
+
     # Make sure data is committed to the database
     cnx.commit()
     cursor.close()
     cnx.close()
+    return 0
 
-def insert_regular_table_data(data): 
-    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
-    cursor = cnx.cursor()
-    try :
-        main_var = ["object_number", "timestamp_ctr", "timestamp", "temperature", "voltage", "temperature_cpu", "restart_number", "cell_number"]
-        discrete_block_prefix = "input_state_"
-        discrete_block_columns = [discrete_block_prefix + str(i) for i in range(1,33)]
-        micom_registers = ["0140"] #["0140","0169","0165","002B","0111","005A","0026","0030","0032","0034","0036"]
-        register_data_columns = ['reg_' + register + '_data' for register in micom_registers]
-        register_value_columns = ['reg_' + register + '_value' for register in micom_registers]
-        combine_data_value_columns = [ data + ', ' + value for (data,value) in zip(register_data_columns,register_value_columns)]
-        regular_table_columns = main_var
-        if int(data[7],16) < 256:
-            regular_table_columns += discrete_block_columns
-        else:
-            regular_table_columns += combine_data_value_columns
-        insert_controller_sql_statement = 'INSERT INTO dreamline_regular_data (' + ', '.join(regular_table_columns) + ') VALUES (' + '%s,' * (len(data) - 1)  + '%s)'
-        # Insert new employee
-        cursor.execute(insert_controller_sql_statement, data)
-        # Make sure data is committed to the database
-        cnx.commit()
-        cursor.close()
-        cnx.close()
-        print('Inserted with successs')
-    except Exception as err:
-        print(err)
-        print(err.with_traceback)
-        print(err.__traceback__)
-    
+
 def multi_threaded_client(connection, address):
+    """
+    The multi_threaded_client() function is responsible
+    for processing the data received from the client.
+
+    Within the multi_threaded_client() function,
+    the received data is checked for validity
+    and parsed according to a specific protocol.
+    If the data is valid and the message type is 1,
+    the insert_regular_table_data() function is called
+    to insert the extracted data into a MySQL database.
+    """
     while True:
         try:
-            data = connection.recv(1024)
-        
-            if not data:
+            received_data = connection.recv(1024)
+            length_received_data = len(received_data)
+
+            if not received_data:
                 break
-            
-            print('Data in bytes:', data, 'With length of ', len(data))
-            check_start_and_end_symbol = (data[0] == START_CHARACTER and data[len(data) - 1] == END_CHARACTER)
-            check_valid_type_packet = data[1] in range(1,3)
-            
-            if check_start_and_end_symbol and check_valid_type_packet and len(data) <= MAX_LEN_PACKET:
+
+            print("Data with length of ", length_received_data)
+            check_start_and_end_symbol = (
+                received_data[0] == START_CHARACTER
+                and received_data[length_received_data - 1] == END_CHARACTER
+            )
+            check_valid_type_packet = received_data[1] in range(1, 3)
+
+            if (
+                check_start_and_end_symbol
+                and check_valid_type_packet
+                and length_received_data <= MAX_LEN_PACKET
+            ):
                 now = datetime.now()
-                object_number = data[2] << 8 | data[3]
-                if data[1] == 1:
-                    temp = data[4]
-                    voltage = data[5]
-                    temp_cpu = data[6]
-                    cell_number = data[8] << 8 | data[9]
-                    if (data[8] << 8 | data[9]) < 256:
-                        s = (object_number, now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number) +  get_binary(data[10:14])
-                        insert_regular_table_data(s)
+                message_type = received_data[1]
+                object_number = received_data[3] << 8 | received_data[2]
+                datetime_from_ctr = (received_data[4:30]).decode()
+                temperature = (
+                    float(received_data[31] << 8 | received_data[30])
+                    / DIVIDER_FOR_FLOAT_VALUES
+                )
+                voltage = (
+                    float(received_data[33] << 8 | received_data[32])
+                    / DIVIDER_FOR_FLOAT_VALUES
+                )
+                temperature_cpu = (
+                    float(received_data[35] << 8 | received_data[34])
+                    / DIVIDER_FOR_FLOAT_VALUES
+                )
+                restart_number = received_data[37] << 8 | received_data[36]
+                cell_number = received_data[38]
+                regular_data = (
+                    object_number,
+                    datetime_from_ctr,
+                    temperature,
+                    voltage,
+                    temperature_cpu,
+                    restart_number,
+                    cell_number,
+                    now,
+                )
+                cell_data = (cell_number,) + get_binary(received_data[39:40])
+                print(regular_data)
+                print(cell_data)
+                if message_type == 1:
+                    insert_result = insert_regular_table_data(regular_data, cell_data)
+                    if insert_result == 0:
+                        print("Insert Success")
                     else:
-                        s = (object_number, now, now, float(temp), float(voltage), float(temp_cpu), data[7], cell_number, data[10], data[10])
-                        insert_regular_table_data(s)
-                elif data[1] == 2:
-                    #register to dec data[4] << 8 | data[5]
-                    now = datetime.now()
-                    formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
-                    s = (data[2], data[3], data[4], data[5], formatted_date, data[3], data[4], data[5], formatted_date)
-                    insert_regular_table_data(s)
+                        print("Insert Fail")
             connection.sendall(b"OK!Recv")
         except ConnectionResetError:
-            print(address, 'is reset connection')
+            print(address, "is reset connection")
     connection.close()
-            
+
+
 try:
     ServerSideSocket.bind((HOST, PORT))
 except socket.error as e:
     print(str(e))
-print('Socket is started')
+print("Socket is started")
 ServerSideSocket.listen()
 
 while True:
-    Client, address = ServerSideSocket.accept()
-    print('Connection from: ' + address[0] + ':' + str(address[1]))
-    start_new_thread(multi_threaded_client, (Client, address))
-    ThreadCount += 1
+    Client, new_socket = ServerSideSocket.accept()
+    print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
+    start_new_thread(multi_threaded_client, (Client, new_socket))
+    THREAD_COUNT += 1
