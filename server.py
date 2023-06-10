@@ -241,6 +241,7 @@ def multi_threaded_client(connection, address):
         length_received_data = len(received_data)
 
         print("Data with length of ", length_received_data)
+        print(received_data)
         check_start_and_end_symbol = (
             received_data[0] == START_CHARACTER
             and received_data[length_received_data - 1] == END_CHARACTER
@@ -329,7 +330,10 @@ def multi_threaded_client(connection, address):
         connection.sendall(msg.encode())
     except ConnectionResetError:
         print(address, "is reset connection")
-    connection.close()
+    except IndexError:
+        print(address, "is empty msg")
+    finally:
+        connection.close()
 
 
 try:
