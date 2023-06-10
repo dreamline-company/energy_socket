@@ -19,7 +19,7 @@ import socket
 from datetime import datetime
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("localhost", 8070))
+sock.connect(("46.101.102.163", 8070))
 
 
 def send_ctrl():

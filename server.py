@@ -310,15 +310,9 @@ def multi_threaded_client(connection, address):
                         end_index = index_of_end_symbol
                     except ValueError:
                         pass
-        if upload_file:
-            # open a file
-            file1 = open("test.txt", "r")
 
-            # read the file
-            read_content = file1.read()
-            connection.sendall(read_content)
-        else:
-            connection.sendall(b"<OK!Recv " + THREAD_COUNT + ">")
+        msg = f"<OK!Recv {THREAD_COUNT}>"
+        connection.sendall(msg.encode())
     except ConnectionResetError:
         print(address, "is reset connection")
     connection.close()
