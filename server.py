@@ -318,7 +318,7 @@ def multi_threaded_client(connection, address):
             read_content = file1.read()
             connection.sendall(read_content)
         else:
-            connection.sendall(b"OK!Recv" + THREAD_COUNT)
+            connection.sendall(b"<OK!Recv " + THREAD_COUNT + ">")
     except ConnectionResetError:
         print(address, "is reset connection")
     connection.close()
