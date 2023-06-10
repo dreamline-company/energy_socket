@@ -32,11 +32,14 @@ PORT = 8070
 IP = socket.gethostbyname(HOST)
 ServerSideSocket = socket.socket()
 
+
 THREAD_COUNT = 0
 MAX_LEN_PACKET = 255
 START_CHARACTER = 60
 END_CHARACTER = 62
 DIVIDER_FOR_FLOAT_VALUES = 10.0
+
+upload_file = False
 
 print(f"Hostname: {HOST}")
 print(f"IP Address: {IP}")
@@ -49,6 +52,7 @@ def get_object_name(object_number):
         f"SELECT object_name FROM object_table WHERE object_number={object_number}"
     )
     object_name = cursor.fetchall()[0][0]
+
     # Make sure data is committed to the database
     cnx.commit()
 
@@ -231,88 +235,99 @@ def multi_threaded_client(connection, address):
     the insert_regular_table_data() function is called
     to insert the extracted data into a MySQL database.
     """
-    while True:
-        try:
-            received_data = connection.recv(1024)
-            length_received_data = len(received_data)
+    try:
+        received_data = connection.recv(1024)
+        length_received_data = len(received_data)
 
-            if not received_data:
-                break
+        if not received_data:
+            break
 
-            print("Data with length of ", length_received_data)
-            check_start_and_end_symbol = (
-                received_data[0] == START_CHARACTER
-                and received_data[length_received_data - 1] == END_CHARACTER
+        if received_data.decode() == "Upload file":
+            upload_file = True
+            break
+
+        print("Data with length of ", length_received_data)
+        check_start_and_end_symbol = (
+            received_data[0] == START_CHARACTER
+            and received_data[length_received_data - 1] == END_CHARACTER
+        )
+        check_valid_type_packet = received_data[1] in range(1, 3)
+
+        if (
+            check_start_and_end_symbol
+            and check_valid_type_packet
+            and length_received_data <= MAX_LEN_PACKET
+        ):
+            now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
+            message_type = received_data[1]
+            object_number = received_data[3] << 8 | received_data[2]
+            object_name = get_object_name(object_number)
+            datetime_from_ctr, end_index = get_datetime_index(received_data)
+            temperature, voltage, temperature_cpu, end_index = get_temp_volt(
+                received_data, end_index + 1
             )
-            check_valid_type_packet = received_data[1] in range(1, 3)
+            restart_number = (
+                received_data[end_index + 1] << 8 | received_data[end_index]
+            )
+            number_of_cells = received_data[end_index + 2]
+            end_index = end_index + 2
 
-            if (
-                check_start_and_end_symbol
-                and check_valid_type_packet
-                and length_received_data <= MAX_LEN_PACKET
-            ):
-                now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-                message_type = received_data[1]
-                object_number = received_data[3] << 8 | received_data[2]
-                object_name = get_object_name(object_number)
-                datetime_from_ctr, end_index = get_datetime_index(received_data)
-                temperature, voltage, temperature_cpu, end_index = get_temp_volt(
-                    received_data, end_index + 1
-                )
-                restart_number = (
-                    received_data[end_index + 1] << 8 | received_data[end_index]
-                )
-                number_of_cells = received_data[end_index + 2]
-                end_index = end_index + 2
+            regular_data = (
+                object_number,
+                object_name,
+                datetime_from_ctr,
+                temperature,
+                voltage,
+                temperature_cpu,
+                restart_number,
+                number_of_cells,
+                now,
+            )
+            if message_type == 1:
+                reg_msg_id = insert_regular_table_data(regular_data)
+                if reg_msg_id:
+                    print("Insert Success")
+                else:
+                    print("Insert Fail")
 
-                regular_data = (
-                    object_number,
-                    object_name,
-                    datetime_from_ctr,
-                    temperature,
-                    voltage,
-                    temperature_cpu,
-                    restart_number,
-                    number_of_cells,
-                    now,
-                )
-                if message_type == 1:
-                    reg_msg_id = insert_regular_table_data(regular_data)
-                    if reg_msg_id:
-                        print("Insert Success")
-                    else:
-                        print("Insert Fail")
+                for i in range(number_of_cells):
+                    try:
+                        index_of_start_symbol = received_data.index(123, end_index)
+                        index_of_end_symbol = received_data.index(
+                            125, index_of_start_symbol + 1
+                        )
 
-                    for i in range(number_of_cells):
-                        try:
-                            index_of_start_symbol = received_data.index(123, end_index)
-                            index_of_end_symbol = received_data.index(
-                                125, index_of_start_symbol + 1
+                        cell_number = received_data[index_of_start_symbol + 1]
+                        cell_data = (
+                            (cell_number,)
+                            + get_binary(
+                                received_data[
+                                    index_of_start_symbol
+                                    + 2 : index_of_start_symbol
+                                    + 3
+                                ]
                             )
+                            + (reg_msg_id,)
+                        )
+                        insert_result = insert_cell_table_data(cell_data)
+                        if insert_result == 0:
+                            print("Insert Success")
+                        else:
+                            print("Insert Fail")
+                        end_index = index_of_end_symbol
+                    except ValueError:
+                        pass
+        if upload_file:
+            # open a file
+            file1 = open("test.txt", "r")
 
-                            cell_number = received_data[index_of_start_symbol + 1]
-                            cell_data = (
-                                (cell_number,)
-                                + get_binary(
-                                    received_data[
-                                        index_of_start_symbol
-                                        + 2 : index_of_start_symbol
-                                        + 3
-                                    ]
-                                )
-                                + (reg_msg_id,)
-                            )
-                            insert_result = insert_cell_table_data(cell_data)
-                            if insert_result == 0:
-                                print("Insert Success")
-                            else:
-                                print("Insert Fail")
-                            end_index = index_of_end_symbol
-                        except ValueError:
-                            pass
-            connection.sendall(b"OK!Recv")
-        except ConnectionResetError:
-            print(address, "is reset connection")
+            # read the file
+            read_content = file1.read()
+            connection.sendall(read_content)
+        else:
+            connection.sendall(b"OK!Recv" + THREAD_COUNT)
+    except ConnectionResetError:
+        print(address, "is reset connection")
     connection.close()
 
 
