@@ -239,7 +239,9 @@ def multi_threaded_client(connection, address):
     try:
         received_data = connection.recv(1024)
         length_received_data = len(received_data)
-
+        start_index = received_data.index("<")
+        end_index = received_data.index(">", start_index)
+        received_data = received_data[start_index : end_index + 1]
         print("Data with length of ", length_received_data)
         print(received_data)
         check_start_and_end_symbol = (
