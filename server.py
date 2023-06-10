@@ -251,7 +251,8 @@ def multi_threaded_client(connection, address):
         print(check_start_and_end_symbol)
         print(check_valid_type_packet)
         print(length_received_data <= MAX_LEN_PACKET)
-
+        msg = f"<OK!Recv {THREAD_COUNT}>"
+        connection.sendall(msg.encode())
         if (
             check_start_and_end_symbol
             and check_valid_type_packet
@@ -263,6 +264,7 @@ def multi_threaded_client(connection, address):
             object_name = get_object_name(object_number)
             datetime_from_ctr = received_data[4:8]
             json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+            print(json_str)
             json_obj = json.loads(json_str)
             s = json.dumps(json_obj, indent=4, sort_keys=True)
             print(s)
@@ -329,9 +331,6 @@ def multi_threaded_client(connection, address):
                 else:
                     print("Insert Fail")
             """
-
-        msg = f"<OK!Recv {THREAD_COUNT}>"
-        connection.sendall(msg.encode())
     except ConnectionResetError:
         print(address, "is reset connection")
     except IndexError as ie:
