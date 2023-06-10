@@ -239,13 +239,6 @@ def multi_threaded_client(connection, address):
         received_data = connection.recv(1024)
         length_received_data = len(received_data)
 
-        if not received_data:
-            break
-
-        if received_data.decode() == "Upload file":
-            upload_file = True
-            break
-
         print("Data with length of ", length_received_data)
         check_start_and_end_symbol = (
             received_data[0] == START_CHARACTER
