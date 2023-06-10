@@ -248,7 +248,10 @@ def multi_threaded_client(connection, address):
             received_data[0] == START_CHARACTER
             and received_data[length_received_data - 1] == END_CHARACTER
         )
-        check_valid_type_packet = received_data[1] in range(1, 3)
+        check_valid_type_packet = received_data[1] in range(1, 4)
+        print(check_start_and_end_symbol)
+        print(check_valid_type_packet)
+        print(length_received_data <= MAX_LEN_PACKET)
 
         if (
             check_start_and_end_symbol
