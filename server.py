@@ -21,6 +21,7 @@ Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
 import socket
+import json
 from datetime import datetime, timezone, timedelta
 from _thread import start_new_thread
 import mysql.connector
@@ -255,61 +256,74 @@ def multi_threaded_client(connection, address):
             message_type = received_data[1]
             object_number = received_data[3] << 8 | received_data[2]
             object_name = get_object_name(object_number)
-            datetime_from_ctr, end_index = get_datetime_index(received_data)
-            temperature, voltage, temperature_cpu, end_index = get_temp_volt(
-                received_data, end_index + 1
-            )
-            restart_number = (
-                received_data[end_index + 1] << 8 | received_data[end_index]
-            )
-            number_of_cells = received_data[end_index + 2]
-            end_index = end_index + 2
+            datetime_from_ctr = received_data[4:8]
+            json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+            json_obj = json.loads(json_str)
+            s = json.dumps(json_obj, indent=4, sort_keys=True)
+            print(s)
+            print(message_type)
 
-            regular_data = (
-                object_number,
-                object_name,
-                datetime_from_ctr,
-                temperature,
-                voltage,
-                temperature_cpu,
-                restart_number,
-                number_of_cells,
-                now,
-            )
+            """  
             if message_type == 1:
+                genral_data = (
+                    object_number,
+                    object_name,
+                    datetime_from_ctr,
+                    json_obj["v1"],
+                    json_obj["v2"],
+                    json_obj["t1"],
+                    json_obj["t2"],
+                    json_obj["rn"],
+                    now,
+                )
+                reg_msg_id = insert_general_table_data(genral_data)
+                if reg_msg_id:
+                    print("Insert Success")
+                else:
+                    print("Insert Fail")
+            elif message_type == 2:
+                json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+                json_obj = json.loads(json_str)
+                s = json.dumps(json_obj, indent=4, sort_keys=True)
+                print(s)
+                regular_data = (
+                    object_number,
+                    object_name,
+                    datetime_from_ctr,
+                    json_obj["v1"],
+                    json_obj["v2"],
+                    json_obj["t1"],
+                    json_obj["t2"],
+                    json_obj["rn"],
+                    now,
+                )
                 reg_msg_id = insert_regular_table_data(regular_data)
                 if reg_msg_id:
                     print("Insert Success")
                 else:
                     print("Insert Fail")
-
-                for i in range(number_of_cells):
-                    try:
-                        index_of_start_symbol = received_data.index(123, end_index)
-                        index_of_end_symbol = received_data.index(
-                            125, index_of_start_symbol + 1
-                        )
-
-                        cell_number = received_data[index_of_start_symbol + 1]
-                        cell_data = (
-                            (cell_number,)
-                            + get_binary(
-                                received_data[
-                                    index_of_start_symbol
-                                    + 2 : index_of_start_symbol
-                                    + 3
-                                ]
-                            )
-                            + (reg_msg_id,)
-                        )
-                        insert_result = insert_cell_table_data(cell_data)
-                        if insert_result == 0:
-                            print("Insert Success")
-                        else:
-                            print("Insert Fail")
-                        end_index = index_of_end_symbol
-                    except ValueError:
-                        pass
+            elif message_type == 3:
+                json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+                json_obj = json.loads(json_str)
+                s = json.dumps(json_obj, indent=4, sort_keys=True)
+                print(s)
+                genral_data = (
+                    object_number,
+                    object_name,
+                    datetime_from_ctr,
+                    json_obj["v1"],
+                    json_obj["v2"],
+                    json_obj["t1"],
+                    json_obj["t2"],
+                    json_obj["rn"],
+                    now,
+                )
+                reg_msg_id = insert_general_table_data(genral_data)
+                if reg_msg_id:
+                    print("Insert Success")
+                else:
+                    print("Insert Fail")
+            """
 
         msg = f"<OK!Recv {THREAD_COUNT}>"
         connection.sendall(msg.encode())
