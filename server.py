@@ -238,6 +238,7 @@ def multi_threaded_client(connection, address):
     """
     try:
         received_data = connection.recv(1024)
+        print(received_data)
         length_received_data = len(received_data)
         start_index = received_data.index(START_CHARACTER)
         end_index = received_data.index(END_CHARACTER, start_index)
