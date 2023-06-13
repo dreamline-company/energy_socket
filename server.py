@@ -335,6 +335,8 @@ def multi_threaded_client(connection, address):
         print(address, "is reset connection")
     except IndexError as ie:
         print(address, ie)
+    except ValueError as ve:
+        print(address, ve)
     finally:
         connection.close()
 
