@@ -236,110 +236,112 @@ def multi_threaded_client(connection, address):
     the insert_regular_table_data() function is called
     to insert the extracted data into a MySQL database.
     """
-    try:
-        received_data = connection.recv(1024)
-        print(received_data)
-        length_received_data = len(received_data)
-        start_index = received_data.index(START_CHARACTER)
-        end_index = received_data.index(END_CHARACTER, start_index)
-        received_data = received_data[start_index : end_index + 1]
-        print("Data with length of ", length_received_data)
-        print(received_data)
-        check_start_and_end_symbol = (
-            received_data[0] == START_CHARACTER and received_data[-1] == END_CHARACTER
-        )
-        check_valid_type_packet = received_data[1] in range(1, 4)
-        print(check_start_and_end_symbol)
-        print(check_valid_type_packet)
-        print(length_received_data <= MAX_LEN_PACKET)
-        msg = f"<OK!Recv {THREAD_COUNT}>"
-        connection.sendall(msg.encode())
-        if (
-            check_start_and_end_symbol
-            and check_valid_type_packet
-            and length_received_data <= MAX_LEN_PACKET
-        ):
-            now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-            message_type = received_data[1]
-            object_number = received_data[3] << 8 | received_data[2]
-            object_name = get_object_name(object_number)
-            datetime_from_ctr = received_data[4:8]
-            json_str = received_data[8:-2].decode("utf8").replace("'", '"')
-            print(json_str)
-            json_obj = json.loads(json_str)
-            s = json.dumps(json_obj, indent=4, sort_keys=True)
-            print(s)
-            print(message_type)
+    while True:
+        try:
+            received_data = connection.recv(1024)
+            print(received_data)
+            length_received_data = len(received_data)
+            start_index = received_data.index(START_CHARACTER)
+            end_index = received_data.index(END_CHARACTER, start_index)
+            received_data = received_data[start_index : end_index + 1]
+            print("Data with length of ", length_received_data)
+            print(received_data)
+            check_start_and_end_symbol = (
+                received_data[0] == START_CHARACTER
+                and received_data[-1] == END_CHARACTER
+            )
+            check_valid_type_packet = received_data[1] in range(1, 4)
+            print(check_start_and_end_symbol)
+            print(check_valid_type_packet)
+            print(length_received_data <= MAX_LEN_PACKET)
+            msg = f"<OK!Recv {THREAD_COUNT}>"
+            connection.sendall(msg.encode())
+            if (
+                check_start_and_end_symbol
+                and check_valid_type_packet
+                and length_received_data <= MAX_LEN_PACKET
+            ):
+                now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
+                message_type = received_data[1]
+                object_number = received_data[3] << 8 | received_data[2]
+                object_name = get_object_name(object_number)
+                datetime_from_ctr = received_data[4:8]
+                json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+                print(json_str)
+                json_obj = json.loads(json_str)
+                s = json.dumps(json_obj, indent=4, sort_keys=True)
+                print(s)
+                print(message_type)
 
-            """  
-            if message_type == 1:
-                genral_data = (
-                    object_number,
-                    object_name,
-                    datetime_from_ctr,
-                    json_obj["v1"],
-                    json_obj["v2"],
-                    json_obj["t1"],
-                    json_obj["t2"],
-                    json_obj["rn"],
-                    now,
-                )
-                reg_msg_id = insert_general_table_data(genral_data)
-                if reg_msg_id:
-                    print("Insert Success")
-                else:
-                    print("Insert Fail")
-            elif message_type == 2:
-                json_str = received_data[8:-2].decode("utf8").replace("'", '"')
-                json_obj = json.loads(json_str)
-                s = json.dumps(json_obj, indent=4, sort_keys=True)
-                print(s)
-                regular_data = (
-                    object_number,
-                    object_name,
-                    datetime_from_ctr,
-                    json_obj["v1"],
-                    json_obj["v2"],
-                    json_obj["t1"],
-                    json_obj["t2"],
-                    json_obj["rn"],
-                    now,
-                )
-                reg_msg_id = insert_regular_table_data(regular_data)
-                if reg_msg_id:
-                    print("Insert Success")
-                else:
-                    print("Insert Fail")
-            elif message_type == 3:
-                json_str = received_data[8:-2].decode("utf8").replace("'", '"')
-                json_obj = json.loads(json_str)
-                s = json.dumps(json_obj, indent=4, sort_keys=True)
-                print(s)
-                genral_data = (
-                    object_number,
-                    object_name,
-                    datetime_from_ctr,
-                    json_obj["v1"],
-                    json_obj["v2"],
-                    json_obj["t1"],
-                    json_obj["t2"],
-                    json_obj["rn"],
-                    now,
-                )
-                reg_msg_id = insert_general_table_data(genral_data)
-                if reg_msg_id:
-                    print("Insert Success")
-                else:
-                    print("Insert Fail")
-            """
-    except ConnectionResetError:
-        print(address, "is reset connection")
-    except IndexError as ie:
-        print(address, ie)
-    except ValueError as ve:
-        print(address, ve)
-    finally:
-        connection.close()
+                """  
+                if message_type == 1:
+                    genral_data = (
+                        object_number,
+                        object_name,
+                        datetime_from_ctr,
+                        json_obj["v1"],
+                        json_obj["v2"],
+                        json_obj["t1"],
+                        json_obj["t2"],
+                        json_obj["rn"],
+                        now,
+                    )
+                    reg_msg_id = insert_general_table_data(genral_data)
+                    if reg_msg_id:
+                        print("Insert Success")
+                    else:
+                        print("Insert Fail")
+                elif message_type == 2:
+                    json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+                    json_obj = json.loads(json_str)
+                    s = json.dumps(json_obj, indent=4, sort_keys=True)
+                    print(s)
+                    regular_data = (
+                        object_number,
+                        object_name,
+                        datetime_from_ctr,
+                        json_obj["v1"],
+                        json_obj["v2"],
+                        json_obj["t1"],
+                        json_obj["t2"],
+                        json_obj["rn"],
+                        now,
+                    )
+                    reg_msg_id = insert_regular_table_data(regular_data)
+                    if reg_msg_id:
+                        print("Insert Success")
+                    else:
+                        print("Insert Fail")
+                elif message_type == 3:
+                    json_str = received_data[8:-2].decode("utf8").replace("'", '"')
+                    json_obj = json.loads(json_str)
+                    s = json.dumps(json_obj, indent=4, sort_keys=True)
+                    print(s)
+                    genral_data = (
+                        object_number,
+                        object_name,
+                        datetime_from_ctr,
+                        json_obj["v1"],
+                        json_obj["v2"],
+                        json_obj["t1"],
+                        json_obj["t2"],
+                        json_obj["rn"],
+                        now,
+                    )
+                    reg_msg_id = insert_general_table_data(genral_data)
+                    if reg_msg_id:
+                        print("Insert Success")
+                    else:
+                        print("Insert Fail")
+                """
+        except ConnectionResetError:
+            print(address, "is reset connection")
+        except IndexError as ie:
+            print(address, ie)
+        except ValueError as ve:
+            print(address, ve)
+        finally:
+            connection.close()
 
 
 try:
