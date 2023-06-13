@@ -241,6 +241,7 @@ def multi_threaded_client(connection, address):
             received_data = connection.recv(1024)
             print(received_data)
             length_received_data = len(received_data)
+            print(length_received_data)
             start_index = received_data.index(START_CHARACTER)
             end_index = received_data.index(END_CHARACTER, start_index)
             received_data = received_data[start_index : end_index + 1]
@@ -340,7 +341,7 @@ def multi_threaded_client(connection, address):
             print(address, ie)
         except ValueError as ve:
             print(address, ve)
-    connection.close() 
+    connection.close()
 
 
 try:
