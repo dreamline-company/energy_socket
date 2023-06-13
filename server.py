@@ -340,8 +340,7 @@ def multi_threaded_client(connection, address):
             print(address, ie)
         except ValueError as ve:
             print(address, ve)
-        finally:
-            connection.close()
+    connection.close() 
 
 
 try:
