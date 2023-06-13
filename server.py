@@ -239,6 +239,8 @@ def multi_threaded_client(connection, address):
     while True:
         try:
             received_data = connection.recv(1024)
+            if not received_data:
+                break
             print(received_data)
             length_received_data = len(received_data)
             print(length_received_data)
