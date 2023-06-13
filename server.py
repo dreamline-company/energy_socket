@@ -236,9 +236,10 @@ def multi_threaded_client(connection, address):
     the insert_regular_table_data() function is called
     to insert the extracted data into a MySQL database.
     """
+    received_data = ""
     while True:
         try:
-            received_data = connection.recv(1024)
+            received_data += connection.recv(1024)
             if not received_data:
                 break
             print(received_data)
@@ -337,6 +338,7 @@ def multi_threaded_client(connection, address):
                     else:
                         print("Insert Fail")
                 """
+            received_data = ""
         except ConnectionResetError:
             print(address, "is reset connection")
         except IndexError as ie:
