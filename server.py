@@ -146,7 +146,7 @@ def insert_table_data(data, table_id):
     namely dreamline_regular_data and cell_table.
     It constructs the SQL statements dynamically based on the data received.
     """
-    cnx = create_server_connection("13.53.134.150", "root", "my-secret-pw")
+    cnx = create_server_connection("13.53.42.132", "root", "my-secret-pw")
     cursor = cnx.cursor()
     insert_sql_statement = ()
     if table_id == 0:
@@ -236,11 +236,11 @@ def multi_threaded_client(connection, address):
                         received_data[4 : received_data.index(ord("{"))], "little"
                     )
                 )
-                
+
                 main_data = received_data[
                     received_data.index(ord("{")) + 1 : received_data.index(ord("}"))
                 ]
-                
+
                 main_data = main_data.split(b",")[:-1]
                 print(main_data)
                 data = (

@@ -47,7 +47,7 @@ def create_server_connection(host_name, user_name, user_password):
     return connection
 
 
-cnx = create_server_connection("13.53.134.150", "root", "my-secret-pw")
+cnx = create_server_connection("13.53.42.132", "root", "my-secret-pw")
 cursor = cnx.cursor()
 
 main = [data + " " + value for (data, value) in zip(main_var, main_var_param)]
