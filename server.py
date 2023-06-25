@@ -222,10 +222,6 @@ def multi_threaded_client(connection, address):
 
             check_valid_type_packet = received_data[1] in range(1, 4)
 
-            msg = f"<OK!Recv {THREAD_COUNT}>"
-
-            connection.sendall(msg.encode())
-
             if (
                 check_start_and_end_symbol
                 and check_valid_type_packet
@@ -280,6 +276,9 @@ def multi_threaded_client(connection, address):
                         print("Insert Success")
                     else:
                         print("Insert Fail")
+                msg = f"<OK!Recv {main_data}>"
+
+                connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
         except IndexError as ie:
