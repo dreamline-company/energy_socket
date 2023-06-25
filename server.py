@@ -203,8 +203,8 @@ def multi_threaded_client(connection, address):
                 break
             print(
                 " ".join(
-                    response.hex()[i : i + 2].upper()
-                    for i in range(0, len(response.hex()), 2)
+                    received_data.hex()[i : i + 2].upper()
+                    for i in range(0, len(received_data.hex()), 2)
                 )
             )
             length_received_data = len(received_data)
