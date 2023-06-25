@@ -277,15 +277,15 @@ def multi_threaded_client(connection, address):
                         print("Insert Success")
                     else:
                         print("Insert Fail")
-                msg = f"<OK!Recv {main_data}>"
-
-                connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
         except IndexError as ie:
             print(address, ie.with_traceback)
         except ValueError as ve:
             print(address, ve.with_traceback)
+        finally:
+            msg = f"<OK!Recv {main_data}>"
+            connection.sendall(msg.encode())
     connection.close()
 
 
