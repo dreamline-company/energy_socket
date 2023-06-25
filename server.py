@@ -146,7 +146,9 @@ def insert_table_data(data, table_id):
     namely dreamline_regular_data and cell_table.
     It constructs the SQL statements dynamically based on the data received.
     """
-    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
+    cnx = create_server_connection(
+        "dreamline-db.c6o4dhstapo3.eu-north-1.rds.amazonaws.com", "admin", "dreamline"
+    )
     cursor = cnx.cursor()
     insert_sql_statement = ()
     if table_id == 0:
