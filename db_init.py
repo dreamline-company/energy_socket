@@ -47,9 +47,7 @@ def create_server_connection(host_name, user_name, user_password):
     return connection
 
 
-cnx = create_server_connection(
-    "dreamline-db.c6o4dhstapo3.eu-north-1.rds.amazonaws.com", "admin", "dreamline"
-)
+cnx = create_server_connection("16.171.27.40", "root", "my-secret-pw")
 cursor = cnx.cursor()
 
 main = [data + " " + value for (data, value) in zip(main_var, main_var_param)]
