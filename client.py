@@ -16,27 +16,52 @@ Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
 import socket
+import time
 from datetime import datetime
 
+s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("46.101.102.163", 8070))
+# sock.connect(("13.51.162.215", 8070))
+# sock.connect(("192.168.0.63", 8070))
+sock.connect(("localhost", 8070))
+if s == "1":
+    sock.send(ord("<").to_bytes(1, "little"))  # start symbol idx 0
+    sock.send((1).to_bytes(1, "little"))
+    sock.send((1).to_bytes(2, "little"))
+    sock.send(round(time.time() * 1000).to_bytes(8, "little"))
+    sock.send(ord("{").to_bytes(1, "little"))
+    for name in range(10):
+        sock.send(name.to_bytes(2, "little"))
+        sock.send(ord(",").to_bytes(1, "little"))
+    sock.send(ord("}").to_bytes(1, "little"))
+    sock.send(ord(">").to_bytes(1, "little"))
+elif s == "2":
+    sock.send(ord("<").to_bytes(1, "little"))  # start symbol idx 0
+    sock.send((2).to_bytes(1, "little"))
+    sock.send((1).to_bytes(2, "little"))
+    sock.send(round(time.time() * 1000).to_bytes(8, "little"))
+    sock.send(ord("{").to_bytes(1, "little"))
+    for cell_number in range(2):
+        if True:
+            sock.send(cell_number.to_bytes(1, "little"))
+            for register_number in range(10):
+                sock.send(register_number.to_bytes(1, "little"))
+                sock.send((register_number + 10).to_bytes(1, "little"))
+                sock.send(ord(";").to_bytes(1, "little"))
+            sock.send(ord(",").to_bytes(1, "little"))
+    sock.send(ord("}").to_bytes(1, "little"))
+    sock.send(ord(">").to_bytes(1, "little"))
+elif s == "3":
+    sock.send(ord("<").to_bytes(1, "little"))  # start symbol idx 0
+    sock.send((3).to_bytes(1, "little"))
+    sock.send((1).to_bytes(2, "little"))
+    sock.send(round(time.time() * 1000).to_bytes(8, "little"))
+    sock.send(ord("{").to_bytes(1, "little"))
+    for i in range(10):
+        sock.send(i.to_bytes(1, "little"))
+        sock.send((i + 10).to_bytes(1, "little"))
+        sock.send(ord(",").to_bytes(1, "little"))
+    sock.send(ord("}").to_bytes(1, "little"))
+    sock.send(ord(">").to_bytes(1, "little"))  # end symbol idx 14
 
-
-sock.send(ord("<").to_bytes(1, "little"))  # start symbol idx 0
-sock.send(int("1").to_bytes(1, "little"))  # type of msg 1
-sock.send(int("0x1", 16).to_bytes(2, "little"))  # object_number 2,3
-sock.send(int(256.4 * 10).to_bytes(2, "little"))  # temperature 4,5
-sock.send(int(5.2 * 10).to_bytes(2, "little"))  # voltage 6,7
-sock.send(int(22.3 * 10).to_bytes(2, "little"))  # temperature_cpu 8,9
-sock.send(int(0).to_bytes(2, "little"))  # restart_number 10,11
-sock.send(int(2).to_bytes(2, "little"))  # restart_number 10,11
-sock.send(ord("{").to_bytes(1, "little"))  # start symbol idx 0
-sock.send(int("0xFF", 16).to_bytes(1, "little"))  # cell_number 12
-sock.send((7).to_bytes(1, "little"))  # 1byte of IO 13
-sock.send(ord("}").to_bytes(1, "little"))  # start symbol idx 0
-sock.send(ord("{").to_bytes(1, "little"))  # start symbol idx 0
-sock.send(int("0xAB", 16).to_bytes(1, "little"))  # cell_number 12
-sock.send((15).to_bytes(1, "little"))  # 1byte of IO 13
-sock.send(ord("}").to_bytes(1, "little"))  # start symbol idx 0
-sock.send(ord(">").to_bytes(1, "little"))  # end symbol idx 14
 print(sock.recv(1024))
