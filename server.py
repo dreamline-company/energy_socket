@@ -233,13 +233,14 @@ def multi_threaded_client(connection, address):
                 object_name = get_object_name(object_number)
                 datetime_from_ctr = datetime.fromtimestamp(
                     int.from_bytes(
-                        received_data[4 : received_data.index(ord("{")) - 1], "little"
+                        received_data[4 : received_data.index(ord("{"))], "little"
                     )
-                    / 1000
                 )
+                
                 main_data = received_data[
                     received_data.index(ord("{")) + 1 : received_data.index(ord("}"))
                 ]
+                
                 main_data = main_data.split(b",")[:-1]
                 print(main_data)
                 data = (
@@ -282,9 +283,9 @@ def multi_threaded_client(connection, address):
         except ConnectionResetError:
             print(address, "is reset connection")
         except IndexError as ie:
-            print(address, ie)
+            print(address, ie.with_traceback)
         except ValueError as ve:
-            print(address, ve)
+            print(address, ve.with_traceback)
     connection.close()
 
 
