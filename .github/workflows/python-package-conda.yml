@@ -55,7 +55,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: "public.ecr.aws/q4q5m5c4/dreamline"
+          ECR_REGISTRY: "public.ecr.aws/q4q5m5c4"
           ECR_REPOSITORY: dreamline
           IMAGE_TAG: dreamline
         run: |
