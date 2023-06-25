@@ -198,9 +198,15 @@ def multi_threaded_client(connection, address):
     while True:
         try:
             received_data = connection.recv(1024)
+
             if not received_data:
                 break
-
+            print(
+                " ".join(
+                    response.hex()[i : i + 2].upper()
+                    for i in range(0, len(response.hex()), 2)
+                )
+            )
             length_received_data = len(received_data)
             start_index = received_data.index(START_CHARACTER)
             end_index = received_data.index(END_CHARACTER, start_index)
