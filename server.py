@@ -284,7 +284,7 @@ def multi_threaded_client(connection, address):
         except ValueError as ve:
             print(address, ve.with_traceback)
         finally:
-            msg = f"<OK!Recv {main_data}>"
+            msg = f"<CreateFile>"
             connection.sendall(msg.encode())
     connection.close()
 
