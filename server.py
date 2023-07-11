@@ -264,6 +264,11 @@ def multi_threaded_client(connection, address):
     В этом методе происходит обработка подключеного клиента
     Данные которые отправил клиент парситься и добавляються в базу данных
     """
+    CONTENTOFTHEFILE = ""
+    # Читаем файл test.txt
+    with open('test.txt', "r") as f:
+        CONTENTOFTHEFILE = f.read()
+        f.close()
     received_data = b''
     while True:
         try:
@@ -298,7 +303,7 @@ def multi_threaded_client(connection, address):
                 received_data = b''
 
                 # Формируем ответ контроллеру
-                msg = "<CreateFile>"
+                msg = f"<CreateFile{CONTENTOFTHEFILE}{THREAD_COUNT}>"
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
         except ConnectionResetError:
