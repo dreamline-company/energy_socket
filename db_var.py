@@ -1,5 +1,5 @@
 """
-HI e
+db_var
 """
 comman_var = [
     "id",
