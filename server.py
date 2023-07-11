@@ -20,19 +20,19 @@ close connections properly, and implement a way to stop the server gracefully.
 Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
-from db_var import *
 import socket
 from datetime import datetime, timezone, timedelta
 from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
 
-HOSTNAME = socket.gethostname()
-HOST = socket.gethostbyname(HOSTNAME)
-PORT = 8070
-IP = socket.gethostbyname(HOST)
-ServerSideSocket = socket.socket()
+from db_var import comman_var, general_var, emergency_var, regular_var
 
+DB_SERVER = "16.171.132.235"
+DB_USERNAME = "root"
+DB_PASSWORD = "my-secret-pw"
+DB_NAME = "sys"
+DB_PORT = 3306
 
 THREAD_COUNT = 0
 MAX_LEN_PACKET = 255
@@ -40,268 +40,307 @@ START_CHARACTER = 60
 END_CHARACTER = 62
 DIVIDER_FOR_FLOAT_VALUES = 10.0
 
-upload_file = False
+LAST_INDEX = -1
 
-print(f"Hostname: {HOST}")
-print(f"IP Address: {IP}")
+REGULAR_PACKET_TYPE = 1
+EMERGENCY_PACKET_TYPE = 2
+
+GENERAL_TABLE_ID = 0
+REGULAR_TABLE_ID = 1
+EMERGENCY_TABLE_ID = 2
+
+UPLOAD_FILE = False
 
 
 def get_object_name(object_number):
-    cnx = create_server_connection("16.171.132.235", "root", "my-secret-pw")
+    """
+    возвращает имя объекта из базы данных по номеру объекта
+    """
+
     cursor = cnx.cursor()
+    # запускаем SQL запрос
     cursor.execute(
         f"SELECT object_name FROM object_table WHERE object_number={object_number}"
     )
+    # Извлекаем имя из ответа базы данных
     object_name = cursor.fetchall()[0][0]
 
-    # Make sure data is committed to the database
+    # Фиксируем данные в базе данных
     cnx.commit()
 
     cursor.close()
-    cnx.close()
     return object_name
 
-
-def get_temp_volt(data, start_index):
-    result = ()
-    for i in range(start_index, start_index + 3 * 2, 2):
-        result += (float(data[i + 1] << 8 | data[i]) / DIVIDER_FOR_FLOAT_VALUES,)
-    result += (start_index + 3 * 2,)
-    return result
-
-
-def get_datetime_index(data):
-    index_of_start_symbol = data.index(124)
-    index_of_end_symbol = data.index(124, index_of_start_symbol + 1)
-    return (
-        (data[index_of_start_symbol + 1 : index_of_end_symbol]).decode(),
-        index_of_end_symbol,
-    )
-
-
-def get_binary(data):
+def create_server_connection(host_name, user_name, user_password, database_name):
     """
-    The get_binary function in the provided code converts
-    a sequence of integers into a tuple of binary values.
-
-    The function takes a parameter data,
-    which is expected to be an iterable containing integers.
-    It initializes an empty list called list_of_bits to store the binary values.
-
-    For each element, it converts the integer i
-    to its binary representation using the f"{i:08b}" formatting syntax.
-    The :08b specifies that the binary representation
-    should have a width of 8 digits, padded with zeros if necessary.
-
-    The resulting binary representation is then
-    converted into a list of integers using a list comprehension.
-
-    Each character in the binary string is
-    converted to an integer using the int() function.
-
-    Finally, the function returns a tuple of the binary
-    values by passing list_of_bits to the tuple() function.
-    """
-
-    list_of_bits = []
-    for i in data:
-        list_of_bits += [int(j) for j in f"{i:08b}"]
-    return tuple(list_of_bits)
-
-
-def create_server_connection(host_name, user_name, user_password):
-    """
-    The create_server_connection function in the provided
-    code establishes a connection to a MySQL database
-    server using the mysql.connector module.
-
-    If the connection is successful, the connection
-    object is assigned to the connection variable.
-    Otherwise, if an error occurs during the connection
-    attempt, an Error object is raised, and an error message is printed.
-
-    Finally, the function returns the connection object,
-    whether it is a valid connection or None if the connection attempt failed.
+    Функция create_server_connection устанавливает соединение с базой данных MySQL с помощью модуля mysql.connector.
     """
 
     connection = None
     try:
+        # передаем все данные сервера и открываем соединение
         connection = mysql.connector.connect(
             host=host_name,
             user=user_name,
             passwd=user_password,
-            database="sys",
-            port=3306,
+            database=database_name,
+            port=DB_PORT,
         )
     except Error as err:
         print(f"Error: '{err}'")
 
     return connection
 
-
 def insert_table_data(data, table_id):
     """
-    The insert_regular_table_data() function connects
-    to a MySQL server and inserts the received data into two database tables,
-    namely dreamline_regular_data and cell_table.
-    It constructs the SQL statements dynamically based on the data received.
+    Функция insert_regular_table_data() вставляет полученные данные в таблицу базы данных,
+    Он динамически строит SQL запрос на основе полученных данных.
     """
-    cnx = create_server_connection("16.171.132.235", "root", "my-secret-pw")
     cursor = cnx.cursor()
     insert_sql_statement = ()
-    if table_id == 0:
+
+    # строит SQL запрос для вставки в dreamline_general_data
+    if table_id == GENERAL_TABLE_ID:
         insert_sql_statement = (
             "INSERT INTO dreamline_general_data ("
-            + ", ".join(main_var[:-1])
+            + ", ".join(comman_var[1:]) + ', '
+            + ", ".join(general_var)
             + ") VALUES ("
-            + "%s," * (len(data) - 1)
-            + "%s)"
+            + "%s," * len(data)
         )
-    elif table_id == 1:
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+    # строит SQL запрос для вставки в dreamline_regular_data
+    elif table_id == REGULAR_TABLE_ID:
         insert_sql_statement = (
-            "INSERT INTO dreamline_regular_data (cell_number,"
-            + ", ".join(general_var[:-1])
+            "INSERT INTO dreamline_regular_data ("
+            + ", ".join(comman_var[1:]) + ', '
+            + ", ".join(regular_var)
             + ") VALUES ("
-            + "%s," * (len(data) - 1)
-            + "%s)"
+            + "%s," * len(data)
         )
-    elif table_id == 2:
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+    # строит SQL запрос для вставки в dreamline_emergency_data
+    elif table_id == EMERGENCY_TABLE_ID:
         insert_sql_statement = (
             "INSERT INTO dreamline_emergency_data ("
-            + ", ".join(emergency_var[1:])
+            + ", ".join(comman_var[1:]) + ', '
+            + ", ".join(emergency_var)
             + ") VALUES ("
-            + "%s," * (len(data) - 1)
-            + "%s)"
+            + "%s," * len(data)
         )
-    print(insert_sql_statement)
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+    # запускаем SQL запрос
     cursor.execute(insert_sql_statement, data)
-
-    # Make sure data is committed to the database
+    print(f'Inserted data - {data}')
+    # Фиксируем данные в базе данных
     cnx.commit()
     cursor.close()
-    cnx.close()
     return 0
 
+def is_data_valid(received_data):
+    """
+    Возвращает true, если полученные данные имеют допустимый формат.
+    - начинаеться с '<'
+    - заканчиваться на '>'
+    - длина меньше MAX_LEN_PACKET
+    """
+    # длина полученных данных
+    length_received_data = len(received_data)
+    # проверяем начальный и конечный символ
+    check_start_and_end_symbol = (
+        received_data[0] == START_CHARACTER
+        and received_data[LAST_INDEX] == END_CHARACTER
+    )
+    # проверяем правильность типа пакета
+    check_valid_type_packet = received_data[1] in [
+        REGULAR_PACKET_TYPE, EMERGENCY_PACKET_TYPE]
+
+    # на основе всех критериев возвращем ответ
+    return check_start_and_end_symbol \
+        and check_valid_type_packet \
+        and length_received_data <= MAX_LEN_PACKET
+
+def parse_regular_registers(base_data, main_data):
+    """
+    Функция возвращает массив кортежей состоящих из номера ячейки, номера регистра, значения регистра
+    """
+
+    data = []
+    for registers in main_data:
+        # получаем номер ячейки
+        cell_number = registers[0]
+        # убираем номер ячейки и оставлемя только информацию про регистры
+        registers = registers[1:]
+        # регистры разделинны символом ';' делим по этому символу
+        registers = registers.split(b";")[:LAST_INDEX]
+
+        for register in registers:
+            # номер регистра
+            register_num = int.from_bytes(register[:2], "little")
+            # значение регистра
+            register_val = int.from_bytes(register[3:], "little")
+            # собираем кортеж из номера ячейки, номера регистра, значения регистра
+            register_data = (cell_number, register_num, register_val)
+            data.append(base_data + register_data)
+    return data
+
+def parse_general_data(base_data, received_data):
+    """
+    Функция возвращает кортеже состоящий из значений температуры, напряжения, состояний модулей, количество перезагрузок
+    """
+
+    # между послденими символами '{' и '}' находиться общая информация с контроллера, вырезаем данный промежуток
+    general_data_r = received_data[received_data.rindex(
+        ord("{")) + 1: received_data.rindex(ord("}"))]
+    # общая информация разделинна символом ',' делим по этому символу
+    general_data_r = general_data_r.split(b",")[:LAST_INDEX]
+    general_data = ()
+    for data_entry in general_data_r:
+        # собираем кортеж из значений
+        general_data += (int.from_bytes(data_entry[2:], "little"),)
+    return base_data + general_data
+
+def parse_emergency_data(base_data, main_data):
+    """
+    Функция возвращает кортеже состоящий из номера ячейки, значения ячейки
+    """
+    data = ()
+    for cell in main_data:
+        # номера ячейк
+        cell_num = int.from_bytes(cell[:2], "little")
+        # значения ячейки
+        cell_val = int.from_bytes(cell[2:], "little")
+        # собираем кортеж из номера ячейки, значения ячейки
+        data += (cell_num, cell_val)
+    return base_data + data
+
+def parse_socket_data(received_data):
+    """
+    Функция возвращает кортеж из тип пакета (packet_type) и спарсенных данных (data)
+    """
+
+    now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
+    # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
+    object_number = int.from_bytes(received_data[1:3], "little")
+    # на основе номера объекта получаем имя объекта из базы данных
+    object_name = get_object_name(object_number)
+    # байт под индексов 3 тип пакета
+    packet_type = received_data[3]
+    # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
+    datetime_from_ctr = datetime.fromtimestamp(
+        int.from_bytes(
+            received_data[4: received_data.index(
+                ord("{"))], "little"
+        )
+    )
+    # между символами '{' и '}' находиться основаная информация с контроллера, вырезаем данный промежуток
+    main_data = received_data[
+        received_data.index(ord("{")) + 1: received_data.index(ord("}"))
+    ]
+    # данные разделинны символом ',' делим по этому символу
+    main_data = main_data.split(b",")[:LAST_INDEX]
+
+    data = ()
+
+    base_data = (
+        object_number,
+        object_name,
+        datetime_from_ctr,
+        now,
+    )
+
+    # парсим регулярный пакет который состоит из регулярных регистров и общей информацией
+    if packet_type == REGULAR_PACKET_TYPE:
+        data = parse_regular_registers(base_data, main_data)
+
+        data.append(parse_general_data(base_data, received_data))
+    # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
+    elif packet_type == EMERGENCY_PACKET_TYPE:
+        data = parse_emergency_data(base_data, main_data)
+    return packet_type, data
 
 def multi_threaded_client(connection, address):
     """
-    The multi_threaded_client() function is responsible
-    for processing the data received from the client.
-
-    Within the multi_threaded_client() function,
-    the received data is checked for validity
-    and parsed according to a specific protocol.
-    If the data is valid and the message type is 1,
-    the insert_regular_table_data() function is called
-    to insert the extracted data into a MySQL database.
+    В этом методе происходит обработка подключеного клиента
+    Данные которые отправил клиент парситься и добавляються в базу данных
     """
+    received_data = b''
     while True:
         try:
-            received_data = connection.recv(1024)
+            # Чтение данных от подключенного контроллера
+            received_data += connection.recv(1024)
 
+            # Если ничего не получили выходим из цикла
             if not received_data:
                 break
-            print(
-                " ".join(
-                    received_data.hex()[i : i + 2].upper()
-                    for i in range(0, len(received_data.hex()), 2)
-                )
-            )
-            length_received_data = len(received_data)
-            start_index = received_data.index(START_CHARACTER)
-            end_index = received_data.index(END_CHARACTER, start_index)
 
-            received_data = received_data[start_index : end_index + 1]
-
-            print("Data with length of ", length_received_data)
-
-            check_start_and_end_symbol = (
-                received_data[0] == START_CHARACTER
-                and received_data[-1] == END_CHARACTER
-            )
-
-            check_valid_type_packet = received_data[1] in range(1, 4)
-
-            if (
-                check_start_and_end_symbol
-                and check_valid_type_packet
-                and length_received_data <= MAX_LEN_PACKET
-            ):
-                now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-                object_number = int.from_bytes(received_data[1:3], "little")
-                object_name = get_object_name(object_number)
-                message_type = received_data[3]
-                print(object_number)
-                datetime_from_ctr = datetime.fromtimestamp(
-                    int.from_bytes(
-                        received_data[4 : received_data.index(ord("{"))], "little"
+            # проверям валдиность данных
+            if is_data_valid(received_data):
+                print(
+                    " ".join(
+                        received_data.hex()[i: i + 2].upper()
+                        for i in range(0, len(received_data.hex()), 2)
                     )
                 )
-                print(datetime_from_ctr)
-                main_data = received_data[
-                    received_data.index(ord("{")) + 1 : received_data.index(ord("}"))
-                ]
+                print("Data with length of ", len(received_data))
 
-                main_data = main_data.split(b",")[:-1]
-                
-                data = (
-                    object_number,
-                    object_name,
-                    datetime_from_ctr,
-                )
-                if message_type == 1:
-                    data += tuple(main_data)
-                elif message_type == 2:
-                    for registers in main_data:
-                        register_data = data + (registers[0],)
-                        registers = registers[1:]
-                        registers = registers.split(b";")[:-1]
-                        for register_number, register_value in registers:
-                            register_data += (register_number, register_value)
-                        register_data += (now,)
-                        print("dawdawdawd", register_data)
-                        insertion_result = 0
+                packet_type, data = parse_socket_data(received_data)
 
-                        if insertion_result == 0:
-                            print("Insert Success")
-                        else:
-                            print("Insert Fail")
-                elif message_type == 3:
-                    for cell in main_data:
-                        data += (int.from_bytes(cell[:2], "little"), int.from_bytes(cell[2:], "little"))
-                    print(main_data)
+                # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
+                if packet_type == REGULAR_PACKET_TYPE:
+                    for entry in data[:LAST_INDEX]:
+                        insert_table_data(entry, REGULAR_TABLE_ID)
+                    insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
+                # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
+                elif packet_type == EMERGENCY_PACKET_TYPE:
+                    insert_table_data(data, EMERGENCY_TABLE_ID)
 
-                if message_type != 2:
-                    data += (now,)
-                    print(data)
-                    insertion_result = insert_table_data(data, message_type - 1)
-                    if insertion_result == 0:
-                        print("Insert Success")
-                    else:
-                        print("Insert Fail")
+                received_data = b''
 
-            msg = f"<CreateFile>"
-            connection.sendall(msg.encode())      
+                # Формируем ответ контроллеру
+                msg = "<CreateFile>"
+                # Отпраляем ответ контроллеру
+                connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
-        except IndexError as ie:
-            print(address, ie.with_traceback, ie)
-        except ValueError as ve:
-            print(address, ve.with_traceback, ve)
-            pass
-        finally:
-            connection.close()
+        except IndexError as i_e:
+            print(address, i_e.with_traceback, i_e)
+        except ValueError as v_e:
+            print(address, v_e.with_traceback, v_e)
+    connection.close()
 
+
+# Получаем имя хоста
+HOSTNAME = socket.gethostname()
+# По имени хоста получаем хоста
+HOST = socket.gethostbyname(HOSTNAME)
+# Порт который будет слушиться
+PORT = 8070
+# По хосту получаем IP адрес
+IP = socket.gethostbyname(HOST)
+
+# подключаемся к базе данных
+cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
+
+print(f"Hostname: {HOST}")
+print(f"IP Address: {IP}")
 
 try:
+    # создаем серверный сокет
+    ServerSideSocket = socket.socket()
+    # связываем серверный сокет и адрес, порт хоста
     ServerSideSocket.bind((HOST, PORT))
 except socket.error as e:
     print(str(e))
 print("Socket is started")
+# слушаем порт
 ServerSideSocket.listen()
 
+# цикл где принимаем все соединения
 while True:
+    # принимаем соединение от клиента
     Client, new_socket = ServerSideSocket.accept()
     print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
+    # создаем новый поток и начниаем там обработку клиента
     start_new_thread(multi_threaded_client, (Client, new_socket))
     THREAD_COUNT += 1

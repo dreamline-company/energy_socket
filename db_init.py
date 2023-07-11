@@ -12,9 +12,13 @@ Before running this script, make sure you have the mysql.connector module instal
 Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
-from db_var import *
+
 import mysql.connector
 from mysql.connector import Error
+
+from db_var import comman_var, general_var, emergency_var, regular_var
+from db_var import comman_var_param, general_var_param, emergency_var_param, regular_var_param
+
 
 
 def create_server_connection(host_name, user_name, user_password):
@@ -50,19 +54,25 @@ def create_server_connection(host_name, user_name, user_password):
 cnx = create_server_connection("16.171.132.235", "root", "my-secret-pw")
 cursor = cnx.cursor()
 
-main = [data + " " + value for (data, value) in zip(main_var, main_var_param)]
+common = [data + " " + value for (data, value)
+          in zip(comman_var, comman_var_param)]
 
-CREATE_TABLE_QUERY = "CREATE TABLE dreamline_general_data ( " + ",".join(main) + ");"
+general = [data + " " + value for (data, value)
+           in zip(general_var, general_var_param)]
+CREATE_TABLE_QUERY = "CREATE TABLE dreamline_general_data ( " + ",".join(
+    common) + "," + ",".join(general) + ");"
 print(CREATE_TABLE_QUERY)
 
 # Insert new employee
 cursor.execute(CREATE_TABLE_QUERY)
 cnx.commit()
 
+regular = [data + " " + value for (data, value)
+           in zip(regular_var, regular_var_param)]
 CREATE_TABLE_QUERY = (
     "CREATE TABLE dreamline_regular_data ( "
-    + "id INT AUTO_INCREMENT PRIMARY KEY, cell_number INT, "
-    + ",".join(general_var_creation)
+    + ",".join(common) + ','
+    + ",".join(regular)
     + ");"
 )
 
@@ -78,7 +88,8 @@ emergency = [
 ]
 
 CREATE_TABLE_QUERY = (
-    "CREATE TABLE dreamline_emergency_data ( " + ",".join(emergency) + ");"
+    "CREATE TABLE dreamline_emergency_data ( " + ",".join(
+        common) + "," + ",".join(emergency) + ");"
 )
 print(CREATE_TABLE_QUERY)
 
