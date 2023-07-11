@@ -47,7 +47,7 @@ print(f"IP Address: {IP}")
 
 
 def get_object_name(object_number):
-    cnx = create_server_connection("46.101.102.163", "root", "my-secret-pw")
+    cnx = create_server_connection("16.171.132.235", "root", "my-secret-pw")
     cursor = cnx.cursor()
     cursor.execute(
         f"SELECT object_name FROM object_table WHERE object_number={object_number}"
@@ -146,7 +146,7 @@ def insert_table_data(data, table_id):
     namely dreamline_regular_data and cell_table.
     It constructs the SQL statements dynamically based on the data received.
     """
-    cnx = create_server_connection("13.53.42.132", "root", "my-secret-pw")
+    cnx = create_server_connection("16.171.132.235", "root", "my-secret-pw")
     cursor = cnx.cursor()
     insert_sql_statement = ()
     if table_id == 0:
@@ -167,8 +167,8 @@ def insert_table_data(data, table_id):
         )
     elif table_id == 2:
         insert_sql_statement = (
-            "INSERT INTO dreamline_general_data ("
-            + ", ".join(emergency_var[:-1])
+            "INSERT INTO dreamline_emergency_data ("
+            + ", ".join(emergency_var[1:])
             + ") VALUES ("
             + "%s," * (len(data) - 1)
             + "%s)"
@@ -228,21 +228,22 @@ def multi_threaded_client(connection, address):
                 and length_received_data <= MAX_LEN_PACKET
             ):
                 now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-                message_type = received_data[1]
-                object_number = int.from_bytes(received_data[2:4], "little")
+                object_number = int.from_bytes(received_data[1:3], "little")
                 object_name = get_object_name(object_number)
+                message_type = received_data[3]
+                print(object_number)
                 datetime_from_ctr = datetime.fromtimestamp(
                     int.from_bytes(
                         received_data[4 : received_data.index(ord("{"))], "little"
                     )
                 )
-
+                print(datetime_from_ctr)
                 main_data = received_data[
                     received_data.index(ord("{")) + 1 : received_data.index(ord("}"))
                 ]
 
                 main_data = main_data.split(b",")[:-1]
-                print(main_data)
+                
                 data = (
                     object_number,
                     object_name,
@@ -266,27 +267,30 @@ def multi_threaded_client(connection, address):
                         else:
                             print("Insert Fail")
                 elif message_type == 3:
-                    for cell_number, cell_value in main_data:
-                        data += (cell_number, cell_value)
+                    for cell in main_data:
+                        data += (int.from_bytes(cell[:2], "little"), int.from_bytes(cell[2:], "little"))
+                    print(main_data)
 
                 if message_type != 2:
                     data += (now,)
-                    # insertion_result = insert_table_data(data, message_type - 1)
                     print(data)
-                    if 0 == 0:
+                    insertion_result = insert_table_data(data, message_type - 1)
+                    if insertion_result == 0:
                         print("Insert Success")
                     else:
                         print("Insert Fail")
+
+            msg = f"<CreateFile>"
+            connection.sendall(msg.encode())      
         except ConnectionResetError:
             print(address, "is reset connection")
         except IndexError as ie:
-            print(address, ie.with_traceback)
+            print(address, ie.with_traceback, ie)
         except ValueError as ve:
-            print(address, ve.with_traceback)
+            print(address, ve.with_traceback, ve)
+            pass
         finally:
-            msg = f"<CreateFile>"
-            connection.sendall(msg.encode())
-    connection.close()
+            connection.close()
 
 
 try:
