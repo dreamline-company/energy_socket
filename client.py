@@ -22,14 +22,13 @@ s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # sock.connect(("13.51.162.215", 8070))
 # sock.connect(("192.168.0.63", 8070))
-sock.connect(("192.168.1.2", 8070))
+sock.connect(("16.171.132.235", 8070))
 emergency_packet_data = {16: b'\x89\xc3\x00\x00', 17: b'\x89\xc3\x00\x00'}
 cell_regular_values = {5: {6: b'\x07\x08', 1: b'\x02\xc8',
                            2: b'\x03\t', 7: b'\x08H', 4: b'\x05\x89'}, 6:{6: b'\x07\x08', 1: b'\x02\xc8',
                            2: b'\x03\t', 7: b'\x08H', 4: b'\x05\x89'}}
 dict_val = {'t2': 0, 're': 0, 'v1': 0, 't1': 0, 'ms': 255}
 if s == "2":
-    sock.send([1,2,2])
     sock.send(bytearray([ord("<")]) + (1).to_bytes(2, "little") + bytearray(
         [2]) + round(time.time()).to_bytes(4, "little") + bytearray([ord("{")]))
     for cell_number, cell_value in emergency_packet_data.items():

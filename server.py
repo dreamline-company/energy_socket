@@ -275,11 +275,10 @@ def multi_threaded_client(connection, address):
         try:
             # Чтение данных от подключенного контроллера
             received_data += connection.recv(1024)
-
             # Если ничего не получили выходим из цикла
             if not received_data:
                 break
-
+            print(received_data)
             # проверям валдиность данных
             if is_data_valid(received_data):
                 print(
