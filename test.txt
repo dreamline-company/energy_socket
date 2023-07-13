@@ -1,2 +1,6 @@
 sock.send(ord("{").to_bytes(1, "little"))  # start symbol idx 0
-
+1
+2
+3
+4
+5

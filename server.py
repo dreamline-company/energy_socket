@@ -21,6 +21,7 @@ Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
 import socket
+import struct
 from datetime import datetime, timezone, timedelta
 from _thread import start_new_thread
 import mysql.connector
@@ -44,6 +45,8 @@ LAST_INDEX = -1
 
 REGULAR_PACKET_TYPE = 1
 EMERGENCY_PACKET_TYPE = 2
+CMD_PACKET_TYPE = 3
+
 
 GENERAL_TABLE_ID = 0
 REGULAR_TABLE_ID = 1
@@ -157,8 +160,9 @@ def is_data_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    check_valid_type_packet = received_data[1] in [
-        REGULAR_PACKET_TYPE, EMERGENCY_PACKET_TYPE]
+    print(received_data[3])
+    check_valid_type_packet = received_data[3] in [
+        REGULAR_PACKET_TYPE, EMERGENCY_PACKET_TYPE, CMD_PACKET_TYPE]
 
     # на основе всех критериев возвращем ответ
     return check_start_and_end_symbol \
@@ -205,7 +209,7 @@ def parse_general_data(base_data, received_data):
     general_data = ()
     for data_entry in general_data_r:
         # собираем кортеж из значений
-        general_data += (int.from_bytes(data_entry[2:], "little"),)
+        general_data += (struct.unpack('f', data_entry[2:]),)[0]
     return base_data[:-1] + general_data + (base_data[-1],)
 
 
@@ -231,6 +235,7 @@ def parse_socket_data(received_data):
 
     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
+    print(received_data[4: received_data.index(ord("{"))])
     object_number = int.from_bytes(received_data[1:3], "little")
     # на основе номера объекта получаем имя объекта из базы данных
     object_name = get_object_name(object_number)
@@ -238,7 +243,7 @@ def parse_socket_data(received_data):
     packet_type = received_data[3]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
-        int.from_bytes(
+       int.from_bytes(
             received_data[4: received_data.index(
                 ord("{"))], "little"
         )
@@ -286,6 +291,7 @@ def multi_threaded_client(connection, address):
     CONTENTOFTHEFILE = CONTENTOFTHEFILE.split()
     line_index = 0
     received_data = b''
+    IS_FILE_SENDING = True
     while True:
         try:
             # Чтение данных от подключенного контроллера
@@ -304,8 +310,14 @@ def multi_threaded_client(connection, address):
                 )
                 print("Data with length of ", len(received_data))
 
-                if 'CMD:NEXTLINE' in received_data.decode():
-                    connection.sendall(f'NEXTLINE:{CONTENTOFTHEFILE[line_index].encode()}')
+                if line_index == len(CONTENTOFTHEFILE):
+                    connection.sendall(f'<FILEEND>'.encode())
+                    IS_FILE_SENDING = False
+                    continue
+
+                if IS_FILE_SENDING and 'CMD:NEXTLINE' in received_data.decode():
+                    msg = f'<NEXTLINE:{CONTENTOFTHEFILE[line_index]}>'
+                    connection.sendall(msg.encode())
                     line_index += 1
                     continue
 
@@ -324,22 +336,23 @@ def multi_threaded_client(connection, address):
 
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                if state[0] and not IS_FILE_SENDING:
+                if states[0] and not IS_FILE_SENDING:
                     IS_FILE_SENDING = True
                     line_index = 0
-                    state[0] = 0
+                    states[0] = 0
                     msg = f"<CHANGEFILE:test.txt>"
-                elif state[1]:
-                    state[1] = 0
+                elif states[1]:
+                    states[1] = 0
                     msg = f"<RESTART>"
-                elif state[2]:
-                    state[2]
+                elif states[2]:
+                    states[2] = 0
                     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
                     msg = f"<SETTIME:{now}>"
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
+            break
         except IndexError as i_e:
             print(address, i_e.with_traceback, i_e)
         except ValueError as v_e:
