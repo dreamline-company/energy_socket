@@ -1,5 +1,2 @@
-    sock.send(ord("{").to_bytes(1, "little"))  # start symbol idx 0
-    sock.send(int("0xFF", 16).to_bytes(1, "little"))  # cell_number 12
-    sock.send((7).to_bytes(1, "little"))  # 1byte of IO 13
-
+sock.send(ord("{").to_bytes(1, "little"))  # start symbol idx 0
 

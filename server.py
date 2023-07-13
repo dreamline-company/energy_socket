@@ -283,6 +283,8 @@ def multi_threaded_client(connection, address):
     with open('test.txt', "r") as f:
         CONTENTOFTHEFILE = f.read()
         f.close()
+    CONTENTOFTHEFILE = CONTENTOFTHEFILE.split()
+    line_index = 0
     received_data = b''
     while True:
         try:
@@ -302,6 +304,11 @@ def multi_threaded_client(connection, address):
                 )
                 print("Data with length of ", len(received_data))
 
+                if 'CMD:NEXTLINE' in received_data.decode():
+                    connection.sendall(f'NEXTLINE:{CONTENTOFTHEFILE[line_index].encode()}')
+                    line_index += 1
+                    continue
+
                 packet_type, data = parse_socket_data(received_data)
 
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
@@ -316,7 +323,19 @@ def multi_threaded_client(connection, address):
                 received_data = b''
 
                 # Формируем ответ контроллеру
-                msg = f"<CreateFile{CONTENTOFTHEFILE}{THREAD_COUNT}>"
+                msg = f"<OK{THREAD_COUNT}>"
+                if state[0] and not IS_FILE_SENDING:
+                    IS_FILE_SENDING = True
+                    line_index = 0
+                    state[0] = 0
+                    msg = f"<CHANGEFILE:test.txt>"
+                elif state[1]:
+                    state[1] = 0
+                    msg = f"<RESTART>"
+                elif state[2]:
+                    state[2]
+                    now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
+                    msg = f"<SETTIME:{now}>"
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
         except ConnectionResetError:
@@ -362,3 +381,6 @@ while True:
     # создаем новый поток и начниаем там обработку клиента
     start_new_thread(multi_threaded_client, (Client, new_socket))
     THREAD_COUNT += 1
+    with open('states.txt', "r") as f:
+        states = [int(i) for i in f.read().split("\n")]
+        f.close()
