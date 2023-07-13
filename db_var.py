@@ -3,10 +3,10 @@ db_var
 """
 comman_var = [
     "id",
-    "object_number",
-    "object_name",
-    "timestamp_ctr",
-    "timestamp"
+    "obj_num",
+    "obj_name",
+    "dt",
+    "dt_0"
 ]
 
 comman_var_param = [
@@ -18,32 +18,24 @@ comman_var_param = [
 ]
 
 general_var = [
-    "temp",
-    "volt",
-    "temp_cpu",
-    "module_stat",
-    "res_num"
+    "VP",
+    "t_air",
+    "t_cpu",
+    "stat",
+    "reset"
 ]
 
 general_var_param = [
     "FLOAT NOT NULL" for i in range(len(general_var))
 ]
 
-emergency_var = [
-    "cell_number",
-    "cell_value"
-]
+emergency_var = ["cell_"+ str(i) for i in range(1, 17)]
 
 emergency_var_param = [
-    "INT NOT NULL" for i in range(len(emergency_var))
+    "INT" for i in range(len(emergency_var))
 ]
 
-regular_var = [
-    "cell_number",
-    "register_number",
-    "register_value"
-]
-
+regular_var = ["cell_number"] + [bytes.hex((i + 1234).to_bytes(2,'little')) for i in range(5)]
 regular_var_param = [
-    "INT NOT NULL" for i in range(len(regular_var))
+    "INT" for i in range(len(regular_var))
 ]

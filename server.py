@@ -60,7 +60,7 @@ def get_object_name(object_number):
     cursor = cnx.cursor()
     # запускаем SQL запрос
     cursor.execute(
-        f"SELECT object_name FROM object_table WHERE object_number={object_number}"
+        f"SELECT obj_name FROM obj_table WHERE obj_num={object_number}"
     )
     # Извлекаем имя из ответа базы данных
     object_name = cursor.fetchall()[0][0]
@@ -102,9 +102,9 @@ def insert_table_data(data, table_id):
     # строит SQL запрос для вставки в dreamline_general_data
     if table_id == GENERAL_TABLE_ID:
         insert_sql_statement = (
-            "INSERT INTO dreamline_general_data ("
-            + ", ".join(comman_var[1:]) + ', '
-            + ", ".join(general_var)
+            "INSERT INTO general ("
+            + ", ".join(comman_var[1:-1]) + ', '
+            + ", ".join(general_var) + f', {comman_var[-1]}'
             + ") VALUES ("
             + "%s," * len(data)
         )
@@ -112,9 +112,9 @@ def insert_table_data(data, table_id):
     # строит SQL запрос для вставки в dreamline_regular_data
     elif table_id == REGULAR_TABLE_ID:
         insert_sql_statement = (
-            "INSERT INTO dreamline_regular_data ("
-            + ", ".join(comman_var[1:]) + ', '
-            + ", ".join(regular_var)
+            "INSERT INTO regular ("
+            + ", ".join(comman_var[1:-1]) + ', '
+            + ", ".join(regular_var[:len(data) - len(comman_var) + 1]) + f', {comman_var[-1]}'
             + ") VALUES ("
             + "%s," * len(data)
         )
@@ -122,9 +122,9 @@ def insert_table_data(data, table_id):
     # строит SQL запрос для вставки в dreamline_emergency_data
     elif table_id == EMERGENCY_TABLE_ID:
         insert_sql_statement = (
-            "INSERT INTO dreamline_emergency_data ("
-            + ", ".join(comman_var[1:]) + ', '
-            + ", ".join(emergency_var)
+            "INSERT INTO emergency ("
+            + ", ".join(comman_var[1:-1]) + ', '
+            + ", ".join(emergency_var[:len(data) - len(comman_var) + 1]) + f', {comman_var[-1]}'
             + ") VALUES ("
             + "%s," * len(data)
         )
@@ -164,8 +164,6 @@ def parse_regular_registers(base_data, main_data):
     """
     Функция возвращает массив кортежей состоящих из номера ячейки, номера регистра, значения регистра
     """
-
-    data = []
     for registers in main_data:
         # получаем номер ячейки
         cell_number = registers[0]
@@ -173,16 +171,15 @@ def parse_regular_registers(base_data, main_data):
         registers = registers[1:]
         # регистры разделинны символом ';' делим по этому символу
         registers = registers.split(b";")[:LAST_INDEX]
-
+        register_data = (cell_number,)
         for register in registers:
             # номер регистра
             register_num = int.from_bytes(register[:2], "little")
             # значение регистра
             register_val = int.from_bytes(register[3:], "little")
             # собираем кортеж из номера ячейки, номера регистра, значения регистра
-            register_data = (cell_number, register_num, register_val)
-            data.append(base_data + register_data)
-    return data
+            register_data += (register_val,)
+    return base_data[:-1] + register_data + (base_data[-1],)
 
 def parse_general_data(base_data, received_data):
     """
@@ -198,7 +195,7 @@ def parse_general_data(base_data, received_data):
     for data_entry in general_data_r:
         # собираем кортеж из значений
         general_data += (int.from_bytes(data_entry[2:], "little"),)
-    return base_data + general_data
+    return base_data[:-1] + general_data + (base_data[-1],)
 
 def parse_emergency_data(base_data, main_data):
     """
@@ -211,8 +208,8 @@ def parse_emergency_data(base_data, main_data):
         # значения ячейки
         cell_val = int.from_bytes(cell[2:], "little")
         # собираем кортеж из номера ячейки, значения ячейки
-        data += (cell_num, cell_val)
-    return base_data + data
+        data += (cell_val,)
+    return base_data[:-1] + data + (base_data[-1],)
 
 def parse_socket_data(received_data):
     """
@@ -251,7 +248,8 @@ def parse_socket_data(received_data):
 
     # парсим регулярный пакет который состоит из регулярных регистров и общей информацией
     if packet_type == REGULAR_PACKET_TYPE:
-        data = parse_regular_registers(base_data, main_data)
+        data = []
+        data.append(parse_regular_registers(base_data, main_data))
 
         data.append(parse_general_data(base_data, received_data))
     # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
@@ -293,8 +291,7 @@ def multi_threaded_client(connection, address):
 
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
                 if packet_type == REGULAR_PACKET_TYPE:
-                    for entry in data[:LAST_INDEX]:
-                        insert_table_data(entry, REGULAR_TABLE_ID)
+                    insert_table_data(data[0], REGULAR_TABLE_ID)
                     insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
                 # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
                 elif packet_type == EMERGENCY_PACKET_TYPE:

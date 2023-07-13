@@ -59,8 +59,8 @@ common = [data + " " + value for (data, value)
 
 general = [data + " " + value for (data, value)
            in zip(general_var, general_var_param)]
-CREATE_TABLE_QUERY = "CREATE TABLE dreamline_general_data ( " + ",".join(
-    common) + "," + ",".join(general) + ");"
+CREATE_TABLE_QUERY = "CREATE TABLE general ( " + ",".join(
+    common[:-1]) + "," + ",".join(general) + f', {common[-1]}' + ");"
 print(CREATE_TABLE_QUERY)
 
 # Insert new employee
@@ -70,9 +70,9 @@ cnx.commit()
 regular = [data + " " + value for (data, value)
            in zip(regular_var, regular_var_param)]
 CREATE_TABLE_QUERY = (
-    "CREATE TABLE dreamline_regular_data ( "
-    + ",".join(common) + ','
-    + ",".join(regular)
+    "CREATE TABLE regular ( "
+    + ",".join(common[:-1]) + ','
+    + ",".join(regular) + f', {common[-1]}'
     + ");"
 )
 
@@ -88,8 +88,8 @@ emergency = [
 ]
 
 CREATE_TABLE_QUERY = (
-    "CREATE TABLE dreamline_emergency_data ( " + ",".join(
-        common) + "," + ",".join(emergency) + ");"
+    "CREATE TABLE emergency ( " + ",".join(
+        common[:-1]) + "," + ",".join(emergency) + f', {common[-1]}' + ");"
 )
 print(CREATE_TABLE_QUERY)
 
@@ -99,22 +99,22 @@ cnx.commit()
 
 
 CREATE_TABLE_QUERY = (
-    "CREATE TABLE object_table (object_number int, object_name VARCHAR(64));"
+    "CREATE TABLE obj_table (obj_num int, obj_name VARCHAR(64));"
 )
-
+print(CREATE_TABLE_QUERY)
 cursor.execute(CREATE_TABLE_QUERY)
 # Make sure data is committed to the database
 cnx.commit()
 
 cursor.execute(
-    "INSERT INTO object_table (object_number, object_name) VALUES (%s,%s)",
+    "INSERT INTO obj_table (obj_num, obj_name) VALUES (%s,%s)",
     (1, "OBJECT 1"),
 )
 # Make sure data is committed to the database
 cnx.commit()
 
 cursor.execute(
-    "INSERT INTO object_table (object_number, object_name) VALUES (%s,%s)",
+    "INSERT INTO obj_table (obj_num, obj_name) VALUES (%s,%s)",
     (2, "OBJECT 2"),
 )
 # Make sure data is committed to the database
