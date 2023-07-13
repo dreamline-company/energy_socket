@@ -71,6 +71,7 @@ def get_object_name(object_number):
     cursor.close()
     return object_name
 
+
 def create_server_connection(host_name, user_name, user_password, database_name):
     """
     Функция create_server_connection устанавливает соединение с базой данных MySQL с помощью модуля mysql.connector.
@@ -90,6 +91,7 @@ def create_server_connection(host_name, user_name, user_password, database_name)
         print(f"Error: '{err}'")
 
     return connection
+
 
 def insert_table_data(data, table_id):
     """
@@ -114,7 +116,8 @@ def insert_table_data(data, table_id):
         insert_sql_statement = (
             "INSERT INTO regular ("
             + ", ".join(comman_var[1:-1]) + ', '
-            + ", ".join(regular_var[:len(data) - len(comman_var) + 1]) + f', {comman_var[-1]}'
+            + ", ".join(regular_var[:len(data) -
+                        len(comman_var) + 1]) + f', {comman_var[-1]}'
             + ") VALUES ("
             + "%s," * len(data)
         )
@@ -124,7 +127,8 @@ def insert_table_data(data, table_id):
         insert_sql_statement = (
             "INSERT INTO emergency ("
             + ", ".join(comman_var[1:-1]) + ', '
-            + ", ".join(emergency_var[:len(data) - len(comman_var) + 1]) + f', {comman_var[-1]}'
+            + ", ".join(emergency_var[:len(data) -
+                        len(comman_var) + 1]) + f', {comman_var[-1]}'
             + ") VALUES ("
             + "%s," * len(data)
         )
@@ -136,6 +140,7 @@ def insert_table_data(data, table_id):
     cnx.commit()
     cursor.close()
     return 0
+
 
 def is_data_valid(received_data):
     """
@@ -160,12 +165,13 @@ def is_data_valid(received_data):
         and check_valid_type_packet \
         and length_received_data <= MAX_LEN_PACKET
 
+
 def parse_regular_registers(base_data, main_data):
     """
     Функция возвращает массив кортежей состоящих из номера ячейки, номера регистра, значения регистра
     """
     data = []
-    
+
     for registers in main_data:
         # получаем номер ячейки
         cell_number = registers[0]
@@ -185,6 +191,7 @@ def parse_regular_registers(base_data, main_data):
         data.append(register_data)
     return data
 
+
 def parse_general_data(base_data, received_data):
     """
     Функция возвращает кортеже состоящий из значений температуры, напряжения, состояний модулей, количество перезагрузок
@@ -201,6 +208,7 @@ def parse_general_data(base_data, received_data):
         general_data += (int.from_bytes(data_entry[2:], "little"),)
     return base_data[:-1] + general_data + (base_data[-1],)
 
+
 def parse_emergency_data(base_data, main_data):
     """
     Функция возвращает кортеже состоящий из номера ячейки, значения ячейки
@@ -214,6 +222,7 @@ def parse_emergency_data(base_data, main_data):
         # собираем кортеж из номера ячейки, значения ячейки
         data += (cell_val,)
     return base_data[:-1] + data + (base_data[-1],)
+
 
 def parse_socket_data(received_data):
     """
@@ -257,8 +266,12 @@ def parse_socket_data(received_data):
         data.append(parse_general_data(base_data, received_data))
     # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
     elif packet_type == EMERGENCY_PACKET_TYPE:
+        main_data = received_data[
+            received_data.index(ord("{")) + 1: received_data.rindex(ord("}"))
+        ]
         data = parse_emergency_data(base_data, main_data)
     return packet_type, data
+
 
 def multi_threaded_client(connection, address):
     """
