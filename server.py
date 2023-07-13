@@ -164,7 +164,8 @@ def parse_regular_registers(base_data, main_data):
     """
     Функция возвращает массив кортежей состоящих из номера ячейки, номера регистра, значения регистра
     """
-    register_data = ()
+    data = []
+    
     for registers in main_data:
         # получаем номер ячейки
         cell_number = registers[0]
@@ -180,7 +181,9 @@ def parse_regular_registers(base_data, main_data):
             register_val = int.from_bytes(register[3:], "little")
             # собираем кортеж из номера ячейки, номера регистра, значения регистра
             register_data += (register_val,)
-    return base_data[:-1] + register_data + (base_data[-1],)
+        register_data = base_data[:-1] + register_data + (base_data[-1],)
+        data.append(register_data)
+    return data
 
 def parse_general_data(base_data, received_data):
     """
