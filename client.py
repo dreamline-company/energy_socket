@@ -27,9 +27,7 @@ emergency_packet_data = {16: b'\x89\xc3\x00\x00', 17: b'\x89\xc3\x00\x00'}
 cell_regular_values = {}
 dict_val = {'t2': 0, 're': 0, 'v1': 0, 't1': 0, 'ms': 255}
 if s == "2":
-    p = [b'<', b'\x02\x00', b'\x02', b'\xb6\x1e\xb0d', b'{', b'\x10\x00', b'\x89\xc3}\x00', b',', b'}', b'>']
-    for i in p:
-        sock.send(i)
+    sock.send(b'<\x02\x00\x02\xfd!\xb0d{\x10\x00\x89\xc3}\x00,}>')
 elif s == "1":
     sock.send(bytearray([ord("<")]) + (1).to_bytes(2, "little") + bytearray(
         [1]) + round(time.time()).to_bytes(4, "little") + bytearray([ord("{")]))

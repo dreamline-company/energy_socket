@@ -268,7 +268,7 @@ def parse_socket_data(received_data):
     elif packet_type == EMERGENCY_PACKET_TYPE:
         main_data = received_data[
             received_data.index(ord("{")) + 1: received_data.rindex(ord("}"))
-        ]
+        ].split(b",")[:LAST_INDEX]
         data = parse_emergency_data(base_data, main_data)
     return packet_type, data
 
