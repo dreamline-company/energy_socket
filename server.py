@@ -252,8 +252,7 @@ def parse_socket_data(received_data):
 
     # парсим регулярный пакет который состоит из регулярных регистров и общей информацией
     if packet_type == REGULAR_PACKET_TYPE:
-        data = []
-        data.append(parse_regular_registers(base_data, main_data))
+        data = parse_regular_registers(base_data, main_data)
 
         data.append(parse_general_data(base_data, received_data))
     # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
@@ -295,7 +294,8 @@ def multi_threaded_client(connection, address):
 
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
                 if packet_type == REGULAR_PACKET_TYPE:
-                    insert_table_data(data[0], REGULAR_TABLE_ID)
+                    for entry in data[:LAST_INDEX]:
+                        insert_table_data(entry, REGULAR_TABLE_ID)
                     insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
                 # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
                 elif packet_type == EMERGENCY_PACKET_TYPE:
