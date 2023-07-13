@@ -164,6 +164,7 @@ def parse_regular_registers(base_data, main_data):
     """
     Функция возвращает массив кортежей состоящих из номера ячейки, номера регистра, значения регистра
     """
+    register_data = ()
     for registers in main_data:
         # получаем номер ячейки
         cell_number = registers[0]
