@@ -131,7 +131,7 @@ def insert_table_data(data, table_id):
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
     # запускаем SQL запрос
     cursor.execute(insert_sql_statement, data)
-    print(f'Inserted data - {data}')
+    print(f'Inserted data into {table_id} - {data}')
     # Фиксируем данные в базе данных
     cnx.commit()
     cursor.close()
