@@ -235,17 +235,17 @@ def parse_socket_data(received_data):
 
     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
-    print(received_data[4: received_data.index(ord("{"))])
     object_number = int.from_bytes(received_data[1:3], "little")
     # на основе номера объекта получаем имя объекта из базы данных
     object_name = get_object_name(object_number)
     # байт под индексов 3 тип пакета
     packet_type = received_data[3]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
+    print(received_data[4: received_data.index(ord("{"))])
+    print(int.from_bytes(received_data[4: received_data.index(ord("{"))], "little"))
     datetime_from_ctr = datetime.fromtimestamp(
        int.from_bytes(
-            received_data[4: received_data.index(
-                ord("{"))], "little"
+            received_data[4: received_data.index(ord("{"))], "little"
         )
     )
     # между символами '{' и '}' находиться основаная информация с контроллера, вырезаем данный промежуток
@@ -291,7 +291,7 @@ def multi_threaded_client(connection, address):
     CONTENTOFTHEFILE = CONTENTOFTHEFILE.split()
     line_index = 0
     received_data = b''
-    IS_FILE_SENDING = True
+    IS_FILE_SENDING = False
     while True:
         try:
             # Чтение данных от подключенного контроллера
@@ -352,11 +352,16 @@ def multi_threaded_client(connection, address):
                 connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
+            received_data = b''
             break
         except IndexError as i_e:
+            received_data = b''
             print(address, i_e.with_traceback, i_e)
+            break
         except ValueError as v_e:
+            received_data = b''
             print(address, v_e.with_traceback, v_e)
+            break
     connection.close()
 
 

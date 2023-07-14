@@ -20,18 +20,19 @@ import re
 import time
 import struct
 from const import *
-
+print(int.from_bytes(round(time.time()).to_bytes(4, "little"),  "little"))
 s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # sock.connect(("13.51.162.215", 8070))
 # sock.connect(("192.168.0.63", 8070))
-sock.connect(("16.171.132.235", 8070))
+sock.connect(("192.168.1.2", 8070))
 cell_emergency_mapped_view = {1: [1,2], 2: [3,4]}
 cell_regular_values = {}
 dict_val = {'t2': 0, 're': 0, 'v1': 0, 't1': 0, 'ms': 255}
 
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
+
 if s == "2":
     packet = [PACKET_START_CHARACTER, OBJECT_ID, EMERGENCY_PACKET_TYPE, round(time.time()).to_bytes(4, "little"), DATA_START_CHARACTER]
     for cell_number in sorted(cell_emergency_mapped_view.keys()):
@@ -54,6 +55,8 @@ elif s == "1":
     print(packet)
     for i in packet:
         sock.send(i) 
+
+print(sock.recv(1024))
 # data = ''
 # packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:NEXTLINE".encode(), PACKET_END_CHARACTER]
 # print(packet)
