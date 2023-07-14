@@ -27,7 +27,16 @@ from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
 
-from db_var import comman_var, general_var, emergency_var, regular_var, state_name, FILE_SEND_STATE_ID, RESET_STATE_ID, SET_TIME_STATE_ID
+from db_var import (
+    comman_var,
+    general_var,
+    emergency_var,
+    regular_var,
+    state_name,
+    FILE_SEND_STATE_ID,
+    RESET_STATE_ID,
+    SET_TIME_STATE_ID,
+)
 
 DB_SERVER = "16.171.132.235"
 DB_USERNAME = "root"
@@ -62,9 +71,7 @@ def get_object_name(object_number):
 
     cursor = cnx.cursor()
     # запускаем SQL запрос
-    cursor.execute(
-        f"SELECT obj_name FROM obj_table WHERE obj_num={object_number}"
-    )
+    cursor.execute(f"SELECT obj_name FROM obj_table WHERE obj_num={object_number}")
     # Извлекаем имя из ответа базы данных
     object_name = cursor.fetchall()[0][0]
 
@@ -74,23 +81,23 @@ def get_object_name(object_number):
     cursor.close()
     return object_name
 
+
 def change_state_to(state_id, state_val):
     cursor = cnx.cursor()
     # запускаем SQL запрос
     cursor.execute(
-    f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = 1"
+        f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = 1"
     )
-    
+
     cnx.commit()
 
     cursor.close()
 
+
 def get_states():
     cursor = cnx.cursor()
     # запускаем SQL запрос
-    cursor.execute(
-    f"SELECT file_send, reset, set_time FROM states WHERE id = 1"
-    )
+    cursor.execute(f"SELECT file_send, reset, set_time FROM states WHERE id = 1")
 
     # Извлекаем имя из ответа базы данных
     state = cursor.fetchall()[0]
@@ -134,37 +141,41 @@ def insert_table_data(data, table_id):
     if table_id == GENERAL_TABLE_ID:
         insert_sql_statement = (
             "INSERT INTO general ("
-            + ", ".join(comman_var[1:-1]) + ', '
-            + ", ".join(general_var) + f', {comman_var[-1]}'
+            + ", ".join(comman_var[1:-1])
+            + ", "
+            + ", ".join(general_var)
+            + f", {comman_var[-1]}"
             + ") VALUES ("
             + "%s," * len(data)
         )
-        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # строит SQL запрос для вставки в dreamline_regular_data
     elif table_id == REGULAR_TABLE_ID:
         insert_sql_statement = (
             "INSERT INTO regular ("
-            + ", ".join(comman_var[1:-1]) + ', '
-            + ", ".join(regular_var[:len(data) -
-                        len(comman_var) + 1]) + f', {comman_var[-1]}'
+            + ", ".join(comman_var[1:-1])
+            + ", "
+            + ", ".join(regular_var[: len(data) - len(comman_var) + 1])
+            + f", {comman_var[-1]}"
             + ") VALUES ("
             + "%s," * len(data)
         )
-        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # строит SQL запрос для вставки в dreamline_emergency_data
     elif table_id == EMERGENCY_TABLE_ID:
         insert_sql_statement = (
             "INSERT INTO emergency ("
-            + ", ".join(comman_var[1:-1]) + ', '
-            + ", ".join(emergency_var[:len(data) -
-                        len(comman_var) + 1]) + f', {comman_var[-1]}'
+            + ", ".join(comman_var[1:-1])
+            + ", "
+            + ", ".join(emergency_var[: len(data) - len(comman_var) + 1])
+            + f", {comman_var[-1]}"
             + ") VALUES ("
             + "%s," * len(data)
         )
-        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ')'
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # запускаем SQL запрос
     cursor.execute(insert_sql_statement, data)
-    print(f'Inserted data into {table_id} - {data}')
+    print(f"Inserted data into {table_id} - {data}")
     # Фиксируем данные в базе данных
     cnx.commit()
     cursor.close()
@@ -188,12 +199,17 @@ def is_data_valid(received_data):
     # проверяем правильность типа пакета
     print(received_data[3])
     check_valid_type_packet = received_data[3] in [
-        REGULAR_PACKET_TYPE, EMERGENCY_PACKET_TYPE, CMD_PACKET_TYPE]
+        REGULAR_PACKET_TYPE,
+        EMERGENCY_PACKET_TYPE,
+        CMD_PACKET_TYPE,
+    ]
 
     # на основе всех критериев возвращем ответ
-    return check_start_and_end_symbol \
-        and check_valid_type_packet \
+    return (
+        check_start_and_end_symbol
+        and check_valid_type_packet
         and length_received_data <= MAX_LEN_PACKET
+    )
 
 
 def parse_regular_registers(base_data, main_data):
@@ -228,14 +244,15 @@ def parse_general_data(base_data, received_data):
     """
 
     # между послденими символами '{' и '}' находиться общая информация с контроллера, вырезаем данный промежуток
-    general_data_r = received_data[received_data.rindex(
-        ord("{")) + 1: received_data.rindex(ord("}"))]
+    general_data_r = received_data[
+        received_data.rindex(ord("{")) + 1 : received_data.rindex(ord("}"))
+    ]
     # общая информация разделинна символом ',' делим по этому символу
     general_data_r = general_data_r.split(b",")[:LAST_INDEX]
     general_data = ()
     for data_entry in general_data_r:
         # собираем кортеж из значений
-        general_data += (struct.unpack('f', data_entry[2:]),)[0]
+        general_data += (struct.unpack("f", data_entry[2:]),)[0]
     return base_data[:-1] + general_data + (base_data[-1],)
 
 
@@ -267,16 +284,14 @@ def parse_socket_data(received_data):
     # байт под индексов 3 тип пакета
     packet_type = received_data[3]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
-    print(received_data[4: received_data.index(ord("{"))])
-    print(int.from_bytes(received_data[4: received_data.index(ord("{"))], "little"))
+    print(received_data[4 : received_data.index(ord("{"))])
+    print(int.from_bytes(received_data[4 : received_data.index(ord("{"))], "little"))
     datetime_from_ctr = datetime.fromtimestamp(
-       int.from_bytes(
-            received_data[4: received_data.index(ord("{"))], "little"
-        )
+        int.from_bytes(received_data[4 : received_data.index(ord("{"))], "little")
     )
     # между символами '{' и '}' находиться основаная информация с контроллера, вырезаем данный промежуток
     main_data = received_data[
-        received_data.index(ord("{")) + 1: received_data.index(ord("}"))
+        received_data.index(ord("{")) + 1 : received_data.index(ord("}"))
     ]
     # данные разделинны символом ',' делим по этому символу
     main_data = main_data.split(b",")[:LAST_INDEX]
@@ -298,7 +313,7 @@ def parse_socket_data(received_data):
     # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
     elif packet_type == EMERGENCY_PACKET_TYPE:
         main_data = received_data[
-            received_data.index(ord("{")) + 1: received_data.rindex(ord("}"))
+            received_data.index(ord("{")) + 1 : received_data.rindex(ord("}"))
         ].split(b",")[:LAST_INDEX]
         data = parse_emergency_data(base_data, main_data)
     return packet_type, data
@@ -311,12 +326,12 @@ def multi_threaded_client(connection, address):
     """
     CONTENTOFTHEFILE = ""
     # Читаем файл test.txt
-    with open('test.txt', "r") as f:
+    with open("test.txt", "r") as f:
         CONTENTOFTHEFILE = f.read()
         f.close()
     CONTENTOFTHEFILE = CONTENTOFTHEFILE.split()
     line_index = 0
-    received_data = b''
+    received_data = b""
     IS_FILE_SENDING = False
     states = get_states()
     while True:
@@ -331,25 +346,28 @@ def multi_threaded_client(connection, address):
             if is_data_valid(received_data):
                 print(
                     " ".join(
-                        received_data.hex()[i: i + 2].upper()
+                        received_data.hex()[i : i + 2].upper()
                         for i in range(0, len(received_data.hex()), 2)
                     )
                 )
                 print("Data with length of ", len(received_data))
 
                 if line_index == len(CONTENTOFTHEFILE):
-                    connection.sendall(f'<FILEEND>'.encode())
+                    connection.sendall(f"<FILEEND>".encode())
                     IS_FILE_SENDING = False
-                    received_data = b''
+                    received_data = b""
                     continue
-                
-                if 'CMD:FILESUCCESS' in received_data.
 
-                if IS_FILE_SENDING and 'CMD:NEXTLINE' in received_data.decode():
-                    msg = f'<NEXTLINE:{CONTENTOFTHEFILE[line_index]}>'
+                if "CMD:FILESUCCESS" in received_data.decode():
+                    received_data = b""
+                    line_index = 0
+                    break
+
+                if IS_FILE_SENDING and "CMD:NEXTLINE" in received_data.decode():
+                    msg = f"<NEXTLINE:{CONTENTOFTHEFILE[line_index]}>"
                     connection.sendall(msg.encode())
                     line_index += 1
-                    received_data = b''
+                    received_data = b""
                     continue
 
                 packet_type, data = parse_socket_data(received_data)
@@ -363,27 +381,27 @@ def multi_threaded_client(connection, address):
                 elif packet_type == EMERGENCY_PACKET_TYPE:
                     insert_table_data(data, EMERGENCY_TABLE_ID)
 
-                received_data = b''
+                received_data = b""
 
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
                 if states[0] and not IS_FILE_SENDING:
                     IS_FILE_SENDING = True
                     line_index = 0
-                    change_state_to(FILE_SEND_STATE_ID,0)
+                    change_state_to(FILE_SEND_STATE_ID, 0)
                     msg = f"<CHANGEFILE:test.txt>"
                 elif states[1]:
                     msg = f"<RESTART>"
-                    change_state_to(RESET_STATE_ID,0)
+                    change_state_to(RESET_STATE_ID, 0)
                 elif states[2]:
                     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
                     msg = f"<SETTIME:{now}>"
-                    change_state_to(SET_TIME_STATE_ID,0)
+                    change_state_to(SET_TIME_STATE_ID, 0)
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
-            received_data = b''
+            received_data = b""
             break
         except IndexError as i_e:
             print(address, i_e.with_traceback, i_e)
