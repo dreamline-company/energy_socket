@@ -33,7 +33,7 @@ dict_val = {"t2": 22.2, "re": 13, "v1": 225.2, "t1": 22.2, "ms": 255}
 
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
-
+new_file_name = ""
 if s == "2":
     packet = [
         PACKET_START_CHARACTER,
@@ -83,10 +83,46 @@ elif s == "1":
     print(packet)
     for i in packet:
         sock.send(i)
+data = sock.recv(1024).decode()
+cmd_from_server = data[data.index("<") + 1 : data.rindex(">")]
+if "CHANGEFILE" in cmd_from_server:
+    IS_FILE_DONWLOAD = True
+    new_file_name = cmd_from_server[cmd_from_server.index(":") + 1 :]
+    print(new_file_name)
+    with open("new/" + new_file_name, "w") as f:
+        f.write("")
+        f.close()
+    sock.close()
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(("192.168.1.2", 8070))
+if IS_FILE_DONWLOAD:
+    packet = [
+        PACKET_START_CHARACTER,
+        OBJECT_ID,
+        THREE,
+        "CMD:NEXTLINE".encode(),
+        PACKET_END_CHARACTER,
+    ]
+    print(packet)
+    for i in packet:
+        sock.send(i)
+    data = ""
+elif IS_FILE_SUCCESS:
+    IS_FILE_SUCCESS = False
+    packet = [
+        PACKET_START_CHARACTER,
+        OBJECT_ID,
+        THREE,
+        "CMD:FILESUCCESS".encode(),
+        PACKET_END_CHARACTER,
+    ]
+    print(packet)
+    for i in packet:
+        sock.send(i)
+    data = ""
 data = ""
-new_file_name = ""
 while True:
-    data += sock.recv(1024).decode()
+    data = sock.recv(1024).decode()
     print(data)
     if not data:
         break
@@ -94,16 +130,12 @@ while True:
         cmd_from_server = data[data.index("<") + 1 : data.rindex(">")]
         if "NEXTLINE" in cmd_from_server:
             print(cmd_from_server[cmd_from_server.index(":") + 1 :])
-            with open("new/" + new_file_name, "a") as f:
+            with open(f"new\{new_file_name}", "a") as f:
                 f.write(cmd_from_server[cmd_from_server.index(":") + 1 :] + "\n")
                 f.close()
-        elif "CHANGEFILE" in cmd_from_server:
-            IS_FILE_DONWLOAD = True
-            new_file_name = cmd_from_server[cmd_from_server.index(":") + 1 :]
-            print(new_file_name)
-            with open("new/" + new_file_name, "w") as f:
-                f.write("")
-                f.close()
+            sock.close()
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(("192.168.1.2", 8070))
         elif "OK" in cmd_from_server:
             break
         elif "FILEEND" in cmd_from_server:

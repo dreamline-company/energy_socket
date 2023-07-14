@@ -82,11 +82,11 @@ def get_object_name(object_number):
     return object_name
 
 
-def change_state_to(state_id, state_val):
+def change_state_to(state_id, object_id, state_val):
     cursor = cnx.cursor()
     # запускаем SQL запрос
     cursor.execute(
-        f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = 1"
+        f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = {object_id}"
     )
 
     cnx.commit()
@@ -94,10 +94,10 @@ def change_state_to(state_id, state_val):
     cursor.close()
 
 
-def get_states():
+def get_states(object_id):
     cursor = cnx.cursor()
     # запускаем SQL запрос
-    cursor.execute(f"SELECT file_send, reset, set_time FROM states WHERE id = 1")
+    cursor.execute(f"SELECT file_send, reset, set_time FROM states WHERE id = {object_id}")
 
     # Извлекаем имя из ответа базы данных
     state = cursor.fetchall()[0]
@@ -314,7 +314,7 @@ def parse_socket_data(received_data):
             received_data.index(ord("{")) + 1 : received_data.rindex(ord("}"))
         ].split(b",")[:LAST_INDEX]
         data = parse_emergency_data(base_data, main_data)
-    return packet_type, data
+    return packet_type, object_number, data
 
 
 def multi_threaded_client(connection, address):
@@ -322,17 +322,8 @@ def multi_threaded_client(connection, address):
     В этом методе происходит обработка подключеного клиента
     Данные которые отправил клиент парситься и добавляються в базу данных
     """
-    CONTENTOFTHEFILE = ""
-    # Читаем файл test.txt
-    with open("test.txt", "r", encoding="utf-8") as f:
-        CONTENTOFTHEFILE = f.read()
-        f.close()
-    CONTENTOFTHEFILE = CONTENTOFTHEFILE.split("\n")
-    CONTENTOFTHEFILE.append(THREAD_COUNT)
-    line_index = 0
+    global CONTENTOFTHEFILE
     received_data = b""
-    IS_FILE_SENDING = False
-    states = get_states()
     while True:
         try:
             # Чтение данных от подключенного контроллера
@@ -350,31 +341,31 @@ def multi_threaded_client(connection, address):
                     )
                 )
                 print("Data with length of ", len(received_data))
-
-                if line_index == len(CONTENTOFTHEFILE):
+                object_id = int.from_bytes(received_data[1:3], "little")
+                if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
                     connection.sendall(f"<FILEEND>".encode())
-                    IS_FILE_SENDING = False
+                    IS_FILE_SENDING[object_id] = False
                     received_data = b""
                     print("Send FILEEND cmd")
                     continue
 
-                if IS_FILE_SENDING and "CMD:FILESUCCESS" in received_data.decode():
+                if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
                     msg = f"<OK>"
                     connection.sendall(msg.encode())
                     received_data = b""
-                    line_index = 0
+                    line_index[object_id] = 0
                     print("Send OK cmd")
                     break
 
-                if IS_FILE_SENDING and "CMD:NEXTLINE" in received_data.decode():
-                    msg = f"<NEXTLINE:{CONTENTOFTHEFILE[line_index]}>"
+                if IS_FILE_SENDING[object_id] and "CMD:NEXTLINE" in received_data.decode():
+                    msg = f"<NEXTLINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>"
                     connection.sendall(msg.encode())
-                    line_index += 1
+                    line_index[object_id] += 1
                     received_data = b""
-                    print(f"Sending NEXTLINE: {CONTENTOFTHEFILE[line_index]}")
+                    print(f"Sending NEXTLINE: {CONTENTOFTHEFILE[object_id][line_index[object_id]]}")
                     continue
 
-                packet_type, data = parse_socket_data(received_data)
+                packet_type, object_id, data = parse_socket_data(received_data)
 
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
                 if packet_type == REGULAR_PACKET_TYPE:
@@ -386,17 +377,26 @@ def multi_threaded_client(connection, address):
                     insert_table_data(data, EMERGENCY_TABLE_ID)
 
                 received_data = b""
-
+                print(object_id)
+                states = get_states(object_id)
+                print(states)
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                if states[0] and not IS_FILE_SENDING:
-                    IS_FILE_SENDING = True
-                    line_index = 0
-                    change_state_to(FILE_SEND_STATE_ID, 0)
+                if states[0] and not IS_FILE_SENDING[object_id]:
+                    IS_FILE_SENDING[object_id] = True
+                    line_index[object_id] = 0
+                    change_state_to(FILE_SEND_STATE_ID, object_id, 0)
                     msg = f"<CHANGEFILE:test.txt>"
+                    # Читаем файл test.txt
+                    with open("test.txt", "r", encoding="utf-8") as f:
+                        CONTENTOFTHEFILE[object_id] = f.read()
+                        f.close()
+                    CONTENTOFTHEFILE[object_id] = CONTENTOFTHEFILE[object_id].split("\n")
+                    CONTENTOFTHEFILE[object_id].append(THREAD_COUNT)
+
                 elif states[1]:
                     msg = f"<RESTART>"
-                    change_state_to(RESET_STATE_ID, 0)
+                    change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[2]:
                     now = str(datetime.now(timezone(timedelta(hours=+6), "ALA")))
                     year = now[2:4]
@@ -406,7 +406,7 @@ def multi_threaded_client(connection, address):
                     min = now[14:16]
                     sec = now[17:19]
                     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{min}:{sec}>"
-                    change_state_to(SET_TIME_STATE_ID, 0)
+                    change_state_to(SET_TIME_STATE_ID, object_id, 0)
                 # Отпраляем ответ контроллеру
                 print(f"Sending : {msg}")
                 connection.sendall(msg.encode())
@@ -418,6 +418,9 @@ def multi_threaded_client(connection, address):
             print(address, i_e.with_traceback, i_e)
         except ValueError as v_e:
             print(address, v_e.with_traceback, v_e)
+        except ConnectionAbortedError as c_a_e:
+            print(address, c_a_e.with_traceback, c_a_e)
+            break
 
     connection.close()
 
@@ -430,6 +433,11 @@ HOST = socket.gethostbyname(HOSTNAME)
 PORT = 8070
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
+
+IS_FILE_SENDING = [False, False]
+CONTENTOFTHEFILE = ["", ""]
+line_index = [0,0]
+
 
 # подключаемся к базе данных
 cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
