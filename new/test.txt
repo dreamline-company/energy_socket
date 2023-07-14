@@ -71,7 +71,7 @@ def init_modules():
         MODULES_STATUSES = MODULES_STATUSES | (1<<0)
         log.log(log.ERROR, f"W25qxx is {e}")
         
-    # DS18B20 РўРµРјРїРµСЂР°С‚СѓСЂР° СЃ One Wire ++
+    # DS18B20 Температура с One Wire ++
     fl_DS18B20 = False
     ds_pin = machine.Pin(15)
     ds_sensor, roms = None, None
@@ -100,8 +100,8 @@ def init_modules():
         log.log(log.ERROR, f"OLED: NOT {e}")
     
     # RTC_PCF
-    adr_RTC = 0x51  # РђРґСЂРµСЃ RTC DS
-    adr_DT = 0x04  # РђРґСЂРµСЃ СЂРµРіРёСЃС‚СЂР° РІСЂeРјРµРЅРё
+    adr_RTC = 0x51  # Адрес RTC DS
+    adr_DT = 0x04  # Адрес регистра врeмени
     rtc_p = None
     try:
         rtc_p = RTC_PCF(i2c1)
@@ -128,7 +128,7 @@ def init_modules():
     addr_PCA = 0x41
     i2c1.writeto(addr_PCA, b"\x03\x00")  # pin -> out
 
-    # Port RS-485-2, С‡РµСЂРµР· I2C. sc16is740 speed: 19200
+    # Port RS-485-2, через I2C. sc16is740 speed: 19200
     rs_2 = None
     try:
         i2c1.writeto(addr_PCA, b"\x01\xFF")
@@ -156,7 +156,7 @@ def init_modules():
 def display_general_info():
     display_list = []
     
-    # Р’С‹РІРѕРґ РІСЂРµРјРµРЅРё
+    # Вывод времени
     datetime = rtc_p.ReadTime(1)
     display_list.append(datetime)
     
@@ -169,13 +169,13 @@ def display_general_info():
         display_list.append("t_DS:{0:0.1f}".format(temperature))
     except Exception as e:
         log.log(log.ERROR, e)
-        # TРµРјРїРµСЂР°С‚СѓСЂa CPU
+        # Tемпературa CPU
         temperature = do_t_CPU(t_CPU)
         display_list.append("tCPU:{0:0.1f} ".format(temperature))
         
     # Voltage
     InVoltDivider = 18.2
-    Kv = 2.048 * InVoltDivider / 32767  # РґРµР»РёС‚РµР»СЊ V
+    Kv = 2.048 * InVoltDivider / 32767  # делитель V
     V = read_ADS(1, 10) * Kv
     display_list[-1] = display_list[-1] + "Vs:{0:0.1f}".format(V)
     dict_val['v1'] = V
@@ -194,19 +194,19 @@ def send_modbus_req(s):
     IS_WAIT_MODBUS_RESPONSE = True
     time.sleep_ms(10)
 
-# РџРѕР»СѓС‡РµРЅРёРµ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ CPU
+# Получение температуры CPU
 def do_t_CPU(adc_t):
     v_tcpu = adc_t.read_u16() * 3.3 / (65535)
     t1 = 27 - (v_tcpu - 0.709) / 0.001721
     return t1
 
-# РџРѕР»СѓС‡РµРЅРёРµ Vsys
+# Получение Vsys
 def do_Vsys():
     V = Pin_sys.read_u16() * 3.3 / (65535)
     V *= 3
     return V
 
-# РџРѕР»СѓС‡РµРЅРёРµ t c DS18B20 (СЃ 1 РґР°С‚С‡РёРєР°)
+# Получение t c DS18B20 (с 1 датчика)
 def do_18B20():
     try:
         for rom in roms:
@@ -215,7 +215,7 @@ def do_18B20():
     except Exception as e:
         raise e
 
-# Р§С‚РµРЅРёРµ РєР°РЅР°Р»Р° РђР¦Рџ. РљР°РЅР°Р» - 1,2,3, dlit РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ - ms
+# Чтение канала АЦП. Канал - 1,2,3, dlit преобразования - ms
 def read_ADS(Kanal, dlit):
     b = bytearray()
     b.append(0x01)
@@ -279,29 +279,29 @@ def send_sms():
 
 log = Logger(f'object_{OBJECT_ID}_main.log')
 
-ms_RS = 0  # Р—Р°РґРµСЂР¶РєР° РґР»СЏ РїРµСЂРµРґР°С‡Рё РїР°РєРµС‚Р° RS-485
+ms_RS = 0  # Задержка для передачи пакета RS-485
 
-fl_ADS = False  # ADS РІ РїСЂРѕС†РµСЃСЃРµ
+fl_ADS = False  # ADS в процессе
 
-PACKET_FORM_STATE = EMERGENCY_PACKET_STATE # РёРґРµС‚ Р»Рё С„РѕСЂРјРёСЂР°РІРёРЅРёРµ СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РїР°РєРµС‚Р°
-# EMERGENCY_PACKET_STATE - С„РѕСЂРјРёСЂР°РІРёРЅРёРµ СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РїР°РєРµС‚Р° РЅРµ РёРґРµС‚
-# REGULAR_PACKET_STATE - РёРґРµС‚ РѕРїСЂРѕСЃ СЂРµРіРёСЃС‚СЂРѕРІ РїРѕ ModBus
-# SERVER_SEND_STATE - РёРґРµС‚ РѕС‚РїСЂР°РІРєР° РЅР° СЃРµСЂРІРµСЂ СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РїР°РєРµС‚Р°
+PACKET_FORM_STATE = EMERGENCY_PACKET_STATE # идет ли формиравиние регулярного пакета
+# EMERGENCY_PACKET_STATE - формиравиние регулярного пакета не идет
+# REGULAR_PACKET_STATE - идет опрос регистров по ModBus
+# SERVER_SEND_STATE - идет отправка на сервер регулярного пакета
 
 #
 IS_WAIT_MODBUS_RESPONSE = False
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
-# РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
+# Инициализация
 #
 response = b''
-# РІСЂРµРјСЏ РїРµСЂРµРґР°С‡Рё РјРѕРґР±Р°СЃ Р·Р°РїСЂРѕСЃР°
+# время передачи модбас запроса
 last_time_modbus_req = time.ticks_ms()
-# РІСЂРµРјСЏ РїРµСЂРµРґР°С‡Рё СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РїР°РєРµС‚Р°
+# время передачи регулярного пакета
 last_time_regular_packet = time.time()
-# РІСЂРµРјСЏ РґР»СЏ СЃРµРєСѓРЅРґРЅРѕРіРѕ С†РёРєР»Р°
+# время для секундного цикла
 last_time_sec = time.time()
-# РјРёРіР°РЅРёРµ
+# мигание
 last_time_DO_0 = time.ticks_ms()
 last_time_DO_1 = time.ticks_ms()
 
@@ -321,7 +321,7 @@ MICOM_REQUEST_TEMPLATE = bytearray(
 error_codes = [0x01, 0x02, 0x03]
 error_code = 0x00
 
-# Р—РЅР°С‡РµРЅРёСЏ СЂРµРіРёСЃС‚СЂРѕРІ Рё РІС…РѕРґРѕРІ ModBus СѓСЃС‚СЂРѕР№СЃС‚РІ
+# Значения регистров и входов ModBus устройств
 cell_regular_values = {}
 cell_emergency_values = {}
 
@@ -341,7 +341,7 @@ to_count = 0
 DO_0 = Pin(7, Pin.OUT)  # Pin Output
 DO_1 = Pin(8, Pin.OUT)
 DO_2 = Pin(9, Pin.OUT)
-Pin(29, machine.Pin.IN)  # РќР°РїСЂСЏР¶РµРЅРёРµ СЃ CPU
+Pin(29, machine.Pin.IN)  # Напряжение с CPU
 Pin_sys = ADC(3)  #
 Pin_int_RS2 = Pin(28, Pin.IN, Pin.PULL_UP)  # Pin I2C --> Rs-485_2
 Pin_RTC_INT = Pin(27, Pin.IN, Pin.PULL_UP)  # RTC DS3231
@@ -351,38 +351,38 @@ led = machine.Pin(25, machine.Pin.OUT)
 fl_led = False
 led.value(0)
 
-# РўРµРјРїРµСЂР°С‚СѓСЂР° CPU
+# Температура CPU
 t_CPU = ADC(4)
 
-log.log(log.INFO, uos.uname())  # РћР±С‰Р°СЏ РёРЅС„Рѕ РѕР± РїР»Р°С‚Рµ
+log.log(log.INFO, uos.uname())  # Общая инфо об плате
 
 # UART
 Pin_RS0 = Pin(2, Pin.OUT)  # RS-485 RE/DE
 Pin_RS0.value(0)
 
-# РњРѕРґСѓР»Рё 
+# Модули 
 i2c1, flash_gd, ds_sensor, roms, oled, rtc_p, ads, rs_2, modem_var, MODULES_STATUSES = init_modules()
 
-# Р’С‹Р±РёСЂР°РµРј RS РїРѕСЂС‚
+# Выбираем RS порт
 uart = None
 if RS_PORT == 1:
     MODULES_STATUSES = MODULES_STATUSES & ~(1<<7)
     uart = UART(0, tx=machine.Pin(0), rx=machine.Pin(1))
     uart.init(baudrate=19200, bits=8, parity=None, stop=1, timeout=30)
     
-# РљРѕРјРјСѓС‚Р°С‚РѕСЂ РєР°РЅР°Р»РѕРІ
+# Коммутатор каналов
 addr_PCA = 0x41
 
 display_general_info()
 
-# Р¤СѓРЅРєС†РёРё РїСЂРµСЂС‹РІР°РЅРёР№
-# interrupt РѕС‚ С‚Р°Р№РјРµСЂР° - РјРёРіР°РµРј Led
+# Функции прерываний
+# interrupt от таймера - мигаем Led
 timer0 = Timer()
 timer0.init(
     period=1000, mode=Timer.PERIODIC, callback=lambda t: led.value(not led.value())
 )
 modem_var.init() 
-# Р‘Р°Р·РѕРІС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё РјРѕРґРµРјР°
+# Базовые настройки модема
 # while modem_var.init() != 2:
 #     data = modem_var.process()
 #     if data and data.startswith('+CCLK'):
@@ -390,9 +390,9 @@ modem_var.init()
 #         sp0 = sp0 + data[20:22]
 #         sp0 = sp0 + data[17:19]
 #         sp0 = sp0 + data[14:16]
-#         sp0 = sp0 + '01' #Р”РµРЅСЊ РЅРµРґРµР»Рё
+#         sp0 = sp0 + '01' #День недели
 #         sp0 = sp0 + data[11:13]
-#         sp0 = sp0 + data[8:10] #Р“РѕРґ/
+#         sp0 = sp0 + data[8:10] #Год/
 #         bp0 = binascii.unhexlify(sp0)
 #         rtc_p.SetTime(NowTime=bp0)
 #     elif data and data.startswith('TIMEOUT'):
@@ -402,13 +402,13 @@ modem_var.init()
 
 log.log(log.INFO, "Modem and time are configured")
 
-# РЎС‡РµС‚С‡РёРє РїРµСЂРµР·Р°РіСЂСѓР·РѕРє
+# Счетчик перезагрузок
 attempt_count_file = File('attempt.txt')
 attempt_file_content = attempt_count_file.read()
 attempts_count = len(attempt_file_content.split())
 dict_val['re'] = attempts_count
 print(dict_val['re'])
-# РџСЂРѕРІРµСЂСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РјРѕРґСѓР»РµР№
+# Проверяем состояние модулей
 if MODULES_STATUSES == 0:
     attempts_count = 0
 elif attempts_count < 3:
@@ -423,12 +423,12 @@ else:
     send_sms()
 
 while True:
-    # RS-485 РєР»СЋС‡РµРЅРёРµ СЂРµР¶РёРјР° РїРµСЂРµРґР°С‡Рё
+    # RS-485 ключение режима передачи
     if Pin_RS0.value():
         if time.ticks_diff(time.ticks_ms(), ms_RS) <= 0:
             Pin_RS0.off()
     
-    # РџСЂРѕРІРµСЂСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ RS-485 РїРѕСЂС‚Р°
+    # Проверяем состояние RS-485 порта
     if 0 in cell_regular_response_fail_count or 0 in cell_emergency_response_fail_count:
         if last_rs_state == 1:
             log.log(log.INFO, 'RS-485 works')
@@ -445,7 +445,7 @@ while True:
         MODULES_STATUSES = MODULES_STATUSES | (1<<7)
         last_rs_state = (MODULES_STATUSES & 2 << 6) >> 7
     
-    # Timeout РґР»СЏ РѕС‚РІРµС‚Р° РїРѕ Modbus РїСЂРѕС‚РѕРєРѕР»Сѓ
+    # Timeout для ответа по Modbus протоколу
     if IS_WAIT_MODBUS_RESPONSE and time.ticks_diff(time.ticks_ms(), last_time_modbus_req) > 100:
         if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
             cell_regular_response_fail_count[current_micom_address_index] = 1
@@ -465,26 +465,26 @@ while True:
         IS_WAIT_MODBUS_RESPONSE = False
         last_time_modbus_req = time.ticks_ms()
     
-    # РћС‚РІРµС‡Р°РµС‚ Р·Р° РјРѕСЂРіР°РЅРёРµ РїСЂРё РѕРїСЂРѕСЃРµ СЂРµРіСѓР»СЏСЂРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ
+    # Отвечает за моргание при опросе регулярных регистров
     if PACKET_FORM_STATE in [REGULAR_PACKET_STATE,SERVER_SEND_STATE] and time.ticks_diff(time.ticks_ms(), last_time_DO_1) > 100:
         DO_1.toggle()
         DO_0.off()
         last_time_DO_1 = time.ticks_ms()  
     
-    # РћС‚РІРµС‡Р°РµС‚ Р·Р° РјРѕСЂРіР°РЅРёРµ РїСЂРё РѕРїСЂРѕСЃРµ Р°РІР°СЂРёР№РЅС‹С… СЃРёРіРЅР°Р»РѕРІ
+    # Отвечает за моргание при опросе аварийных сигналов
     if PACKET_FORM_STATE == EMERGENCY_PACKET_STATE and time.ticks_diff(time.ticks_ms(), last_time_DO_0) > 100:
         DO_0.toggle()
         DO_1.off()
         last_time_DO_0 = time.ticks_ms()  
     
-    # Р Р°Р±РѕС‡РёР№ С†РёРєР» 1 СЃРµРє
+    # Рабочий цикл 1 сек
     if abs(time.time() - last_time_sec) >= 1:
         display_general_info()
         last_time_sec = time.time()
     
-    # РЎРІРѕР±РѕРґРЅР°СЏ Р»Рё Р»РёРЅРёСЏ ModBus
+    # Свободная ли линия ModBus
     if not IS_WAIT_MODBUS_RESPONSE:
-        # РћС‚РїСЂР°РІРєР° Р·Р°РїСЂРѕСЃР° РЅР° Micom
+        # Отправка запроса на Micom
         if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
             last_time_DO_1 = time.ticks_ms()
             message = MICOM_REQUEST_TEMPLATE[:]
@@ -496,7 +496,7 @@ while True:
             message += crc
             
             send_modbus_req(message)
-        # РћС‚РїСЂР°РІРєР° Р·Р°РїСЂРѕСЃР° РЅР° DI32
+        # Отправка запроса на DI32
         elif PACKET_FORM_STATE == EMERGENCY_PACKET_STATE:
             last_time_DO_0 = time.ticks_ms()
             DI_32_REQUEST_TEMPLATE[0] = DI_32_ADDRESSES[current_DI_32_address_index]
@@ -508,26 +508,26 @@ while True:
         
         last_time_modbus_req = time.ticks_ms()
 
-    # РџРµСЂРµС…РѕРґ РІ СЂРµР¶РёРј РѕС‚РїСЂРѕСЃР° СЂРµРіСѓР»СЏСЂРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ 
+    # Переход в режим отпроса регулярных регистров 
     if abs(time.time() - last_time_regular_packet) >= REGULAR_PACKET_PERIOD_SECONDS:
         PACKET_FORM_STATE = REGULAR_PACKET_STATE
         last_time_regular_packet = time.time()
         
-    # РћРїСЂРѕСЃ СЂРµРіСѓР»СЏСЂРЅС‹С… СЂРµРіРёСЃС‚СЂРѕРІ Р·Р°РєРѕРЅС‡РµРЅ РјРѕР¶РЅРѕ РѕС‚РїСЂР°Р»СЏС‚СЊ РЅР° СЃРµСЂРІРµСЂ
+    # Опрос регулярных регистров закончен можно отпралять на сервер
     if PACKET_FORM_STATE == SERVER_SEND_STATE:
         modem_var.connect_to_server()
         
-    # * * * * * * * * * * * РџСЂРёРµРј СЃ UART РїРѕСЂС‚РѕРІ * * * * * * * * * * *
+    # * * * * * * * * * * * Прием с UART портов * * * * * * * * * * *
     
-    # РџРѕР»СѓС‡РЅРёРµ РѕС‚РІРµС‚Р° РѕС‚ РјРѕРґРµРјР°
+    # Получние ответа от модема
     data = modem_var.process_tcpip()
     
     # TODO
     # different dialoge window when comm
     
-    # РЈСЃРїРµС€РЅРѕРµ Р·Р°РєСЂС‹С‚РёРµ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ СЃРµСЂРІРµСЂРѕРј
+    # Успешное закрытие соединения с сервером
     if data and 'IP INITIAL' in data:
-        # РџРµСЂРµС…РѕРґ РІ РѕРїСЂРѕСЃ Р°РІР°СЂРёР№РЅС‹С… СЃРёРіРЅР°Р»РѕРІ
+        # Переход в опрос аварийных сигналов
         PACKET_FORM_STATE = EMERGENCY_PACKET_STATE
         last_time_regular_packet = time.time()
     elif data and re.search('.*<.*>.*', data):
@@ -559,7 +559,7 @@ while True:
         display_general_info()
         PACKET_FORM_STATE = EMERGENCY_PACKET_STATE
         last_time_regular_packet = time.time()
-    # РњРѕРґРµРј РѕР¶РёРґР°РµС‚ РґР°РЅРЅС‹С… РґР»СЏ РѕС‚РїСЂР°РІРєРё РЅР° СЃРµСЂРІРµСЂ
+    # Модем ожидает данных для отправки на сервер
     elif data and  '>' in str(data):
         if IS_FILE_DONWLOAD:
             modem_var.send_str(f"<{OBJECT_ID}CMD:NEXTLINE>".encode())
@@ -570,31 +570,31 @@ while True:
             send_general_regular_packet()
         modem_var.send_data()
 
-    # РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРµ РѕС‚РІРµС‚Р° РѕС‚ РїРѕРґРєР»СЋС‡РµРЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ РїРѕ Modbus РїСЂРѕС‚РѕРєРѕР»Сѓ 
+    # Проверка на наличие ответа от подключенных устройств по Modbus протоколу 
     if uart.any():
         start_time = time.ticks_ms()
         
-        # Р§С‚РµРЅРёРµ РІСЃРµС… РґР°РЅРЅС‹С… РµСЃР»Рё РЅРµ РІСЃРµ Р±С‹Р»Рё РїСЂРѕС‡РёС‚Р°РЅРЅС‹ СЃ РїРµСЂРІРѕР№ РїРѕРїС‹С‚РєРё
+        # Чтение всех данных если не все были прочитанны с первой попытки
         while uart.any() and time.ticks_diff(time.ticks_ms(), time.ticks_ms()) < 5:
-            # Р§С‚РµРЅРёРµ РѕС‚РІРµС‚Р° РѕС‚ РїРѕРґРєР»СЋС‡РµРЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ РїРѕ Modbus РїСЂРѕС‚РѕРєРѕР»Сѓ
+            # Чтение ответа от подключенных устройств по Modbus протоколу
             response += uart.readline()
             
-        # РџСЂРѕРІРµСЂРєР° РЅР° РІР°Р»РґРЅРѕСЃС‚СЊ Р°РґСЂРµСЃ РІ РѕС‚РІРµС‚Рµ, РІР°Р»РёРґРЅРѕСЃС‚СЊ С„СѓРЅ. РєРѕРґР°, РїСЂР°РІРёР»СЊРЅРѕ Р»Рё СЂР°СЃС‡РёС‚Р°РЅ crc
+        # Проверка на валдность адрес в ответе, валидность фун. кода, правильно ли расчитан crc
         if not (check_crc(response) and response[1] < 129 and (response[0] in DI_32_ADDRESSES or response[0] in MICOM_RELAY_ADDRESSES)):
             response = b''
             continue
         
-        # Р•СЃС‚СЊ Р»Рё Р·Р°РїРёСЃСЊ СЃРѕСЃС‚РѕСЏРЅРёСЏ РґР°РЅРЅРѕРіРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ 
+        # Есть ли запись состояния данного устройство 
         if not (response[0] in cell_regular_values) and (response[0] in MICOM_RELAY_ADDRESSES):
             cell_regular_values[response[0]] = {}
         if not (response[0] in cell_emergency_values) and (response[0] in DI_32_ADDRESSES):
             cell_emergency_values[response[0]] =  b'\xFF\xFF\xFF\xFF'
                         
         try:
-            # Р Р°Р·Р±РёСЂР°РµРј РѕС‚РІРµС‚ РѕС‚ СѓСЃС‚СЂРѕР№С‚РІРѕ Micom
+            # Разбираем ответ от устройтво Micom
             if PACKET_FORM_STATE == REGULAR_PACKET_STATE and (response[0] in MICOM_RELAY_ADDRESSES):
                 cell_regular_values[response[0]][MICOM_REGULAR_REGISTER[current_MICOM_REGULAR_REGISTER_index]] = response[4:6]
-            # РџСЂРѕРІРµСЂСЏРµРј РёР·РјРµРЅРёР»РёСЃСЊ Р»Рё Р°РІР°СЂРёР№РЅС‹Рµ СЃРёРіРЅР°Р»С‹
+            # Проверяем изменились ли аварийные сигналы
             elif (response[0] in DI_32_ADDRESSES) and not (cell_emergency_values[response[0]] == response[3 : 3 + response[2]]):
                 cell_emergency_values[response[0]] = response[3 : 3 + response[2]]
                 for i in range(len(cell_emergency_values[response[0]])):
@@ -613,7 +613,7 @@ while True:
         except Exception as err:
             log.log(log.ERROR, str(err))
     
-        # РџСЂРё СѓСЃРїРµС€РЅРѕРј РѕС‚РІРµС‚Рµ РїРµСЂРµС…РѕРґРёРј РЅР° СЃР»РµРґСѓСЋС‰РёРµ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
+        # При успешном ответе переходим на следующие устройство
         if response is not None:
             if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
                 cell_regular_response_fail_count[current_micom_address_index] = 0
@@ -635,3 +635,5 @@ while True:
             log.log(4, "No response received.")
             
 # ================================= END ================================
+
+2

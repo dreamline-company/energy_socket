@@ -26,7 +26,7 @@ s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # sock.connect(("13.51.162.215", 8070))
 # sock.connect(("192.168.0.63", 8070))
-sock.connect(("localhost", 8070))
+sock.connect(("192.168.1.2", 8070))
 cell_emergency_mapped_view = {1: [1, 2], 2: [3, 4]}
 cell_regular_values = {}
 dict_val = {"t2": 22.2, "re": 13, "v1": 225.2, "t1": 22.2, "ms": 255}
@@ -84,6 +84,7 @@ elif s == "1":
     for i in packet:
         sock.send(i)
 data = ""
+new_file_name = ""
 while True:
     data += sock.recv(1024).decode()
     print(data)
@@ -91,18 +92,25 @@ while True:
         break
     if data and re.search(".*<.*>.*", data):
         cmd_from_server = data[data.index("<") + 1 : data.rindex(">")]
-        if "CHANGEFILE" in cmd_from_server:
+        if "NEXTLINE" in cmd_from_server:
+            print(cmd_from_server[cmd_from_server.index(":") + 1 :])
+            with open("new/" + new_file_name, "a") as f:
+                f.write(cmd_from_server[cmd_from_server.index(":") + 1 :] + "\n")
+                f.close()
+        elif "CHANGEFILE" in cmd_from_server:
             IS_FILE_DONWLOAD = True
             new_file_name = cmd_from_server[cmd_from_server.index(":") + 1 :]
             print(new_file_name)
+            with open("new/" + new_file_name, "w") as f:
+                f.write("")
+                f.close()
         elif "OK" in cmd_from_server:
             break
-        elif "NEXTLINE" in cmd_from_server:
-            print(cmd_from_server[cmd_from_server.index(":") + 1 :])
         elif "FILEEND" in cmd_from_server:
             IS_FILE_SUCCESS = True
             IS_FILE_DONWLOAD = False
             print(cmd_from_server)
+            break
         elif "RESTART" in cmd_from_server:
             print(cmd_from_server)
         elif "SETTIME" in cmd_from_server:

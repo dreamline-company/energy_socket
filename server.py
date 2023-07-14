@@ -326,10 +326,11 @@ def multi_threaded_client(connection, address):
     """
     CONTENTOFTHEFILE = ""
     # Читаем файл test.txt
-    with open("test.txt", "r") as f:
+    with open("test.txt", "r", encoding="utf-8") as f:
         CONTENTOFTHEFILE = f.read()
         f.close()
-    CONTENTOFTHEFILE = CONTENTOFTHEFILE.split()
+    CONTENTOFTHEFILE = CONTENTOFTHEFILE.split("\n")
+    CONTENTOFTHEFILE.append(THREAD_COUNT)
     line_index = 0
     received_data = b""
     IS_FILE_SENDING = False
@@ -358,7 +359,9 @@ def multi_threaded_client(connection, address):
                     received_data = b""
                     continue
 
-                if "CMD:FILESUCCESS" in received_data.decode():
+                if IS_FILE_SENDING and "CMD:FILESUCCESS" in received_data.decode():
+                    msg = f"<OK>"
+                    connection.sendall(msg.encode())
                     received_data = b""
                     line_index = 0
                     break
