@@ -28,7 +28,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("192.168.1.2", 8070))
 cell_emergency_mapped_view = {1: [1,2], 2: [3,4]}
 cell_regular_values = {}
-dict_val = {'t2': 0, 're': 0, 'v1': 0, 't1': 0, 'ms': 255}
+dict_val = {'t2': 22.2, 're': 13, 'v1': 225.2, 't1': 22.2, 'ms': 255}
 
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False

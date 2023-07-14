@@ -120,5 +120,22 @@ cursor.execute(
 # Make sure data is committed to the database
 cnx.commit()
 
+CREATE_TABLE_QUERY = (
+    "CREATE TABLE states (id int, file_send int, reset int, set_time int);"
+)
+
+print(CREATE_TABLE_QUERY)
+cursor.execute(CREATE_TABLE_QUERY)
+# Make sure data is committed to the database
+cnx.commit()
+
+cursor.execute(
+    "INSERT INTO states (id, file_send, reset, set_time) VALUES (%s,%s,%s, %s)",
+    (1,0,0,0),
+)
+# Make sure data is committed to the database
+cnx.commit()
+
+
 cursor.close()
 cnx.close()

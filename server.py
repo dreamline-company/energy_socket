@@ -27,7 +27,7 @@ from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
 
-from db_var import comman_var, general_var, emergency_var, regular_var
+from db_var import comman_var, general_var, emergency_var, regular_var, state_name, FILE_SEND_STATE_ID, RESET_STATE_ID, SET_TIME_STATE_ID
 
 DB_SERVER = "16.171.132.235"
 DB_USERNAME = "root"
@@ -73,6 +73,28 @@ def get_object_name(object_number):
 
     cursor.close()
     return object_name
+
+def change_state_to(state_id, state_val):
+    cursor = cnx.cursor()
+    # запускаем SQL запрос
+    cursor.execute(
+    f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = 1"
+    )
+    cursor.close()
+
+def get_states():
+    cursor = cnx.cursor()
+    # запускаем SQL запрос
+    cursor.execute(
+    f"SELECT file_send, reset, set_time FROM states WHERE id = 1"
+    )
+
+    # Извлекаем имя из ответа базы данных
+    state = cursor.fetchall()[0]
+    # Фиксируем данные в базе данных
+
+    cnx.commit()
+    return state
 
 
 def create_server_connection(host_name, user_name, user_password, database_name):
@@ -292,6 +314,7 @@ def multi_threaded_client(connection, address):
     line_index = 0
     received_data = b''
     IS_FILE_SENDING = False
+    states = get_states()
     while True:
         try:
             # Чтение данных от подключенного контроллера
@@ -299,7 +322,7 @@ def multi_threaded_client(connection, address):
             # Если ничего не получили выходим из цикла
             if not received_data:
                 break
-            print(received_data)
+            print("Raw view of data:", received_data)
             # проверям валдиность данных
             if is_data_valid(received_data):
                 print(
@@ -339,15 +362,15 @@ def multi_threaded_client(connection, address):
                 if states[0] and not IS_FILE_SENDING:
                     IS_FILE_SENDING = True
                     line_index = 0
-                    states[0] = 0
+                    change_state_to(FILE_SEND_STATE_ID,0)
                     msg = f"<CHANGEFILE:test.txt>"
                 elif states[1]:
-                    states[1] = 0
                     msg = f"<RESTART>"
+                    change_state_to(RESET_STATE_ID,0)
                 elif states[2]:
-                    states[2] = 0
                     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
                     msg = f"<SETTIME:{now}>"
+                    change_state_to(SET_TIME_STATE_ID,0)
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
         except ConnectionResetError:
@@ -399,6 +422,3 @@ while True:
     # создаем новый поток и начниаем там обработку клиента
     start_new_thread(multi_threaded_client, (Client, new_socket))
     THREAD_COUNT += 1
-    with open('states.txt', "r") as f:
-        states = [int(i) for i in f.read().split("\n")]
-        f.close()

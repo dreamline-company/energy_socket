@@ -17,3 +17,4 @@ EMERGENCY_PACKET_STATE = (0).to_bytes(1, "little")
 OBJECT_ID = (2).to_bytes(2, "little")
 
 THREE = (3).to_bytes(1, "little")
+
