@@ -80,6 +80,9 @@ def change_state_to(state_id, state_val):
     cursor.execute(
     f"UPDATE states SET {state_name[state_id]} = {state_val} WHERE id = 1"
     )
+    
+    cnx.commit()
+
     cursor.close()
 
 def get_states():
@@ -94,6 +97,7 @@ def get_states():
     # Фиксируем данные в базе данных
 
     cnx.commit()
+    cursor.close()
     return state
 
 
@@ -336,12 +340,16 @@ def multi_threaded_client(connection, address):
                 if line_index == len(CONTENTOFTHEFILE):
                     connection.sendall(f'<FILEEND>'.encode())
                     IS_FILE_SENDING = False
+                    received_data = b''
                     continue
+                
+                if 'CMD:FILESUCCESS' in received_data.
 
                 if IS_FILE_SENDING and 'CMD:NEXTLINE' in received_data.decode():
                     msg = f'<NEXTLINE:{CONTENTOFTHEFILE[line_index]}>'
                     connection.sendall(msg.encode())
                     line_index += 1
+                    received_data = b''
                     continue
 
                 packet_type, data = parse_socket_data(received_data)
@@ -378,13 +386,10 @@ def multi_threaded_client(connection, address):
             received_data = b''
             break
         except IndexError as i_e:
-            received_data = b''
             print(address, i_e.with_traceback, i_e)
-            break
         except ValueError as v_e:
-            received_data = b''
             print(address, v_e.with_traceback, v_e)
-            break
+
     connection.close()
 
 

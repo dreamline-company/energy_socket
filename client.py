@@ -55,47 +55,42 @@ elif s == "1":
     print(packet)
     for i in packet:
         sock.send(i) 
-
-print(sock.recv(1024))
-# data = ''
-# packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:NEXTLINE".encode(), PACKET_END_CHARACTER]
-# print(packet)
-# for i in packet:
-#     sock.send(i) 
-# data = ''
-# while True:
-#     data += sock.recv(1024).decode()
-#     if not data:
-#         break
-#     if data and re.search('.*<.*>.*', data):
-#         cmd_from_server = data[data.index('<')+1:data.rindex('>')]
-#         if "CHANGEFILE" in cmd_from_server:
-#             IS_FILE_DONWLOAD = True
-#             new_file_name = cmd_from_server[cmd_from_server.index(":") + 1:]
-#             print(new_file_name)
-            
-#         elif "NEXTLINE" in cmd_from_server:
-#             print(cmd_from_server[cmd_from_server.index(":") + 1:])
-#         elif "FILEEND" in cmd_from_server:
-#             IS_FILE_SUCCESS = True
-#             IS_FILE_DONWLOAD = False
-#             print(cmd_from_server)
-#         elif "RESTART" in cmd_from_server:
-#             print(cmd_from_server)
-#         elif "SETTIME" in cmd_from_server:
-#             print(cmd_from_server)
-#         data = ''
-#         if IS_FILE_DONWLOAD:
-#             packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:NEXTLINE".encode(), PACKET_END_CHARACTER]
-#             print(packet)
-#             for i in packet:
-#                 sock.send(i) 
-#             data = ''
-#         elif IS_FILE_SUCCESS:
-#             IS_FILE_SUCCESS = False
-#             packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:FILESUCCESS".encode(), PACKET_END_CHARACTER]
-#             print(packet)
-#             for i in packet:
-#                 sock.send(i) 
-#             data = ''
-# print('data')
+data = ''
+while True:
+    data += sock.recv(1024).decode()
+    print(data)
+    if not data:
+        break
+    if data and re.search('.*<.*>.*', data):
+        cmd_from_server = data[data.index('<')+1:data.rindex('>')]
+        if "CHANGEFILE" in cmd_from_server:
+            IS_FILE_DONWLOAD = True
+            new_file_name = cmd_from_server[cmd_from_server.index(":") + 1:]
+            print(new_file_name)
+        elif "OK" in cmd_from_server:
+            break   
+        elif "NEXTLINE" in cmd_from_server:
+            print(cmd_from_server[cmd_from_server.index(":") + 1:])
+        elif "FILEEND" in cmd_from_server:
+            IS_FILE_SUCCESS = True
+            IS_FILE_DONWLOAD = False
+            print(cmd_from_server)
+        elif "RESTART" in cmd_from_server:
+            print(cmd_from_server)
+        elif "SETTIME" in cmd_from_server:
+            print(cmd_from_server)
+        data = ''
+        if IS_FILE_DONWLOAD:
+            packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:NEXTLINE".encode(), PACKET_END_CHARACTER]
+            print(packet)
+            for i in packet:
+                sock.send(i) 
+            data = ''
+        elif IS_FILE_SUCCESS:
+            IS_FILE_SUCCESS = False
+            packet = [PACKET_START_CHARACTER, OBJECT_ID, THREE,"CMD:FILESUCCESS".encode(), PACKET_END_CHARACTER]
+            print(packet)
+            for i in packet:
+                sock.send(i) 
+            data = ''
+print('data')
