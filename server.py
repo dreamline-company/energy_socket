@@ -371,7 +371,7 @@ def multi_threaded_client(connection, address):
                     connection.sendall(msg.encode())
                     line_index += 1
                     received_data = b""
-                    print("Sending NEXTLINE: {CONTENTOFTHEFILE[line_index]}")
+                    print(f"Sending NEXTLINE: {CONTENTOFTHEFILE[line_index]}")
                     continue
 
                 packet_type, data = parse_socket_data(received_data)
@@ -408,7 +408,7 @@ def multi_threaded_client(connection, address):
                     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{min}:{sec}>"
                     change_state_to(SET_TIME_STATE_ID, 0)
                 # Отпраляем ответ контроллеру
-                print("Sending : {msg}")
+                print(f"Sending : {msg}")
                 connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
