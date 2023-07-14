@@ -397,8 +397,14 @@ def multi_threaded_client(connection, address):
                     msg = f"<RESTART>"
                     change_state_to(RESET_STATE_ID, 0)
                 elif states[2]:
-                    now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-                    msg = f"<SETTIME:{now}>"
+                    now = str(datetime.now(timezone(timedelta(hours=+6), "ALA")))
+                    year = now[2:4]
+                    month = now[5:7]
+                    day = now[8:10]
+                    hour = now[11:13]
+                    min = now[14:16]
+                    sec = now[17:19]
+                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{min}:{sec}>"
                     change_state_to(SET_TIME_STATE_ID, 0)
                 # Отпраляем ответ контроллеру
                 connection.sendall(msg.encode())
