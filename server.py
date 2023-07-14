@@ -342,28 +342,30 @@ def multi_threaded_client(connection, address):
                 )
                 print("Data with length of ", len(received_data))
                 object_id = int.from_bytes(received_data[1:3], "little")
-                if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
-                    connection.sendall(f"<FILEEND>".encode())
-                    IS_FILE_SENDING[object_id] = False
-                    received_data = b""
-                    print("Send FILEEND cmd")
-                    continue
+                packet_type = received_data[3]
+                if packet_type == 3:
+                    if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
+                        connection.sendall(f"<FILEEND>".encode())
+                        IS_FILE_SENDING[object_id] = False
+                        received_data = b""
+                        print("Send FILEEND cmd")
+                        continue
 
-                if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
-                    msg = f"<OK>"
-                    connection.sendall(msg.encode())
-                    received_data = b""
-                    line_index[object_id] = 0
-                    print("Send OK cmd")
-                    break
+                    if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
+                        msg = f"<OK>"
+                        connection.sendall(msg.encode())
+                        received_data = b""
+                        line_index[object_id] = 0
+                        print("Send OK cmd")
+                        break
 
-                if IS_FILE_SENDING[object_id] and "CMD:NEXTLINE" in received_data.decode():
-                    msg = f"<NEXTLINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>"
-                    connection.sendall(msg.encode())
-                    line_index[object_id] += 1
-                    received_data = b""
-                    print(f"Sending NEXTLINE: {CONTENTOFTHEFILE[object_id][line_index[object_id]]}")
-                    continue
+                    if IS_FILE_SENDING[object_id] and "CMD:NEXTLINE" in received_data.decode():
+                        msg = f"<NEXTLINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>"
+                        connection.sendall(msg.encode())
+                        line_index[object_id] += 1
+                        received_data = b""
+                        print(f"Sending NEXTLINE: {CONTENTOFTHEFILE[object_id][line_index[object_id]]}")
+                        continue
 
                 packet_type, object_id, data = parse_socket_data(received_data)
 
