@@ -284,8 +284,6 @@ def parse_socket_data(received_data):
     # байт под индексов 3 тип пакета
     packet_type = received_data[3]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
-    print(received_data[4 : received_data.index(ord("{"))])
-    print(int.from_bytes(received_data[4 : received_data.index(ord("{"))], "little"))
     datetime_from_ctr = datetime.fromtimestamp(
         int.from_bytes(received_data[4 : received_data.index(ord("{"))], "little")
     )
@@ -357,6 +355,7 @@ def multi_threaded_client(connection, address):
                     connection.sendall(f"<FILEEND>".encode())
                     IS_FILE_SENDING = False
                     received_data = b""
+                    print("Send FILEEND cmd")
                     continue
 
                 if IS_FILE_SENDING and "CMD:FILESUCCESS" in received_data.decode():
@@ -364,6 +363,7 @@ def multi_threaded_client(connection, address):
                     connection.sendall(msg.encode())
                     received_data = b""
                     line_index = 0
+                    print("Send OK cmd")
                     break
 
                 if IS_FILE_SENDING and "CMD:NEXTLINE" in received_data.decode():
@@ -371,6 +371,7 @@ def multi_threaded_client(connection, address):
                     connection.sendall(msg.encode())
                     line_index += 1
                     received_data = b""
+                    print("Sending NEXTLINE: {CONTENTOFTHEFILE[line_index]}")
                     continue
 
                 packet_type, data = parse_socket_data(received_data)
@@ -407,6 +408,7 @@ def multi_threaded_client(connection, address):
                     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{min}:{sec}>"
                     change_state_to(SET_TIME_STATE_ID, 0)
                 # Отпраляем ответ контроллеру
+                print("Sending : {msg}")
                 connection.sendall(msg.encode())
         except ConnectionResetError:
             print(address, "is reset connection")
