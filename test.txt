@@ -31,7 +31,7 @@ from library.constants import *
 
 from machine import Pin, UART, SPI, I2C
 from time import localtime, mktime, ticks_ms
-# ver 1.0.3
+# ver 1.0.6
 # ------------------------------- FUNCTION ---------------------------------
 
 def init_modules():
@@ -184,8 +184,19 @@ def display_general_info():
     if not (MODULES_STATUSES & 2 << 1) >> 2:
         oled.Oled(display_list)
     else:
-        print("OLED: Bad")
-        
+        log.log(log.ERROR, "OLED: Bad")
+
+def set_time(str_time):
+    sp0 = str_time[23:25]
+    sp0 = sp0 + str_time[20:22]
+    sp0 = sp0 + str_time[17:19]
+    sp0 = sp0 + str_time[14:16]
+    sp0 = sp0 + '01' #День недели
+    sp0 = sp0 + str_time[11:13]
+    sp0 = sp0 + str_time[8:10] #Год/
+    bp0 = binascii.unhexlify(sp0)
+    rtc_p.SetTime(NowTime=bp0)
+    IS_CLOCK_SET = True
 def send_modbus_req(s):
     global ms_RS, IS_WAIT_MODBUS_RESPONSE
     Pin_RS0.on()
@@ -225,59 +236,64 @@ def read_ADS(Kanal, dlit):
     nV = ads.read(0)
     return nV
 
-def send_general_regular_packet():
-    packet = [PACKET_START_CHARACTER, OBJECT_ID, REGULAR_PACKET_TYPE, time.time().to_bytes(4, "little"), DATA_START_CHARACTER]
-    for cell_number in sorted(cell_regular_values.keys()):
-        packet.append(cell_number.to_bytes(1, "little"))
-        for reg_num in sorted(cell_regular_values[cell_number].keys()):
-            packet.extend((reg_num, REGISTER_NUM_VALUE_DELIMITER, cell_regular_values[cell_number][reg_num], REGISTER_DELIMITER))
-        packet.append(DATA_DELIMITER)
-    packet.extend((DATA_END_CHARACTER, DATA_START_CHARACTER))
-    for name in ["v1", "t1", "t2", "ms", "re"]:
-        packet.extend((name.encode(), bytearray(struct.pack("f", dict_val[name])) , DATA_DELIMITER))
-    packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
-    log.log(log.INFO, f'Send regular packet : {packet}')
-    for i in packet:
-        modem_var.send_number(i) 
+def form_packet(packet_type):
+    packet = [PACKET_START_CHARACTER, OBJECT_ID, packet_type, time.time().to_bytes(4, "little"), DATA_START_CHARACTER]
+    if packet_type == EMERGENCY_PACKET_TYPE:
+        for cell_number in sorted(cell_emergency_mapped_view.keys()):
+            packet.extend((cell_number.to_bytes(2, "little"), sum(cell_emergency_mapped_view[cell_number]).to_bytes(1,"little"), DATA_DELIMITER))
+        packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
+    if packet_type == REGULAR_PACKET_TYPE:
+        for cell_number in sorted(cell_regular_values.keys()):
+            packet.append(cell_number.to_bytes(1, "little"))
+            for reg_num in sorted(cell_regular_values[cell_number].keys()):
+                packet.extend((MICOM_REGULAR_REGISTER[reg_num], REGISTER_NUM_VALUE_DELIMITER, cell_regular_values[cell_number][reg_num], REGISTER_DELIMITER))
+            packet.append(DATA_DELIMITER)
+        packet.extend((DATA_END_CHARACTER, DATA_START_CHARACTER))
+        for name in ["v1", "t1", "t2", "ms", "re"]:
+            try:
+                packet.extend((name.encode(), bytearray(struct.pack("f", dict_val[name])) , DATA_DELIMITER))
+            except:
+                pass
+        packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
+    return packet
 
-def send_emergency_packet(emergency_packet_data):
-    to_count = 0
-    while True:
-        modem_var.connect_to_server()
-        data = modem_var.process_tcpip()
-        if data and '>' in data and not '<' in data:
-            packet = [PACKET_START_CHARACTER, OBJECT_ID, EMERGENCY_PACKET_TYPE, time.time().to_bytes(4, "little"), DATA_START_CHARACTER]
-            for cell_number in sorted(cell_emergency_mapped_view.keys()):
-                packet.extend((cell_number.to_bytes(2, "little"), sum(cell_emergency_mapped_view[cell_number]).to_bytes(1,"little"), DATA_DELIMITER))
-            packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
-            
-            log.log(log.INFO, f'Send emergency packet : {packet}')
-            for i in packet:
-                modem_var.send_number(i)
-            modem_var.send_data()
-        elif data and 'IP INITIAL' in data:
-            return 0
-        elif data and to_count < 3 and 'TIMEOUT' in data:
-            to_count += 1
-        elif to_count >= 3:
-            return -1
+def send_general_regular_packet():
+    packet = form_packet(REGULAR_PACKET_TYPE)
+    if modem_var.get_status() != -1:
+        for i in packet:
+            modem_var.send_number(i)
+        log.log(log.INFO, f'Send regular packet : {packet}')
+    else:
+        File('unsended_packets.txt').writeln(f'{packet}')
+    return packet
+
+def send_emergency_packet():
+    packet = form_packet(EMERGENCY_PACKET_TYPE)
+    if modem_var.get_status() != -1:
+        for i in packet:
+            modem_var.send_number(i)
+        log.log(log.INFO, f'Send emergency packet : {packet}')
+    else:
+        File('unsended_packets.txt').writeln(f'{packet}')
+    return packet
+
 def send_sms():
     while True:
         modem_var.send_sms_mode_on()
-        data = modem_var.process()
+        data = modem_var.process_sms()
         if data and '>' in data:
             modem_var.send_number('MESSAGE'.encode())
             modem_var.send_number((26).to_bytes(1, "little"))
+            modem_var.send_data()
             break
-            
-        
+
     log.log(log.INFO, 'Some modules are fail to start. Send SMS message to emergency contact')
 
 # ------------------------------- END FUNCTION ------------------------------------
 
 # ---------------------------------START-------------------------------------------
 
-log = Logger(f'object_{OBJECT_ID}_main.log')
+log = Logger(f'object_{int.from_bytes(OBJECT_ID, "little")}_main.log')
 
 ms_RS = 0  # Задержка для передачи пакета RS-485
 
@@ -286,12 +302,14 @@ fl_ADS = False  # ADS в процессе
 PACKET_FORM_STATE = EMERGENCY_PACKET_STATE # идет ли формиравиние регулярного пакета
 # EMERGENCY_PACKET_STATE - формиравиние регулярного пакета не идет
 # REGULAR_PACKET_STATE - идет опрос регистров по ModBus
-# SERVER_SEND_STATE - идет отправка на сервер регулярного пакета
-
+SERVER_SEND_STATE = SERVER_SEND_NOT_STATE
 #
 IS_WAIT_MODBUS_RESPONSE = False
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
+IS_CLOCK_SET = False
+SENDED_RS_WORK = False
+SENDED_RS_D_WORK = False
 # Инициализация
 #
 response = b''
@@ -313,9 +331,34 @@ DI_32_REQUEST_TEMPLATE = bytearray(
     [0x01, 0x03, 0x00, 0x63, 0x00, 0x02]
 )
 
+DI_32_REQUEST_LIST = []
+
+for i in range(DI_32_COUNT):
+    request = DI_32_REQUEST_TEMPLATE[:]
+    request[0] = DI_32_ADDRESSES[i]
+    crc = crc16(request)
+    request += crc
+    
+    DI_32_REQUEST_LIST.append(request)
+
 MICOM_REQUEST_TEMPLATE = bytearray(
     [0x01, 0x03, 0x00, 0x00, 0x00, 0x01]
 )
+
+MICOM_REQUEST_LIST = []
+
+for i in range(MICOM_RELAY_COUNT):
+    MICOM_REQUEST_REG_LIST = []
+    request = MICOM_REQUEST_TEMPLATE[:]
+    request[0] = MICOM_RELAY_ADDRESSES[i]
+    for reg_i in range(len(MICOM_REGULAR_REGISTER)):
+        request[2] = MICOM_REGULAR_REGISTER[reg_i][0]
+        request[3] = MICOM_REGULAR_REGISTER[reg_i][1]
+
+        crc = crc16(request)
+        request += crc
+        MICOM_REQUEST_REG_LIST.append(request)
+    MICOM_REQUEST_LIST.append(MICOM_REQUEST_REG_LIST)
 
 # TODO error code definition
 error_codes = [0x01, 0x02, 0x03]
@@ -368,7 +411,7 @@ uart = None
 if RS_PORT == 1:
     MODULES_STATUSES = MODULES_STATUSES & ~(1<<7)
     uart = UART(0, tx=machine.Pin(0), rx=machine.Pin(1))
-    uart.init(baudrate=19200, bits=8, parity=None, stop=1, timeout=30)
+    uart.init(baudrate=38400, bits=8, parity=None, stop=1, timeout=30)
     
 # Коммутатор каналов
 addr_PCA = 0x41
@@ -381,83 +424,96 @@ timer0 = Timer()
 timer0.init(
     period=1000, mode=Timer.PERIODIC, callback=lambda t: led.value(not led.value())
 )
-modem_var.init() 
 # Базовые настройки модема
-# while modem_var.init() != 2:
-#     data = modem_var.process()
-#     if data and data.startswith('+CCLK'):
-#         sp0 = data[23:25]
-#         sp0 = sp0 + data[20:22]
-#         sp0 = sp0 + data[17:19]
-#         sp0 = sp0 + data[14:16]
-#         sp0 = sp0 + '01' #День недели
-#         sp0 = sp0 + data[11:13]
-#         sp0 = sp0 + data[8:10] #Год/
-#         bp0 = binascii.unhexlify(sp0)
-#         rtc_p.SetTime(NowTime=bp0)
-#     elif data and data.startswith('TIMEOUT'):
-#         # TODO
-#         # send to server
-#         pass
+if 'SIM not inserted' in modem_var.init():
+    error_code = error_code | (1<<2)
 
-log.log(log.INFO, "Modem and time are configured")
+if modem_var.get_status() != -1:
+    str_time = modem_var.get_time()
+    if str_time.startswith('+CCLK'):
+        set_time(str_time)
+    elif str_time.startswith('TIMEOUT'):
+        IS_CLOCK_SET = False
+    log.log(log.INFO, "Modem and time are configured")        
+else:
+    log.log(log.INFO, "Modem and time can't be configured cause of CME error")
+    
 
 # Счетчик перезагрузок
 attempt_count_file = File('attempt.txt')
 attempt_file_content = attempt_count_file.read()
-attempts_count = len(attempt_file_content.split())
+attempts_count = len(attempt_file_content.split("\n"))
 dict_val['re'] = attempts_count
-print(dict_val['re'])
 # Проверяем состояние модулей
 if MODULES_STATUSES == 0:
     attempts_count = 0
 elif attempts_count < 3:
-    attempts_count += 1
-    attempt_count_file.write(str(attempts_count), 'w')
+    attempt_count_file.writeln("Not all modules started properly")
     log.log(log.INFO, 'Some modules are fail to start. Initiate restart process')
     machine.reset()
-elif not (MODULES_STATUSES & 2 << 5) >> 6 and send_general_regular_packet():
-    log.log(log.INFO, 'Some modules are fail to start. Send message to server')
-else:
-    log.log(log.INFO, "Some modules are fail to start. 3 times attempted to restart system. Doesn't help.")
-    send_sms()
-
+elif modem_var.get_status != -1:
+    SEND_SMS = False
+    while True:
+        modem_var.connect_to_server()
+        # Получние ответа от модема
+        data = modem_var.process_tcpip()
+    
+        # Успешное закрытие соединения с сервером
+        if data and 'IP INITIAL' in data:
+            break
+        elif data and re.search('.*<.*>.*', data):
+            error_code = error_code & ~(1<<0)
+            cmd_from_server = data[data.index('<')+1:data.rindex('>')]
+        elif data and 'CONNECT FAIL' in data:
+            log.log(log.INFO, 'Can\'t connect to server')
+        elif data and to_count < 3 and 'TIMEOUT' in data:
+            log.log(log.INFO, 'Can\'t connect to server')
+            to_count += 1
+            modem_var.connect_to_server()
+        elif to_count >= 3:
+            log.log(log.INFO, 'Fail to connect to server 3 times')
+            to_count = 0
+            error_code = error_code | (1<<0)
+            modem_var.current_at_cmd_index = -1
+            display_general_info()
+            packet = b''            
+            for i in form_packet(REGULAR_PACKET_TYPE):
+                packet += i
+            File('unsended_packets.txt').writeln(f'{packet}')
+            SEND_SMS = True
+        # Модем ожидает данных для отправки на сервер
+        elif data and  '>' in str(data):        
+            send_general_regular_packet()
+            modem_var.send_data()
+    if SEND_SMS:
+        log.log(log.INFO, "Some modules are fail to start. 3 times attempted to restart system. Doesn't help.")
+        send_sms()
+    else:
+        log.log(log.INFO, 'Some modules are fail to start. Send message to server')
+        
 while True:
     # RS-485 ключение режима передачи
     if Pin_RS0.value():
         if time.ticks_diff(time.ticks_ms(), ms_RS) <= 0:
             Pin_RS0.off()
     
-    # Проверяем состояние RS-485 порта
-    if 0 in cell_regular_response_fail_count or 0 in cell_emergency_response_fail_count:
-        if last_rs_state == 1:
-            log.log(log.INFO, 'RS-485 works')
-            error_code = 0x00
-            display_general_info()
-        MODULES_STATUSES = MODULES_STATUSES & ~(1<<7)
-        last_rs_state = (MODULES_STATUSES & 2 << 6) >> 7
-    else:
-        if last_rs_state == 0:
-            PACKET_FORM_STATE = 2
-            log.log(log.INFO, 'RS-485 doesn\'t work')
-            error_code = 0x02
-            display_general_info()
-        MODULES_STATUSES = MODULES_STATUSES | (1<<7)
-        last_rs_state = (MODULES_STATUSES & 2 << 6) >> 7
-    
     # Timeout для ответа по Modbus протоколу
-    if IS_WAIT_MODBUS_RESPONSE and time.ticks_diff(time.ticks_ms(), last_time_modbus_req) > 100:
+    if IS_WAIT_MODBUS_RESPONSE and time.ticks_diff(time.ticks_ms(), last_time_modbus_req) > 35:
         if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
-            cell_regular_response_fail_count[current_micom_address_index] = 1
+            cell_regular_response_fail_count[current_micom_address_index] += 1
+            if cell_regular_response_fail_count[current_micom_address_index] > 50:
+                cell_regular_response_fail_count[current_micom_address_index] = 50
             if current_micom_address_index + 1 == MICOM_RELAY_COUNT:
-                PACKET_FORM_STATE = SERVER_SEND_STATE
+                SERVER_SEND_STATE = SERVER_SEND_REGULAR_STATE
             if current_MICOM_REGULAR_REGISTER_index + 1 == len(MICOM_REGULAR_REGISTER):
                 current_micom_address_index = (
                     current_micom_address_index + 1
                 ) % MICOM_RELAY_COUNT
             current_MICOM_REGULAR_REGISTER_index = (current_MICOM_REGULAR_REGISTER_index + 1) % len(MICOM_REGULAR_REGISTER)
         elif PACKET_FORM_STATE == EMERGENCY_PACKET_STATE:
-            cell_emergency_response_fail_count[current_DI_32_address_index] = 1
+            cell_emergency_response_fail_count[current_DI_32_address_index] += 1
+            if cell_emergency_response_fail_count[current_DI_32_address_index] > 50:
+                cell_emergency_response_fail_count[current_DI_32_address_index] = 50
             current_DI_32_address_index = (
                 current_DI_32_address_index + 1
             ) % DI_32_COUNT
@@ -466,7 +522,7 @@ while True:
         last_time_modbus_req = time.ticks_ms()
     
     # Отвечает за моргание при опросе регулярных регистров
-    if PACKET_FORM_STATE in [REGULAR_PACKET_STATE,SERVER_SEND_STATE] and time.ticks_diff(time.ticks_ms(), last_time_DO_1) > 100:
+    if PACKET_FORM_STATE == REGULAR_PACKET_STATE and time.ticks_diff(time.ticks_ms(), last_time_DO_1) > 100:
         DO_1.toggle()
         DO_0.off()
         last_time_DO_1 = time.ticks_ms()  
@@ -479,6 +535,21 @@ while True:
     
     # Рабочий цикл 1 сек
     if abs(time.time() - last_time_sec) >= 1:
+        # Проверяем состояние RS-485 порта
+        if sum(cell_regular_response_fail_count) + sum(cell_emergency_response_fail_count) < 50 * (DI_32_COUNT + MICOM_RELAY_COUNT):
+            if not SENDED_RS_WORK:
+                SENDED_RS_WORK = True
+                SENDED_RS_D_WORK = False
+                log.log(log.INFO, 'RS-485 work')
+            error_code = error_code & ~(1<<1)
+            MODULES_STATUSES = MODULES_STATUSES & ~(1<<7)
+        else:
+            if not SENDED_RS_D_WORK:
+                SENDED_RS_D_WORK = True
+                SENDED_RS_WORK = False
+                log.log(log.INFO, 'RS-485 doesn\'t work')
+            error_code = error_code | (1<<1)
+            MODULES_STATUSES = MODULES_STATUSES | (1<<7)
         display_general_info()
         last_time_sec = time.time()
     
@@ -487,24 +558,15 @@ while True:
         # Отправка запроса на Micom
         if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
             last_time_DO_1 = time.ticks_ms()
-            message = MICOM_REQUEST_TEMPLATE[:]
-            message[0] = MICOM_RELAY_ADDRESSES[current_micom_address_index]
-            message[2] = MICOM_REGULAR_REGISTER[current_MICOM_REGULAR_REGISTER_index][0]
-            message[3] = MICOM_REGULAR_REGISTER[current_MICOM_REGULAR_REGISTER_index][1]
             
-            crc = crc16(message)
-            message += crc
             
-            send_modbus_req(message)
+            send_modbus_req(MICOM_REQUEST_LIST[current_micom_address_index][current_MICOM_REGULAR_REGISTER_index])
         # Отправка запроса на DI32
         elif PACKET_FORM_STATE == EMERGENCY_PACKET_STATE:
             last_time_DO_0 = time.ticks_ms()
-            DI_32_REQUEST_TEMPLATE[0] = DI_32_ADDRESSES[current_DI_32_address_index]
-            message = DI_32_REQUEST_TEMPLATE[:]
-            crc = crc16(message)
-            message += crc
             
-            send_modbus_req(message)
+            
+            send_modbus_req(DI_32_REQUEST_LIST[current_DI_32_address_index])
         
         last_time_modbus_req = time.ticks_ms()
 
@@ -514,111 +576,117 @@ while True:
         last_time_regular_packet = time.time()
         
     # Опрос регулярных регистров закончен можно отпралять на сервер
-    if PACKET_FORM_STATE == SERVER_SEND_STATE:
+    if SERVER_SEND_STATE in [SERVER_SEND_REGULAR_STATE, SERVER_SEND_EMERGENCY_STATE] and modem_var.get_status() != -1:
         modem_var.connect_to_server()
-        
+    
     # * * * * * * * * * * * Прием с UART портов * * * * * * * * * * *
     
     # Получние ответа от модема
-    data = modem_var.process_tcpip()
-    
-    # TODO
-    # different dialoge window when comm
+    data = modem_var.process_tcpip(IS_FILE_DONWLOAD)
     
     # Успешное закрытие соединения с сервером
     if data and 'IP INITIAL' in data:
         # Переход в опрос аварийных сигналов
+        SERVER_SEND_STATE = SERVER_SEND_NOT_STATE
         PACKET_FORM_STATE = EMERGENCY_PACKET_STATE
         last_time_regular_packet = time.time()
+        IS_FILE_DONWLOAD = False
+    elif IS_FILE_DONWLOAD:
+        splited_name = new_file_name.split(".")
+        File(splited_name[0] + "1." + splited_name[1]).writeln(data)
     elif data and re.search('.*<.*>.*', data):
-        error_code = 0x00
+        error_code = error_code & ~(1<<0)
         cmd_from_server = data[data.index('<')+1:data.rindex('>')]
         if "CHANGEFILE" in cmd_from_server:
             IS_FILE_DONWLOAD = True
             new_file_name = cmd_from_server[cmd_from_server.index(":") + 1:]
-            modem_var.send_at_cmd()
-        elif "NEXTLINE" in cmd_from_server:
-            File('attempt.txt').writeln(cmd_from_server[cmd_from_server.index(":") + 1:])
+            splited_name = new_file_name.split(".")
+            File(splited_name[0] + "1." + splited_name[1]).write("", 'w')
         elif "FILEEND" in cmd_from_server:
             IS_FILE_SUCCESS = True
             IS_FILE_DONWLOAD = False
-            modem_var.send_at_cmd()
         elif "RESTART" in cmd_from_server:
+            log.log(log.INFO, f"From server reciveid cmd : restart")
+            attempt_count_file.writeln("From server reciveid cmd : restart")
             machine.reset()
         elif "SETTIME" in cmd_from_server:
-            pass
+            str_time = cmd_from_server[cmd_from_server.index(":") + 1:]
+            log.log(log.INFO, f"From server reciveid time: {str_time}")
+            set_time(str_time)
+    elif data and IS_FILE_DONWLOAD and "CLOSE" in data:
+        modem_var.current_at_cmd_index = 3
+        modem_var.ALLOW_NEXT_CMD = True
+        modem_var.CHECK_IP = False
+        modem_var.connect_to_server()
     elif data and 'CONNECT FAIL' in data:
         log.log(log.INFO, 'Can\'t connect to server')
     elif data and to_count < 3 and 'TIMEOUT' in data:
+        log.log(log.INFO, 'Can\'t connect to server')
         to_count += 1
         modem_var.connect_to_server()
     elif to_count >= 3:
+        log.log(log.INFO, 'Fail to connect to server 3 times')
         to_count = 0
-        error_code = 0x01
-        modem_var.current_at_cmd_index = 0
+        error_code = error_code | (1<<0)
+        modem_var.current_at_cmd_index = -1
         display_general_info()
-        PACKET_FORM_STATE = EMERGENCY_PACKET_STATE
+        packet = b''
+        if SERVER_SEND_STATE == SERVER_SEND_REGULAR_STATE:
+            for i in form_packet(REGULAR_PACKET_TYPE):
+                packet += i
+        elif SERVER_SEND_STATE == SERVER_SEND_EMERGENCY_STATE:
+            for i in form_packet(EMERGENCY_PACKET_TYPE):
+                packet += i
+        File('unsended_packets.txt').writeln(f'{packet}')
         last_time_regular_packet = time.time()
     # Модем ожидает данных для отправки на сервер
     elif data and  '>' in str(data):
-        if IS_FILE_DONWLOAD:
-            modem_var.send_str(f"<{OBJECT_ID}CMD:NEXTLINE>".encode())
-        elif IS_FILE_SUCCESS:
-            IS_FILE_SUCCESS = False
-            modem_var.send_str(f"<{OBJECT_ID}CMD:FILESUCCESS>")
-        else:
+        if SERVER_SEND_STATE == SERVER_SEND_REGULAR_STATE:
             send_general_regular_packet()
+        elif SERVER_SEND_STATE == SERVER_SEND_EMERGENCY_STATE:
+            send_emergency_packet()
         modem_var.send_data()
 
     # Проверка на наличие ответа от подключенных устройств по Modbus протоколу 
     if uart.any():
         start_time = time.ticks_ms()
-        
         # Чтение всех данных если не все были прочитанны с первой попытки
         while uart.any() and time.ticks_diff(time.ticks_ms(), time.ticks_ms()) < 5:
             # Чтение ответа от подключенных устройств по Modbus протоколу
             response += uart.readline()
-            
         # Проверка на валдность адрес в ответе, валидность фун. кода, правильно ли расчитан crc
-        if not (check_crc(response) and response[1] < 129 and (response[0] in DI_32_ADDRESSES or response[0] in MICOM_RELAY_ADDRESSES)):
+        if not (check_crc(response) and response[1] < 129 and (response[0] in DI_32_ADDRESSES or response[0] in MICOM_RELAY_ADDRESSES) and (len(response) == 9 or len(response) == 7)):
             response = b''
             continue
-        
         # Есть ли запись состояния данного устройство 
         if not (response[0] in cell_regular_values) and (response[0] in MICOM_RELAY_ADDRESSES):
             cell_regular_values[response[0]] = {}
         if not (response[0] in cell_emergency_values) and (response[0] in DI_32_ADDRESSES):
-            cell_emergency_values[response[0]] =  b'\xFF\xFF\xFF\xFF'
-                        
+            cell_emergency_values[response[0]] =  b'\xFF\xFF\xFF\xFF' 
         try:
             # Разбираем ответ от устройтво Micom
             if PACKET_FORM_STATE == REGULAR_PACKET_STATE and (response[0] in MICOM_RELAY_ADDRESSES):
-                cell_regular_values[response[0]][MICOM_REGULAR_REGISTER[current_MICOM_REGULAR_REGISTER_index]] = response[4:6]
+                cell_regular_values[response[0]][current_MICOM_REGULAR_REGISTER_index] = response[3:5]
             # Проверяем изменились ли аварийные сигналы
             elif (response[0] in DI_32_ADDRESSES) and not (cell_emergency_values[response[0]] == response[3 : 3 + response[2]]):
                 cell_emergency_values[response[0]] = response[3 : 3 + response[2]]
-                for i in range(len(cell_emergency_values[response[0]])):
-                    for j in range(i * 8, (i + 1) * 8):
-                        cell_conn = DI_32_DRY_CONTACT_CONN_MAP[j]
-                        if not (cell_conn[0] in cell_emergency_mapped_view):
-                            cell_emergency_mapped_view[cell_conn[0]] = []
-                        if (cell_emergency_values[response[0]][i] & 1 << (7 - j%8)) >> (7 - j%8) and not (cell_conn[1] in cell_emergency_mapped_view[cell_conn[0]]):
-                                cell_emergency_mapped_view[cell_conn[0]].append(cell_conn[1])
-                        elif cell_conn[1] in cell_emergency_mapped_view[cell_conn[0]]:
-                            cell_emergency_mapped_view[cell_conn[0]].remove(cell_conn[1])    
+                response_32_bit_value = int.from_bytes(cell_emergency_values[response[0]], "big")
+                bit_index = 0
+                for i in range(MAX_CELL_COUNT):
+                    if not ((CELL_TYPE & 1 << i) >> i):
+                        cell_emergency_mapped_view[i] = (response_32_bit_value & (15 << bit_index * DRY_CONTACT_PER_CELL_COUNT)) >> bit_index * DRY_CONTACT_PER_CELL_COUNT
+                        bit_index += 1
                 log.log(log.INFO, f'Parsed view of cells : {cell_emergency_mapped_view}')
-                if send_emergency_packet(cell_emergency_values) == -1:
-                    error_code = 0x01
-                    display_general_info()
+                SERVER_SEND_STATE = SERVER_SEND_EMERGENCY_STATE
         except Exception as err:
-            log.log(log.ERROR, str(err))
+            log.log(log.ERROR, str(err) + " " + str(response))
     
         # При успешном ответе переходим на следующие устройство
         if response is not None:
             if PACKET_FORM_STATE == REGULAR_PACKET_STATE:
                 cell_regular_response_fail_count[current_micom_address_index] = 0
                 if current_micom_address_index + 1 == MICOM_RELAY_COUNT:
-                    PACKET_FORM_STATE = SERVER_SEND_STATE
+                    SERVER_SEND_STATE = SERVER_SEND_REGULAR_STATE
                 if current_MICOM_REGULAR_REGISTER_index + 1 == len(MICOM_REGULAR_REGISTER):
                     current_micom_address_index = (
                         current_micom_address_index + 1

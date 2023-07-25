@@ -377,7 +377,6 @@ def multi_threaded_client(connection, address):
                         f.close()
                     for i in CONTENTOFTHEFILE[object_id]:
                         msg += i
-                    connection.sendall(f"<FILEEND>".encode())
                     change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[1]:
                     msg = f"<RESTART>"
