@@ -344,18 +344,10 @@ def multi_threaded_client(connection, address):
                 object_id = int.from_bytes(received_data[1:3], "little")
                 packet_type = received_data[3]
                 if packet_type == 3:
-                    if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
-                        
-                        IS_FILE_SENDING[object_id] = False
-                        received_data = b""
-                        print("Send FILEEND cmd")
-                        continue
-
-                    if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
+                    if "CMD:FILESUCCESS" in received_data.decode():
                         msg = f"<OK>"
                         connection.sendall(msg.encode())
                         received_data = b""
-                        line_index[object_id] = 0
                         print("Send OK cmd")
                         break
 
@@ -376,9 +368,7 @@ def multi_threaded_client(connection, address):
                 print(states)
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                if states[0] and not IS_FILE_SENDING[object_id]:
-                    IS_FILE_SENDING[object_id] = True
-                    line_index[object_id] = 0
+                if states[0]:
                     change_state_to(FILE_SEND_STATE_ID, object_id, 0)
                     msg = f"<CHANGEFILE:test.txt>\n"
                     # Читаем файл test.txt
@@ -388,6 +378,7 @@ def multi_threaded_client(connection, address):
                     for i in CONTENTOFTHEFILE[object_id]:
                         msg += i
                     connection.sendall(f"<FILEEND>".encode())
+                    change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[1]:
                     msg = f"<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
@@ -428,9 +419,8 @@ PORT = 8070
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
 
-IS_FILE_SENDING = [False, False]
-CONTENTOFTHEFILE = ["", ""]
-line_index = [0,0]
+IS_FILE_SENDING = [False, False, False]
+CONTENTOFTHEFILE = ["", "", ""]
 
 
 # подключаемся к базе данных

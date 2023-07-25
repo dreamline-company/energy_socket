@@ -26,7 +26,7 @@ s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # sock.connect(("13.51.162.215", 8070))
 # sock.connect(("192.168.0.63", 8070))
-sock.connect(("192.168.1.2", 8070))
+sock.connect(("localhost", 8070))
 cell_emergency_mapped_view = {1: [1, 2], 2: [3, 4]}
 cell_regular_values = {}
 dict_val = {"t2": 22.2, "re": 13, "v1": 225.2, "t1": 22.2, "ms": 255}
