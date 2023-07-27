@@ -169,8 +169,8 @@ def insert_table_data(data, table_id):
         insert_sql_statement = (
             "INSERT INTO emergency ("
             + ", ".join(comman_var[1:-1])
-            + ", "
-            + ", ".join(emergency_var[: len(data) - len(comman_var) + k])
+            + ", " * k
+            + ", ".join(emergency_var[: len(data) - len(comman_var) + 1])
             + f", {comman_var[-1]}"
             + ") VALUES ("
             + "%s," * len(data)
