@@ -154,7 +154,7 @@ def insert_table_data(data, table_id):
         if len(data) == 4:
             insert_sql_statement = (
                 "INSERT INTO emergency ("
-                + ", ".join(comman_var)
+                + ", ".join(comman_var[1:])
                 + ") VALUES ("
                 + "%s," * len(data)
             )
