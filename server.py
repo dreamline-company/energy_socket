@@ -344,7 +344,7 @@ def multi_threaded_client(connection, address):
                 print("Data with length of ", len(received_data))
 
                 packet_type, object_id, data = parse_socket_data(received_data)
-
+                print(f'DATATATDATA - {data}')
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
                 if packet_type == REGULAR_PACKET_TYPE:
                     for entry in data[:LAST_INDEX]:
