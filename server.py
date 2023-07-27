@@ -143,7 +143,7 @@ def insert_table_data(data, table_id):
             "INSERT INTO general ("
             + ", ".join(comman_var[1:-1])
             + ", "
-            + ", ".join(general_var)
+            + ", ".join(general_var[: len(data) - len(comman_var) + 1])
             + f", {comman_var[-1]}"
             + ") VALUES ("
             + "%s," * len(data)
