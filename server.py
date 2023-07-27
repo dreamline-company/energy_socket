@@ -153,7 +153,7 @@ def insert_table_data(data, table_id):
     elif table_id == REGULAR_TABLE_ID:
         if len(data) == 4:
             insert_sql_statement = (
-                "INSERT INTO emergency ("
+                "INSERT INTO regular ("
                 + ", ".join(comman_var[1:])
                 + ") VALUES ("
                 + "%s," * len(data)
@@ -170,16 +170,24 @@ def insert_table_data(data, table_id):
             )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # строит SQL запрос для вставки в dreamline_emergency_data
-    elif table_id == EMERGENCY_TABLE_ID:        
-        insert_sql_statement = (
-            "INSERT INTO emergency ("
-            + ", ".join(comman_var[1:-1])
-            + ", "
-            + ", ".join(emergency_var[: len(data) - len(comman_var) + 1])
-            + f", {comman_var[-1]}"
-            + ") VALUES ("
-            + "%s," * len(data)
-        )
+    elif table_id == EMERGENCY_TABLE_ID:  
+        if len(data) == 4:
+            insert_sql_statement = (
+                "INSERT INTO emergency ("
+                + ", ".join(comman_var[1:])
+                + ") VALUES ("
+                + "%s," * len(data)
+            )   
+        else :
+            insert_sql_statement = (
+                "INSERT INTO emergency ("
+                + ", ".join(comman_var[1:-1])
+                + ", "
+                + ", ".join(emergency_var[: len(data) - len(comman_var) + 1])
+                + f", {comman_var[-1]}"
+                + ") VALUES ("
+                + "%s," * len(data)
+            )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # запускаем SQL запрос
     print(insert_sql_statement)
