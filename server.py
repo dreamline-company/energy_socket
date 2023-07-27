@@ -168,7 +168,7 @@ def insert_table_data(data, table_id):
                 + ") VALUES ("
                 + "%s," * len(data)
             )
-            insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
+        insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # строит SQL запрос для вставки в dreamline_emergency_data
     elif table_id == EMERGENCY_TABLE_ID:        
         insert_sql_statement = (
