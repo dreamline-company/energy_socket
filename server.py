@@ -174,6 +174,7 @@ def insert_table_data(data, table_id):
         )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # запускаем SQL запрос
+    print(insert_sql_statement)
     print(f"{table_id} - {data}")
     cursor.execute(insert_sql_statement, data)
     print(f"Inserted data into {table_id} - {data}")
