@@ -306,7 +306,8 @@ def parse_socket_data(received_data):
     # парсим регулярный пакет который состоит из регулярных регистров и общей информацией
     if packet_type == REGULAR_PACKET_TYPE:
         data = parse_regular_registers(base_data, main_data)
-
+        if len(data) == 0:
+            data.append([base_data[:-1]] + [base_data[-1]])
         data.append(parse_general_data(base_data, received_data))
     # парсим аварийный пакет который состоит из номера ячейки, значения ячейки
     elif packet_type == EMERGENCY_PACKET_TYPE:
