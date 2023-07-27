@@ -322,7 +322,6 @@ def multi_threaded_client(connection, address):
     В этом методе происходит обработка подключеного клиента
     Данные которые отправил клиент парситься и добавляються в базу данных
     """
-    global CONTENTOFTHEFILE
     received_data = b""
     while True:
         try:
@@ -341,15 +340,6 @@ def multi_threaded_client(connection, address):
                     )
                 )
                 print("Data with length of ", len(received_data))
-                object_id = int.from_bytes(received_data[1:3], "little")
-                packet_type = received_data[3]
-                if packet_type == 3:
-                    if "CMD:FILESUCCESS" in received_data.decode():
-                        msg = f"<OK>"
-                        connection.sendall(msg.encode())
-                        received_data = b""
-                        print("Send OK cmd")
-                        break
 
                 packet_type, object_id, data = parse_socket_data(received_data)
 
@@ -363,22 +353,10 @@ def multi_threaded_client(connection, address):
                     insert_table_data(data, EMERGENCY_TABLE_ID)
 
                 received_data = b""
-                print(object_id)
                 states = get_states(object_id)
-                print(states)
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                if states[0]:
-                    change_state_to(FILE_SEND_STATE_ID, object_id, 0)
-                    msg = f"<CHANGEFILE:test.txt>\n"
-                    # Читаем файл test.txt
-                    with open("test.txt", "r", encoding="utf-8") as f:
-                        CONTENTOFTHEFILE[object_id] = f.readlines()
-                        f.close()
-                    for i in CONTENTOFTHEFILE[object_id]:
-                        msg += i
-                    change_state_to(RESET_STATE_ID, object_id, 0)
-                elif states[1]:
+                if states[1]:
                     msg = f"<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[2]:
@@ -417,10 +395,6 @@ HOST = socket.gethostbyname(HOSTNAME)
 PORT = 8070
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
-
-IS_FILE_SENDING = [False, False, False]
-CONTENTOFTHEFILE = ["", "", ""]
-
 
 # подключаемся к базе данных
 cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
