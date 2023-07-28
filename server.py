@@ -444,7 +444,7 @@ ServerSideSocket.listen()
 while True:
     # принимаем соединение от клиента
     Client, new_socket = ServerSideSocket.accept()
-    Client.setdefaulttimeout(10)
+    Client.settimeout(5)
     print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
     # создаем новый поток и начниаем там обработку клиента
     start_new_thread(multi_threaded_client, (Client, new_socket))
