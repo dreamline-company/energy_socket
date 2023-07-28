@@ -356,9 +356,10 @@ def multi_threaded_client(connection, address):
             # Если ничего не получили выходим из цикла
             if not received_data:
                 break
-            print("Raw view of data:", received_data)
             # проверям валдиность данных
             if is_data_valid(received_data):
+                print("Raw view of data:", received_data)
+                
                 print(
                     " ".join(
                         received_data.hex()[i : i + 2].upper()
