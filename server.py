@@ -215,8 +215,7 @@ def is_data_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    print(received_data[3])
-    check_valid_type_packet = received_data[3] in [
+    check_valid_type_packet = received_data[2] in [
         REGULAR_PACKET_TYPE,
         EMERGENCY_PACKET_TYPE,
         CMD_PACKET_TYPE,
@@ -268,9 +267,17 @@ def parse_general_data(base_data, received_data):
     # общая информация разделинна символом ',' делим по этому символу
     general_data_r = general_data_r.split(b",")[:LAST_INDEX]
     general_data = ()
+    temp_map = {}
     for data_entry in general_data_r:
+        key_val = data_entry.split(b':')
+        print(key_val, "keyval")
         # собираем кортеж из значений
-        general_data += (struct.unpack("f", data_entry[2:]),)[0]
+        temp_map[key_val[0].decode()] = key_val[1].decode()
+    print(temp_map, 'tempmap')
+
+    for key in general_var:
+        general_data += (temp_map[key],)
+    print(general_data, 'genetal')
     return base_data[:-1] + general_data + (base_data[-1],)
 
 
@@ -296,14 +303,14 @@ def parse_socket_data(received_data):
 
     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
-    object_number = int.from_bytes(received_data[1:3], "little")
+    object_number = received_data[1]
     # на основе номера объекта получаем имя объекта из базы данных
     object_name = get_object_name(object_number)
     # байт под индексов 3 тип пакета
-    packet_type = received_data[3]
+    packet_type = received_data[2]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
-        int.from_bytes(received_data[4 : received_data.index(ord("{"))], "little")
+        int.from_bytes(received_data[3 : received_data.index(ord("{"))], "little")
     )
     # между символами '{' и '}' находиться основаная информация с контроллера, вырезаем данный промежуток
     main_data = received_data[

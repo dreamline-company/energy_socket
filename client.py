@@ -24,13 +24,11 @@ from const import *
 print(int.from_bytes(round(time.time()).to_bytes(4, "little"), "little"))
 s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# sock.connect(("13.51.162.215", 8070))
-# sock.connect(("192.168.0.63", 8070))
-sock.connect(("localhost", 8070))
+sock.connect((s, 8070))
 cell_emergency_mapped_view = {1: [1, 2], 2: [3, 4]}
 cell_regular_values = {}
-dict_val = {"t2": 22.2, "re": 13, "v1": 225.2, "t1": 22.2, "ms": 255}
-
+dict_val = {"t_air": 22.2, "reset": 13, "VP": 225.2, "t_cpu": 22.2, "stat": 255}
+s = input()
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
 new_file_name = ""
@@ -77,11 +75,10 @@ elif s == "1":
     packet.extend((DATA_END_CHARACTER, DATA_START_CHARACTER))
     for name, value in dict_val.items():
         packet.extend(
-            (name.encode(), bytearray(struct.pack("f", value)), DATA_DELIMITER)
+            (name.encode(), b':', str(value).encode(), DATA_DELIMITER)
         )
     packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
     print(packet)
     for i in packet:
         sock.send(i)
-while True:
-    print(sock.recv(1024).decode())
+print(sock.recv(1024).decode())
