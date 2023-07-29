@@ -215,12 +215,12 @@ def is_data_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    check_valid_type_packet = received_data[2] in [
+    check_valid_type_packet = received_data[2] - ord('0') in [
         REGULAR_PACKET_TYPE,
         EMERGENCY_PACKET_TYPE,
         CMD_PACKET_TYPE,
     ]
-
+    
     # на основе всех критериев возвращем ответ
     return (
         check_start_and_end_symbol
@@ -303,11 +303,11 @@ def parse_socket_data(received_data):
 
     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
-    object_number = received_data[1]
+    object_number = received_data[1] - ord('0')
     # на основе номера объекта получаем имя объекта из базы данных
     object_name = get_object_name(object_number)
     # байт под индексов 3 тип пакета
-    packet_type = received_data[2]
+    packet_type = received_data[2] - ord('0')
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
         int(str(received_data[3 : received_data.index(ord("{"))].decode()))

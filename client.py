@@ -32,6 +32,9 @@ s = input()
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
 new_file_name = ""
+a = [b'<', b'2', b'1', b'1690689712', b'{', b'}', b'{', b'reset', b':', b'1', b',', b't_cpu', b':', b'26.91501', b',', b'VP', b':', b'12.18072', b',', b't_air', b':', b'25.1875', b',', b'stat', b':', b'0', b',', b'}', b'>']
+for i in a:
+    sock.send(i)
 if s == "2":
     packet = [
         PACKET_START_CHARACTER,
