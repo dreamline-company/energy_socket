@@ -190,8 +190,6 @@ def insert_table_data(data, table_id):
             )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # запускаем SQL запрос
-    print(insert_sql_statement)
-    print(f"{table_id} - {data}")
     cursor.execute(insert_sql_statement, data)
     print(f"Inserted data into {table_id} - {data}")
     # Фиксируем данные в базе данных
@@ -273,11 +271,10 @@ def parse_general_data(base_data, received_data):
         print(key_val, "keyval")
         # собираем кортеж из значений
         temp_map[key_val[0].decode()] = key_val[1].decode()
-    print(temp_map, 'tempmap')
 
     for key in general_var:
         general_data += (temp_map[key],)
-    print(general_data, 'genetal')
+
     return base_data[:-1] + general_data + (base_data[-1],)
 
 
