@@ -37,7 +37,7 @@ if s == "2":
         PACKET_START_CHARACTER,
         OBJECT_ID,
         EMERGENCY_PACKET_TYPE,
-        round(time.time()).to_bytes(4, "little"),
+        str(round(time.time())).encode(),
         DATA_START_CHARACTER,
     ]
     for cell_number in sorted(cell_emergency_mapped_view.keys()):

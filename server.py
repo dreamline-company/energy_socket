@@ -310,7 +310,7 @@ def parse_socket_data(received_data):
     packet_type = received_data[2]
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
-        int.from_bytes(received_data[3 : received_data.index(ord("{"))], "little")
+        int(str(received_data[3 : received_data.index(ord("{"))].decode()))
     )
     # между символами '{' и '}' находиться основаная информация с контроллера, вырезаем данный промежуток
     main_data = received_data[
