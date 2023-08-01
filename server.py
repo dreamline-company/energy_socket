@@ -235,24 +235,29 @@ def parse_regular_registers(base_data, main_data):
     """
     data = []
 
-    for registers in main_data:
-        key_val = registers.split(b'|')
+    for cell in main_data:
+        print('-----------------------')
+        key_val = cell.split(b'|')
+        print(key_val)
         # получаем номер ячейки
-        cell_number = key_val[0]
-        # убираем номер ячейки и оставлемя только информацию про регистры
-        registers = key_val[1]
+        cell_number = key_val[0].decode()
+        print(cell_number)
         # регистры разделинны символом ';' делим по этому символу
-        registers = registers.split(b";")[:LAST_INDEX]
+        registers = key_val[1].split(b";")[:LAST_INDEX]
+        print(registers)
         register_data = (cell_number,)
         for register in registers:
+            key_val_reg = register.split(b':')
             # номер регистра
-            register_num = int.from_bytes(register[:2], "little")
+            register_num = key_val_reg[0].decode()
             # значение регистра
-            register_val = int.from_bytes(register[3:], "little")
+            register_val = key_val_reg[1].decode()
             # собираем кортеж из номера ячейки, номера регистра, значения регистра
             register_data += (register_val,)
+        print(register_data)
         register_data = base_data[:-1] + register_data + (base_data[-1],)
         data.append(register_data)
+        print('--------------------')
     return data
 
 def parse_general_data(base_data, received_data):
@@ -278,7 +283,6 @@ def parse_general_data(base_data, received_data):
 
     return base_data[:-1] + general_data + (base_data[-1],)
 
-
 def parse_emergency_data(base_data, main_data):
     """
     Функция возвращает кортеже состоящий из номера ячейки, значения ячейки
@@ -287,9 +291,9 @@ def parse_emergency_data(base_data, main_data):
     for cell in main_data:
         key_val = cell.split(b':')
         # номера ячейк
-        cell_num = key_val[0].decode()
+        cell_num = int(key_val[0].decode())
         # значения ячейки
-        cell_val = key_val[1].decode()
+        cell_val = int(key_val[1].decode())
         # собираем кортеж из номера ячейки, значения ячейки
         data += (cell_val,)
     return base_data[:-1] + data + (base_data[-1],)

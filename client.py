@@ -32,55 +32,9 @@ s = input()
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
 new_file_name = ""
-sock.send(b'<121690904604{1:0,2:3,3:0,4:15,5:0,6:15,7:15,8:15,9:0,10:15,11:15,12:6,13:1,14:15,15:15,16:0,17:12,}>')
 if s == "2":
-    packet = [
-        PACKET_START_CHARACTER,
-        OBJECT_ID,
-        EMERGENCY_PACKET_TYPE,
-        str(round(time.time())).encode(),
-        DATA_START_CHARACTER,
-    ]
-    for cell_number in sorted(cell_emergency_mapped_view.keys()):
-        packet.extend(
-            (
-                str(cell_number).encode(),
-                REGISTER_NUM_VALUE_DELIMITER,
-                str(sum(cell_emergency_mapped_view[cell_number])).encode(),
-                DATA_DELIMITER,
-            )
-        )
-    packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
-    print(packet)
-    for i in packet:
-        sock.send(i)
+    sock.send(b'<121690904604{1:0,2:3,3:0,4:15,5:0,6:15,7:15,8:15,9:0,10:15,11:15,12:6,13:1,14:15,15:15,16:0,17:12,}>')
 elif s == "1":
-    packet = [
-        PACKET_START_CHARACTER,
-        OBJECT_ID,
-        REGULAR_PACKET_TYPE,
-        str(round(time.time())).encode(),
-        DATA_START_CHARACTER,
-    ]
-    for cell_number in sorted(cell_regular_values.keys()):
-        packet.append(str(cell_number).encode(), '|'.encode())
-        for reg_num in sorted(cell_regular_values[cell_number].keys()):
-            packet.extend(
-                (
-                    reg_num,
-                    REGISTER_NUM_VALUE_DELIMITER,
-                    cell_regular_values[cell_number][reg_num],
-                    REGISTER_DELIMITER,
-                )
-            )
-        packet.append(DATA_DELIMITER)
-    packet.extend((DATA_END_CHARACTER, DATA_START_CHARACTER))
-    for name, value in dict_val.items():
-        packet.extend(
-            (name.encode(), ':'.encode(), str(value).encode(), DATA_DELIMITER)
-        )
-    packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
-    print(packet)
-    for i in packet:
-        sock.send(i)
+    sock.send(b'<111690914296{13|0010:65535;0011:65535;0012:65535;0013:65535;0014:65535;,}{reset:0,t_cpu:33.00088,VP:12.25011,t_air:27.625,stat:0,}>')
+
 print(sock.recv(1024).decode())

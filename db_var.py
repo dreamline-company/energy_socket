@@ -29,13 +29,13 @@ general_var_param = [
     "FLOAT NOT NULL" for i in range(len(general_var))
 ]
 
-emergency_var = ["cell_"+ str(i) for i in range(1, 17)]
+emergency_var = ["cell_"+ str(i) for i in range(1, 25)]
 
 emergency_var_param = [
     "INT" for i in range(len(emergency_var))
 ]
 
-regular_var = ["cell_number"] + [bytes.hex((i).to_bytes(2,'big')) for i in [16,17,18,19,20]]
+regular_var = ["cell_number"] + ['AB' + str(bytes.hex((i).to_bytes(1,'big'))) for i in [16,17,18,19,20]]
 regular_var_param = [
     "INT" for i in range(len(regular_var))
 ]
