@@ -32,7 +32,7 @@ s = input()
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
 new_file_name = ""
-
+sock.send(b'<121690904604{1:0,2:3,3:0,4:15,5:0,6:15,7:15,8:15,9:0,10:15,11:15,12:6,13:1,14:15,15:15,16:0,17:12,}>')
 if s == "2":
     packet = [
         PACKET_START_CHARACTER,
