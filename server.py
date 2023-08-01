@@ -38,7 +38,7 @@ from db_var import (
     SET_TIME_STATE_ID,
 )
 
-DB_SERVER = "16.171.132.235"
+DB_SERVER = "13.51.150.58"
 DB_USERNAME = "root"
 DB_PASSWORD = "my-secret-pw"
 DB_NAME = "sys"
@@ -234,10 +234,11 @@ def parse_regular_registers(base_data, main_data):
     data = []
 
     for registers in main_data:
+        key_val = registers.split(b'|')
         # получаем номер ячейки
-        cell_number = registers[0]
+        cell_number = key_val[0]
         # убираем номер ячейки и оставлемя только информацию про регистры
-        registers = registers[1:]
+        registers = key_val[1]
         # регистры разделинны символом ';' делим по этому символу
         registers = registers.split(b";")[:LAST_INDEX]
         register_data = (cell_number,)
@@ -251,7 +252,6 @@ def parse_regular_registers(base_data, main_data):
         register_data = base_data[:-1] + register_data + (base_data[-1],)
         data.append(register_data)
     return data
-
 
 def parse_general_data(base_data, received_data):
     """
@@ -268,7 +268,6 @@ def parse_general_data(base_data, received_data):
     temp_map = {}
     for data_entry in general_data_r:
         key_val = data_entry.split(b':')
-        print(key_val, "keyval")
         # собираем кортеж из значений
         temp_map[key_val[0].decode()] = key_val[1].decode()
 
@@ -284,10 +283,11 @@ def parse_emergency_data(base_data, main_data):
     """
     data = ()
     for cell in main_data:
+        key_val = cell.split(b':')
         # номера ячейк
-        cell_num = int.from_bytes(cell[:2], "little")
+        cell_num = key_val[0].decode()
         # значения ячейки
-        cell_val = int.from_bytes(cell[2:], "little")
+        cell_val = key_val[1].decode()
         # собираем кортеж из номера ячейки, значения ячейки
         data += (cell_val,)
     return base_data[:-1] + data + (base_data[-1],)
@@ -356,17 +356,9 @@ def multi_threaded_client(connection, address):
             # проверям валдиность данных
             if is_data_valid(received_data):
                 print("Raw view of data:", received_data)
-                
-                print(
-                    " ".join(
-                        received_data.hex()[i : i + 2].upper()
-                        for i in range(0, len(received_data.hex()), 2)
-                    )
-                )
                 print("Data with length of ", len(received_data))
 
                 packet_type, object_id, data = parse_socket_data(received_data)
-                print(f'DATATATDATA - {data}')
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
                 if packet_type == REGULAR_PACKET_TYPE:
                     for entry in data[:LAST_INDEX]:
@@ -381,7 +373,7 @@ def multi_threaded_client(connection, address):
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
                 if states[1]:
-                    msg = f"<RESTART>"
+                    msg = "<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[2]:
                     now = str(datetime.now(timezone(timedelta(hours=+6), "ALA")))

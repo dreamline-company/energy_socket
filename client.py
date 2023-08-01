@@ -21,7 +21,7 @@ import time
 import struct
 from const import *
 
-print(int.from_bytes(round(time.time()).to_bytes(4, "little"), "little"))
+print(str(round(time.time())).encode())
 s = input()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((s, 8070))
@@ -32,9 +32,7 @@ s = input()
 IS_FILE_DONWLOAD = False
 IS_FILE_SUCCESS = False
 new_file_name = ""
-a = [b'<', b'2', b'1', b'1690689712', b'{', b'}', b'{', b'reset', b':', b'1', b',', b't_cpu', b':', b'26.91501', b',', b'VP', b':', b'12.18072', b',', b't_air', b':', b'25.1875', b',', b'stat', b':', b'0', b',', b'}', b'>']
-for i in a:
-    sock.send(i)
+
 if s == "2":
     packet = [
         PACKET_START_CHARACTER,
@@ -46,8 +44,9 @@ if s == "2":
     for cell_number in sorted(cell_emergency_mapped_view.keys()):
         packet.extend(
             (
-                cell_number.to_bytes(2, "little"),
-                sum(cell_emergency_mapped_view[cell_number]).to_bytes(1, "little"),
+                str(cell_number).encode(),
+                REGISTER_NUM_VALUE_DELIMITER,
+                str(sum(cell_emergency_mapped_view[cell_number])).encode(),
                 DATA_DELIMITER,
             )
         )
@@ -60,11 +59,11 @@ elif s == "1":
         PACKET_START_CHARACTER,
         OBJECT_ID,
         REGULAR_PACKET_TYPE,
-        round(time.time()).to_bytes(4, "little"),
+        str(round(time.time())).encode(),
         DATA_START_CHARACTER,
     ]
     for cell_number in sorted(cell_regular_values.keys()):
-        packet.append(cell_number.to_bytes(1, "little"))
+        packet.append(str(cell_number).encode(), '|'.encode())
         for reg_num in sorted(cell_regular_values[cell_number].keys()):
             packet.extend(
                 (
@@ -78,7 +77,7 @@ elif s == "1":
     packet.extend((DATA_END_CHARACTER, DATA_START_CHARACTER))
     for name, value in dict_val.items():
         packet.extend(
-            (name.encode(), b':', str(value).encode(), DATA_DELIMITER)
+            (name.encode(), ':'.encode(), str(value).encode(), DATA_DELIMITER)
         )
     packet.extend((DATA_END_CHARACTER, PACKET_END_CHARACTER))
     print(packet)

@@ -35,11 +35,10 @@ emergency_var_param = [
     "INT" for i in range(len(emergency_var))
 ]
 
-regular_var = ["cell_number"] + [bytes.hex((i + 1234).to_bytes(2,'little')) for i in range(5)]
+regular_var = ["cell_number"] + [bytes.hex((i).to_bytes(2,'big')) for i in [16,17,18,19,20]]
 regular_var_param = [
     "INT" for i in range(len(regular_var))
 ]
-
 
 state_name = ["file_send", "reset", "set_time"]
 
