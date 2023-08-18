@@ -45,7 +45,7 @@ DB_NAME = "sys"
 DB_PORT = 3306
 
 THREAD_COUNT = 0
-MAX_LEN_PACKET = 255
+#MAX_LEN_PACKET = 255
 START_CHARACTER = 60
 END_CHARACTER = 62
 DIVIDER_FOR_FLOAT_VALUES = 10.0
@@ -190,8 +190,8 @@ def insert_table_data(data, table_id):
             )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # запускаем SQL запрос
-    print(data)
-    print(insert_sql_statement)
+    # print(data)
+    # print(insert_sql_statement)
     cursor.execute(insert_sql_statement, data)
     print(f"Inserted data into {table_id} - {data}")
     # Фиксируем данные в базе данных
@@ -225,7 +225,7 @@ def is_data_valid(received_data):
     return (
         check_start_and_end_symbol
         and check_valid_type_packet
-        and length_received_data <= MAX_LEN_PACKET
+        # and length_received_data <= MAX_LEN_PACKET
     )
 
 
@@ -236,15 +236,15 @@ def parse_regular_registers(base_data, main_data):
     data = []
 
     for cell in main_data:
-        print('-----------------------')
+        # print('-----------------------')
         key_val = cell.split(b'|')
-        print(key_val)
+        # print(key_val)
         # получаем номер ячейки
         cell_number = key_val[0].decode()
-        print(cell_number)
+        # print(cell_number)
         # регистры разделинны символом ';' делим по этому символу
         registers = key_val[1].split(b";")[:LAST_INDEX]
-        print(registers)
+        # print(registers)
         register_data = (cell_number,)
         for register in registers:
             key_val_reg = register.split(b':')
@@ -254,10 +254,10 @@ def parse_regular_registers(base_data, main_data):
             register_val = key_val_reg[1].decode()
             # собираем кортеж из номера ячейки, номера регистра, значения регистра
             register_data += (register_val,)
-        print(register_data)
+        # print(register_data)
         register_data = base_data[:-1] + register_data + (base_data[-1],)
         data.append(register_data)
-        print('--------------------')
+        # print('--------------------')
     return data
 
 def parse_general_data(base_data, received_data):
