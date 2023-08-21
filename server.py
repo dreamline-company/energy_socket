@@ -45,7 +45,7 @@ DB_NAME = "sys"
 DB_PORT = 3306
 
 THREAD_COUNT = 0
-#MAX_LEN_PACKET = 255
+# MAX_LEN_PACKET = 255
 START_CHARACTER = 60
 END_CHARACTER = 62
 DIVIDER_FOR_FLOAT_VALUES = 10.0
@@ -97,7 +97,9 @@ def change_state_to(state_id, object_id, state_val):
 def get_states(object_id):
     cursor = cnx.cursor()
     # запускаем SQL запрос
-    cursor.execute(f"SELECT file_send, reset, set_time FROM states WHERE id = {object_id}")
+    cursor.execute(
+        f"SELECT file_send, reset, set_time, timezone FROM states WHERE id = {object_id}"
+    )
 
     # Извлекаем имя из ответа базы данных
     state = cursor.fetchall()[0]
@@ -158,7 +160,7 @@ def insert_table_data(data, table_id):
                 + ") VALUES ("
                 + "%s," * len(data)
             )
-        else: 
+        else:
             insert_sql_statement = (
                 "INSERT INTO regular ("
                 + ", ".join(comman_var[1:-1])
@@ -170,15 +172,15 @@ def insert_table_data(data, table_id):
             )
         insert_sql_statement = insert_sql_statement[:LAST_INDEX] + ")"
     # строит SQL запрос для вставки в dreamline_emergency_data
-    elif table_id == EMERGENCY_TABLE_ID:  
+    elif table_id == EMERGENCY_TABLE_ID:
         if len(data) == 4:
             insert_sql_statement = (
                 "INSERT INTO emergency ("
                 + ", ".join(comman_var[1:])
                 + ") VALUES ("
                 + "%s," * len(data)
-            )   
-        else :
+            )
+        else:
             insert_sql_statement = (
                 "INSERT INTO emergency ("
                 + ", ".join(comman_var[1:-1])
@@ -215,12 +217,12 @@ def is_data_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    check_valid_type_packet = received_data[2] - ord('0') in [
+    check_valid_type_packet = received_data[2] - ord("0") in [
         REGULAR_PACKET_TYPE,
         EMERGENCY_PACKET_TYPE,
         CMD_PACKET_TYPE,
     ]
-    
+
     # на основе всех критериев возвращем ответ
     return (
         check_start_and_end_symbol
@@ -237,7 +239,7 @@ def parse_regular_registers(base_data, main_data):
 
     for cell in main_data:
         # print('-----------------------')
-        key_val = cell.split(b'|')
+        key_val = cell.split(b"|")
         # print(key_val)
         # получаем номер ячейки
         cell_number = key_val[0].decode()
@@ -247,7 +249,7 @@ def parse_regular_registers(base_data, main_data):
         # print(registers)
         register_data = (cell_number,)
         for register in registers:
-            key_val_reg = register.split(b':')
+            key_val_reg = register.split(b":")
             # номер регистра
             register_num = key_val_reg[0].decode()
             # значение регистра
@@ -259,6 +261,7 @@ def parse_regular_registers(base_data, main_data):
         data.append(register_data)
         # print('--------------------')
     return data
+
 
 def parse_general_data(base_data, received_data):
     """
@@ -274,7 +277,7 @@ def parse_general_data(base_data, received_data):
     general_data = ()
     temp_map = {}
     for data_entry in general_data_r:
-        key_val = data_entry.split(b':')
+        key_val = data_entry.split(b":")
         # собираем кортеж из значений
         temp_map[key_val[0].decode()] = key_val[1].decode()
 
@@ -283,13 +286,14 @@ def parse_general_data(base_data, received_data):
 
     return base_data[:-1] + general_data + (base_data[-1],)
 
+
 def parse_emergency_data(base_data, main_data):
     """
     Функция возвращает кортеже состоящий из номера ячейки, значения ячейки
     """
     data = ()
     for cell in main_data:
-        key_val = cell.split(b':')
+        key_val = cell.split(b":")
         # номера ячейк
         cell_num = int(key_val[0].decode())
         # значения ячейки
@@ -306,11 +310,11 @@ def parse_socket_data(received_data):
 
     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
-    object_number = received_data[1] - ord('0')
+    object_number = received_data[1] - ord("0")
     # на основе номера объекта получаем имя объекта из базы данных
     object_name = get_object_name(object_number)
     # байт под индексов 3 тип пакета
-    packet_type = received_data[2] - ord('0')
+    packet_type = received_data[2] - ord("0")
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
         int(str(received_data[3 : received_data.index(ord("{"))].decode()))
@@ -382,7 +386,7 @@ def multi_threaded_client(connection, address):
                     msg = "<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[2]:
-                    now = str(datetime.now(timezone(timedelta(hours=+6), "ALA")))
+                    now = str(datetime.now(timezone(timedelta(hours=states[3]), "ALA")))
                     year = now[2:4]
                     month = now[5:7]
                     day = now[8:10]
