@@ -38,10 +38,15 @@ from db_var import (
     SET_TIME_STATE_ID,
 )
 
-DB_SERVER = "13.51.150.58"
-DB_USERNAME = "root"
-DB_PASSWORD = "my-secret-pw"
-DB_NAME = "sys"
+# DB_SERVER = "13.51.150.58"
+# DB_USERNAME = "root"
+# DB_PASSWORD = "my-secret-pw"
+# DB_NAME = "sys"
+# DB_PORT = 3306
+DB_SERVER = "192.168.17.158"
+DB_USERNAME = "amirkhan"
+DB_PASSWORD = "amirkhan2023*"
+DB_NAME = "emg-cm-test"
 DB_PORT = 3306
 
 THREAD_COUNT = 0
@@ -370,6 +375,7 @@ def multi_threaded_client(connection, address):
 
                 packet_type, object_id, data = parse_socket_data(received_data)
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
+                print("tet")
                 if packet_type == REGULAR_PACKET_TYPE:
                     for entry in data[:LAST_INDEX]:
                         insert_table_data(entry, REGULAR_TABLE_ID)
@@ -377,7 +383,7 @@ def multi_threaded_client(connection, address):
                 # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
                 elif packet_type == EMERGENCY_PACKET_TYPE:
                     insert_table_data(data, EMERGENCY_TABLE_ID)
-
+                print("here")
                 received_data = b""
                 states = get_states(object_id)
                 # Формируем ответ контроллеру
@@ -391,9 +397,9 @@ def multi_threaded_client(connection, address):
                     month = now[5:7]
                     day = now[8:10]
                     hour = now[11:13]
-                    min = now[14:16]
+                    minu = now[14:16]
                     sec = now[17:19]
-                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{min}:{sec}>"
+                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
                     change_state_to(SET_TIME_STATE_ID, object_id, 0)
                 # Отпраляем ответ контроллеру
                 print(f"Sending : {msg}")
@@ -414,9 +420,9 @@ def multi_threaded_client(connection, address):
 
 
 # Получаем имя хоста
-HOSTNAME = socket.gethostname()
+# HOSTNAME = socket.gethostname()
 # По имени хоста получаем хоста
-HOST = socket.gethostbyname(HOSTNAME)
+HOST = "0.0.0.0"
 # Порт который будет слушиться
 PORT = 8070
 # По хосту получаем IP адрес
