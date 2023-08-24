@@ -38,16 +38,16 @@ from db_var import (
     SET_TIME_STATE_ID,
 )
 
-# DB_SERVER = "13.51.150.58"
-# DB_USERNAME = "root"
-# DB_PASSWORD = "my-secret-pw"
-# DB_NAME = "sys"
-# DB_PORT = 3306
-DB_SERVER = "192.168.17.158"
-DB_USERNAME = "amirkhan"
-DB_PASSWORD = "amirkhan2023*"
-DB_NAME = "emg-cm-test"
+DB_SERVER = "13.51.150.58"
+DB_USERNAME = "root"
+DB_PASSWORD = "my-secret-pw"
+DB_NAME = "sys"
 DB_PORT = 3306
+# DB_SERVER = "192.168.17.158"
+# DB_USERNAME = "amirkhan"
+# DB_PASSWORD = "amirkhan2023*"
+# DB_NAME = "emg-cm-test"
+# DB_PORT = 3306
 
 THREAD_COUNT = 0
 # MAX_LEN_PACKET = 255
