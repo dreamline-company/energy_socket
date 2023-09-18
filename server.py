@@ -421,16 +421,18 @@ def multi_threaded_client(connection, address):
                 # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
                 elif packet_type == EMERGENCY_PACKET_TYPE:
                     insert_table_data(data, EMERGENCY_TABLE_ID)
-                print("here")
+                
                 received_data = b""
                 states = get_states(object_id)
+                print(states)
+                print(IS_FILE_SENDING)
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
                 if states[0] and not IS_FILE_SENDING[object_id]:
                     IS_FILE_SENDING[object_id] = True
                     line_index[object_id] = 0
                     change_state_to(FILE_SEND_STATE_ID, object_id, 0)
-                    msg = f"<CHANGEFILE:test.txt>\n"
+                    msg = f"<FILE:test.txt>\n"
                     # Читаем файл test.txt
                     with open("test.txt", "r", encoding="utf-8") as f:
                         CONTENTOFTHEFILE[object_id] = f.readlines()
