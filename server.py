@@ -375,7 +375,7 @@ def multi_threaded_client(connection, address):
                 print("Data with length of ", len(received_data))
 
                 object_id = received_data[1] - ord("0")
-                
+
                 if not (object_id in IS_FILE_SENDING):
                     IS_FILE_SENDING[object_id] = False
                 if not (object_id in CONTENTOFTHEFILE):
@@ -385,13 +385,27 @@ def multi_threaded_client(connection, address):
 
                 packet_type = received_data[2] - ord("0")
                 if packet_type == 3:
-                    if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
+                    if IS_FILE_SENDING[object_id] and line_index[object_id] == len(
+                        CONTENTOFTHEFILE[object_id]
+                    ):
                         IS_FILE_SENDING[object_id] = False
                         received_data = b""
+                        connection.sendall(f"<FILEEND>".encode())
                         continue
 
-                    if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
-                        msg = f"<OK>"
+                    if (
+                        IS_FILE_SENDING[object_id]
+                        and "CMD:NEXTLINE" in received_data.decode()
+                    ):
+                        connection.sendall(
+                            f"<LINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>".encode()
+                        )
+                        line_index[object_id] += 1
+                    if (
+                        IS_FILE_SENDING[object_id]
+                        and "CMD:FILESUCCESS" in received_data.decode()
+                    ):
+                        msg = f"<OK{THREAD_COUNT}>"
                         connection.sendall(msg.encode())
                         received_data = b""
                         line_index[object_id] = 0
@@ -421,9 +435,6 @@ def multi_threaded_client(connection, address):
                     with open("test.txt", "r", encoding="utf-8") as f:
                         CONTENTOFTHEFILE[object_id] = f.readlines()
                         f.close()
-                    for i in CONTENTOFTHEFILE[object_id]:
-                        msg += i
-                    connection.sendall(f"<FILEEND>".encode())
                 elif states[1]:
                     msg = "<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
