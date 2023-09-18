@@ -9,6 +9,7 @@ RUN pip3 install -r /server/requirements.txt
 
 COPY server.py /server
 COPY db_var.py /server
+COPY test.txt /server
 EXPOSE 8070
 
 CMD ["python3", "-u", "/server/server.py"]
