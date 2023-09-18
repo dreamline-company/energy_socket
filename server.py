@@ -38,7 +38,7 @@ from db_var import (
     SET_TIME_STATE_ID,
 )
 
-DB_SERVER = "13.51.150.58"
+DB_SERVER = "13.48.27.123"
 DB_USERNAME = "root"
 DB_PASSWORD = "my-secret-pw"
 DB_NAME = "sys"
@@ -360,6 +360,7 @@ def multi_threaded_client(connection, address):
     В этом методе происходит обработка подключеного клиента
     Данные которые отправил клиент парситься и добавляються в базу данных
     """
+    global CONTENTOFTHEFILE
     received_data = b""
     while True:
         try:
@@ -372,6 +373,29 @@ def multi_threaded_client(connection, address):
             if is_data_valid(received_data):
                 print("Raw view of data:", received_data)
                 print("Data with length of ", len(received_data))
+
+                object_id = received_data[1] - ord("0")
+                
+                if not (object_id in IS_FILE_SENDING):
+                    IS_FILE_SENDING[object_id] = False
+                if not (object_id in CONTENTOFTHEFILE):
+                    CONTENTOFTHEFILE[object_id] = ""
+                if not (object_id in line_index):
+                    line_index[object_id] = 0
+
+                packet_type = received_data[2] - ord("0")
+                if packet_type == 3:
+                    if IS_FILE_SENDING[object_id] and line_index[object_id] == len(CONTENTOFTHEFILE[object_id]):
+                        IS_FILE_SENDING[object_id] = False
+                        received_data = b""
+                        continue
+
+                    if IS_FILE_SENDING[object_id] and "CMD:FILESUCCESS" in received_data.decode():
+                        msg = f"<OK>"
+                        connection.sendall(msg.encode())
+                        received_data = b""
+                        line_index[object_id] = 0
+                        break
 
                 packet_type, object_id, data = parse_socket_data(received_data)
                 # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
@@ -388,7 +412,19 @@ def multi_threaded_client(connection, address):
                 states = get_states(object_id)
                 # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                if states[1]:
+                if states[0] and not IS_FILE_SENDING[object_id]:
+                    IS_FILE_SENDING[object_id] = True
+                    line_index[object_id] = 0
+                    change_state_to(FILE_SEND_STATE_ID, object_id, 0)
+                    msg = f"<CHANGEFILE:test.txt>\n"
+                    # Читаем файл test.txt
+                    with open("test.txt", "r", encoding="utf-8") as f:
+                        CONTENTOFTHEFILE[object_id] = f.readlines()
+                        f.close()
+                    for i in CONTENTOFTHEFILE[object_id]:
+                        msg += i
+                    connection.sendall(f"<FILEEND>".encode())
+                elif states[1]:
                     msg = "<RESTART>"
                     change_state_to(RESET_STATE_ID, object_id, 0)
                 elif states[2]:
@@ -427,6 +463,11 @@ HOST = "0.0.0.0"
 PORT = 8070
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
+
+
+IS_FILE_SENDING = {}
+CONTENTOFTHEFILE = {}
+line_index = {}
 
 # подключаемся к базе данных
 cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
