@@ -401,6 +401,7 @@ def multi_threaded_client(connection, address):
                             f"<LINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>".encode()
                         )
                         line_index[object_id] += 1
+                        break
                     if (
                         IS_FILE_SENDING[object_id]
                         and "CMD:FILESUCCESS" in received_data.decode()
