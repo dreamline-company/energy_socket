@@ -287,9 +287,9 @@ def send_sms():
 
 log = Logger(f'object_{int.from_bytes(OBJECT_ID, "little")}_main.log')
 
-ms_RS = 0  # Задержка для передачи пакета RS-485
+ms_RS = 0
 
-fl_ADS = False  # ADS в процессе
+fl_ADS = False 
 
 PACKET_FORM_STATE = EMERGENCY_PACKET_STATE 
 SERVER_SEND_STATE = SERVER_SEND_NOT_STATE
