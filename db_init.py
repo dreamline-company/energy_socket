@@ -58,79 +58,79 @@ def create_server_connection(host_name, user_name, user_password, database_name)
 # cnx = create_server_connection(
 #     "192.168.17.158", "amirkhan", "amirkhan2023*", "emg-cm-test"
 # )
-cnx = create_server_connection("13.51.150.58", "root", "my-secret-pw", "sys")
+cnx = create_server_connection("194.87.238.61", "root", "2BzxCcpT6E", "sys")
 
 cursor = cnx.cursor()
 
 
-# common = [data + " " + value for (data, value) in zip(comman_var, comman_var_param)]
+common = [data + " " + value for (data, value) in zip(comman_var, comman_var_param)]
 
-# general = [data + " " + value for (data, value) in zip(general_var, general_var_param)]
-# CREATE_TABLE_QUERY = (
-#     "CREATE TABLE general ( "
-#     + ",".join(common[:-1])
-#     + ","
-#     + ",".join(general)
-#     + f", {common[-1]}"
-#     + ");"
-# )
-# print(CREATE_TABLE_QUERY)
+general = [data + " " + value for (data, value) in zip(general_var, general_var_param)]
+CREATE_TABLE_QUERY = (
+    "CREATE TABLE general ( "
+    + ",".join(common[:-1])
+    + ","
+    + ",".join(general)
+    + f", {common[-1]}"
+    + ");"
+)
+print(CREATE_TABLE_QUERY)
 
-# # Insert new employee
-# cursor.execute(CREATE_TABLE_QUERY)
-# cnx.commit()
+# Insert new employee
+cursor.execute(CREATE_TABLE_QUERY)
+cnx.commit()
 
-# regular = [data + " " + value for (data, value) in zip(regular_var, regular_var_param)]
-# CREATE_TABLE_QUERY = (
-#     "CREATE TABLE regular ( "
-#     + ",".join(common[:-1])
-#     + ","
-#     + ",".join(regular)
-#     + f", {common[-1]}"
-#     + ");"
-# )
+regular = [data + " " + value for (data, value) in zip(regular_var, regular_var_param)]
+CREATE_TABLE_QUERY = (
+    "CREATE TABLE regular ( "
+    + ",".join(common[:-1])
+    + ","
+    + ",".join(regular)
+    + f", {common[-1]}"
+    + ");"
+)
 
-# print(CREATE_TABLE_QUERY)
+print(CREATE_TABLE_QUERY)
 
-# # Insert new employee
-# cursor.execute(CREATE_TABLE_QUERY)
-# # Make sure data is committed to the database
-# cnx.commit()
+# Insert new employee
+cursor.execute(CREATE_TABLE_QUERY)
+# Make sure data is committed to the database
+cnx.commit()
 
-# emergency = [
-#     data + " " + value for (data, value) in zip(emergency_var, emergency_var_param)
-# ]
+emergency = [
+    data + " " + value for (data, value) in zip(emergency_var, emergency_var_param)
+]
 
-# CREATE_TABLE_QUERY = (
-#     "CREATE TABLE emergency ( "
-#     + ",".join(common[:-1])
-#     + ","
-#     + ",".join(emergency)
-#     + f", {common[-1]}"
-#     + ");"
-# )
-# print(CREATE_TABLE_QUERY)
+CREATE_TABLE_QUERY = (
+    "CREATE TABLE emergency ( "
+    + ",".join(common[:-1])
+    + ","
+    + ",".join(emergency)
+    + f", {common[-1]}"
+    + ");"
+)
+print(CREATE_TABLE_QUERY)
 
-# # Insert new employee
-# cursor.execute(CREATE_TABLE_QUERY)
-# cnx.commit()
+# Insert new employee
+cursor.execute(CREATE_TABLE_QUERY)
+cnx.commit()
 
 
-# CREATE_TABLE_QUERY = "CREATE TABLE obj_table (obj_num int, obj_name VARCHAR(64));"
-# print(CREATE_TABLE_QUERY)
-# cursor.execute(CREATE_TABLE_QUERY)
-# # Make sure data is committed to the database
-# cnx.commit()
+CREATE_TABLE_QUERY = "CREATE TABLE obj_table (obj_num int, obj_name VARCHAR(64));"
+print(CREATE_TABLE_QUERY)
+cursor.execute(CREATE_TABLE_QUERY)
+# Make sure data is committed to the database
+cnx.commit()
 
-# cursor.execute(
-#     "INSERT INTO obj_table (obj_num, obj_name) VALUES (%s,%s)",
-#     (1, "ПС Промзона 35/10кВ"),
-# )
-# # Make sure data is committed to the database
-# cnx.commit()
+cursor.execute(
+    "INSERT INTO obj_table (obj_num, obj_name) VALUES (%s,%s)",
+    (1, "ПС Промзона 35/10кВ"),
+)
+# Make sure data is committed to the database
+cnx.commit()
 
-# # Make sure data is committed to the database
-# cnx.commit()
+# Make sure data is committed to the database
+cnx.commit()
 
 CREATE_TABLE_QUERY = "CREATE TABLE states (id int, file_send int, reset int, set_time int, timezone int);"
 
