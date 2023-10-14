@@ -433,7 +433,7 @@ def multi_threaded_client(connection, address):
             # print(states)
             # print(IS_FILE_SENDING)
             # # Формируем ответ контроллеру
-            msg = f"<OK{THREAD_COUNT}>"
+                msg = f"<OK{THREAD_COUNT}>"
             # if states[0] and not IS_FILE_SENDING[object_id]:
             #     IS_FILE_SENDING[object_id] = True
             #     line_index[object_id] = 0
@@ -457,8 +457,9 @@ def multi_threaded_client(connection, address):
             #     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
             #     change_state_to(SET_TIME_STATE_ID, object_id, 0)
             # # Отпраляем ответ контроллеру
-            print(f"Sending : {msg}")
-            connection.sendall(msg.encode())
+                print(f"Sending : {msg}")
+                connection.sendall(msg.encode())
+                break
         except ConnectionResetError:
             print(address, "is reset connection")
             received_data = b""
