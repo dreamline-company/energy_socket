@@ -415,9 +415,9 @@ def multi_threaded_client(connection, address):
                 packet_type, object_id, data = parse_socket_data(received_data)
                 print(packet_type, object_id, data)
                 cursor = cnx.cursor()
-                # cursor.execute(
-                #     "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
-                # )
+                cursor.execute(
+                    "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
+                )
             # # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
             # print("tet")
             # if packet_type == REGULAR_PACKET_TYPE:
