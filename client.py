@@ -43,3 +43,5 @@ elif s == "1":
 
 
 print(sock.recv(1024).decode())
+
+sock.close()

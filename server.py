@@ -360,7 +360,7 @@ def multi_threaded_client(connection, address):
     В этом методе происходит обработка подключеного клиента
     Данные которые отправил клиент парситься и добавляються в базу данных
     """
-    global CONTENTOFTHEFILE
+    # global CONTENTOFTHEFILE
     received_data = b""
     while True:
         try:
@@ -369,55 +369,55 @@ def multi_threaded_client(connection, address):
             # Если ничего не получили выходим из цикла
             if not received_data:
                 break
-            cursor = cnx.cursor()
-            cursor.execute(
-                "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
-            )
             # проверям валдиность данных
-            # if is_data_valid(received_data):
+            if is_data_valid(received_data):
+                # print("Raw view of data:", received_data)
+                # print("Data with length of ", len(received_data))
 
-            # print("Raw view of data:", received_data)
-            # print("Data with length of ", len(received_data))
+                # object_id = received_data[1] - ord("0")
 
-            # object_id = received_data[1] - ord("0")
+                # if not (object_id in IS_FILE_SENDING):
+                #     IS_FILE_SENDING[object_id] = False
+                # if not (object_id in CONTENTOFTHEFILE):
+                #     CONTENTOFTHEFILE[object_id] = ""
+                # if not (object_id in line_index):
+                #     line_index[object_id] = 0
 
-            # if not (object_id in IS_FILE_SENDING):
-            #     IS_FILE_SENDING[object_id] = False
-            # if not (object_id in CONTENTOFTHEFILE):
-            #     CONTENTOFTHEFILE[object_id] = ""
-            # if not (object_id in line_index):
-            #     line_index[object_id] = 0
+                # packet_type = received_data[2] - ord("0")
+                # if packet_type == 3:
+                #     if IS_FILE_SENDING[object_id] and line_index[object_id] == len(
+                #         CONTENTOFTHEFILE[object_id]
+                #     ):
+                #         IS_FILE_SENDING[object_id] = False
+                #         received_data = b""
+                #         connection.sendall(f"<FILEEND>".encode())
+                #         continue
 
-            # packet_type = received_data[2] - ord("0")
-            # if packet_type == 3:
-            #     if IS_FILE_SENDING[object_id] and line_index[object_id] == len(
-            #         CONTENTOFTHEFILE[object_id]
-            #     ):
-            #         IS_FILE_SENDING[object_id] = False
-            #         received_data = b""
-            #         connection.sendall(f"<FILEEND>".encode())
-            #         continue
+                #     if (
+                #         IS_FILE_SENDING[object_id]
+                #         and "CMD:NEXTLINE" in received_data.decode()
+                #     ):
+                #         connection.sendall(
+                #             f"<LINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>".encode()
+                #         )
+                #         line_index[object_id] += 1
+                #         break
+                #     if (
+                #         IS_FILE_SENDING[object_id]
+                #         and "CMD:FILESUCCESS" in received_data.decode()
+                #     ):
+                #         msg = f"<OK{THREAD_COUNT}>"
+                #         connection.sendall(msg.encode())
+                #         received_data = b""
+                #         line_index[object_id] = 0
+                #         break
 
-            #     if (
-            #         IS_FILE_SENDING[object_id]
-            #         and "CMD:NEXTLINE" in received_data.decode()
-            #     ):
-            #         connection.sendall(
-            #             f"<LINE:{CONTENTOFTHEFILE[object_id][line_index[object_id]]}>".encode()
-            #         )
-            #         line_index[object_id] += 1
-            #         break
-            #     if (
-            #         IS_FILE_SENDING[object_id]
-            #         and "CMD:FILESUCCESS" in received_data.decode()
-            #     ):
-            #         msg = f"<OK{THREAD_COUNT}>"
-            #         connection.sendall(msg.encode())
-            #         received_data = b""
-            #         line_index[object_id] = 0
-            #         break
-
-            # packet_type, object_id, data = parse_socket_data(received_data)
+                packet_type, object_id, data = parse_socket_data(received_data)
+                print(packet_type, object_id, data)
+                cursor = cnx.cursor()
+                # cursor.execute(
+                #     "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
+                # )
             # # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
             # print("tet")
             # if packet_type == REGULAR_PACKET_TYPE:
@@ -469,6 +469,9 @@ def multi_threaded_client(connection, address):
             print(address, v_e.with_traceback, v_e)
         except ConnectionAbortedError as c_a_e:
             print(address, c_a_e.with_traceback, c_a_e)
+            break
+        except BrokenPipeError as b_p_e:
+            print(address, b_p_e.with_traceback, b_p_e)
             break
 
     connection.close()
