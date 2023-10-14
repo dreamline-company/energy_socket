@@ -416,47 +416,50 @@ def multi_threaded_client(connection, address):
                 # print(packet_type, object_id, data)
                 cursor = cnx.cursor()
                 cursor.execute(
-                    "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
+                    "INSERT INTO data_raw (text) VALUES (%s)",
+                    (received_data.decode(),),
                 )
-            # # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
-            # print("tet")
-            # if packet_type == REGULAR_PACKET_TYPE:
-            #     for entry in data[:LAST_INDEX]:
-            #         insert_table_data(entry, REGULAR_TABLE_ID)
-            #     insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
-            # # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
-            # elif packet_type == EMERGENCY_PACKET_TYPE:
-            #     insert_table_data(data, EMERGENCY_TABLE_ID)
+                cnx.commit()
+                cursor.close()
+                # # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
+                # print("tet")
+                # if packet_type == REGULAR_PACKET_TYPE:
+                #     for entry in data[:LAST_INDEX]:
+                #         insert_table_data(entry, REGULAR_TABLE_ID)
+                #     insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
+                # # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
+                # elif packet_type == EMERGENCY_PACKET_TYPE:
+                #     insert_table_data(data, EMERGENCY_TABLE_ID)
 
-            # received_data = b""
-            # states = get_states(object_id)
-            # print(states)
-            # print(IS_FILE_SENDING)
-            # # Формируем ответ контроллеру
+                # received_data = b""
+                # states = get_states(object_id)
+                # print(states)
+                # print(IS_FILE_SENDING)
+                # # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-            # if states[0] and not IS_FILE_SENDING[object_id]:
-            #     IS_FILE_SENDING[object_id] = True
-            #     line_index[object_id] = 0
-            #     change_state_to(FILE_SEND_STATE_ID, object_id, 0)
-            #     msg = f"<FILE:test.txt>\n"
-            #     # Читаем файл test.txt
-            #     with open("test.txt", "r", encoding="utf-8") as f:
-            #         CONTENTOFTHEFILE[object_id] = f.readlines()
-            #         f.close()
-            # elif states[1]:
-            #     msg = "<RESTART>"
-            #     change_state_to(RESET_STATE_ID, object_id, 0)
-            # elif states[2]:
-            #     now = str(datetime.now(timezone(timedelta(hours=states[3]), "ALA")))
-            #     year = now[2:4]
-            #     month = now[5:7]
-            #     day = now[8:10]
-            #     hour = now[11:13]
-            #     minu = now[14:16]
-            #     sec = now[17:19]
-            #     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
-            #     change_state_to(SET_TIME_STATE_ID, object_id, 0)
-            # # Отпраляем ответ контроллеру
+                # if states[0] and not IS_FILE_SENDING[object_id]:
+                #     IS_FILE_SENDING[object_id] = True
+                #     line_index[object_id] = 0
+                #     change_state_to(FILE_SEND_STATE_ID, object_id, 0)
+                #     msg = f"<FILE:test.txt>\n"
+                #     # Читаем файл test.txt
+                #     with open("test.txt", "r", encoding="utf-8") as f:
+                #         CONTENTOFTHEFILE[object_id] = f.readlines()
+                #         f.close()
+                # elif states[1]:
+                #     msg = "<RESTART>"
+                #     change_state_to(RESET_STATE_ID, object_id, 0)
+                # elif states[2]:
+                #     now = str(datetime.now(timezone(timedelta(hours=states[3]), "ALA")))
+                #     year = now[2:4]
+                #     month = now[5:7]
+                #     day = now[8:10]
+                #     hour = now[11:13]
+                #     minu = now[14:16]
+                #     sec = now[17:19]
+                #     msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
+                #     change_state_to(SET_TIME_STATE_ID, object_id, 0)
+                # # Отпраляем ответ контроллеру
                 print(f"Sending : {msg}")
                 connection.sendall(msg.encode())
                 break
