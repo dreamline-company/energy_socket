@@ -412,8 +412,8 @@ def multi_threaded_client(connection, address):
                 #         line_index[object_id] = 0
                 #         break
 
-                packet_type, object_id, data = parse_socket_data(received_data)
-                print(packet_type, object_id, data)
+                # packet_type, object_id, data = parse_socket_data(received_data)
+                # print(packet_type, object_id, data)
                 cursor = cnx.cursor()
                 cursor.execute(
                     "INSERT INTO data_raw (text) VALUES (%s)", (received_data.decode(),)
