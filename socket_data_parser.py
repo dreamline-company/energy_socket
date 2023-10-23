@@ -46,7 +46,7 @@ def parse_regular_registers(base_data, main_data):
     for cell in main_data:
         key_val = cell.split(b"|")
         # получаем номер ячейки
-        cell_number = key_val[0].decode()
+        cell_number = int(key_val[0].decode())
         # регистры разделинны символом ';' делим по этому символу
         registers = key_val[1].split(b";")[:LAST_INDEX]
         # logger.info(registers)
