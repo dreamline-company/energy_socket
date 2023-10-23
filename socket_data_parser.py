@@ -56,7 +56,7 @@ def parse_regular_registers(base_data, main_data):
         for register in registers:
             key_val_reg = register.split(b":")
             # номер регистра
-            register_num = key_val_reg[0].decode().upper()
+            register_num = '`' + key_val_reg[0].decode().upper() + '`'
             # значение регистра
             register_val = int(key_val_reg[1].decode())
             # собираем кортеж из номера ячейки, номера регистра, значения регистра
