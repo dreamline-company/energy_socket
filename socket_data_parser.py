@@ -1,5 +1,5 @@
 """
-from datetime import datetime, timezone, timedelta
+socket_data_parser
 """
 from datetime import datetime, timezone, timedelta
 
@@ -12,7 +12,6 @@ EMERGENCY_PACKET_TYPE = 2
 CMD_PACKET_TYPE = 3
 
 LAST_INDEX = -1
-
 
 def is_packet_valid(received_data):
     """
@@ -112,7 +111,6 @@ def parse_socket_data(received_data):
     Функция возвращает кортеж из тип пакета (packet_type) и спарсенных данных (data)
     """
 
-    now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
     # нужно объединить два байта для получение номера объекта (индексы 1 и 2)
     object_number = received_data[1] - ord("0")
     # байт под индексов 3 тип пакета
@@ -133,7 +131,6 @@ def parse_socket_data(received_data):
     base_data = {
         "obj_num": object_number,
         "dt": datetime_from_ctr,
-        "dt_0": now,
     }
 
     # парсим регулярный пакет который состоит из регулярных регистров и общей информацией

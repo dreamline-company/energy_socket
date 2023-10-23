@@ -59,7 +59,7 @@ def update_regular(new_data, row_id):
 
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
-    # print(f"UPATE regular SET {params}  WHERE id = {row_id}")
+    
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE regular SET {params}  WHERE id = {row_id}")
 

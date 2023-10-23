@@ -79,7 +79,7 @@ def update_tx_config(new_data, row_id):
 
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
-    # print(f"UPATE tx_config SET {params}  WHERE id = {row_id}")
+    
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE tx_config SET {params}  WHERE id = {row_id}")
 
@@ -109,7 +109,3 @@ def delete_tx_config_by_id(row_id):
         logger.info("Delete data to database table 'tx_config'")
 
     return cursor.rowcount
-
-
-print(create_tx_config({"obj_num": 1, "str_tx": "234123"}))
-print(read_unsended_tx_config(1))
