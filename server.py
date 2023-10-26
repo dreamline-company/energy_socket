@@ -30,6 +30,8 @@ import service.general as general
 import service.emergency as emergency
 import service.regular as regular
 import service.tx_config as tx_config
+import service.data_raw as data_raw
+
 import socket_data_parser
 import sys
 
@@ -98,9 +100,11 @@ def multi_threaded_client(connection, address):
                 logger.info("Raw view of data: %s", received_data)
                 logger.info("Data with length of %s", len(received_data))
 
-                packet_type, object_id, data = socket_data_parser.parse_socket_data(
+                packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
                     received_data
                 )
+
+                data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data})
 
                 logger.info(
                     "Packet from object with id:%s, type of packet is %s, data is %s",

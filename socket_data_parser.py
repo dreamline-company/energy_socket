@@ -145,4 +145,4 @@ def parse_socket_data(received_data):
             received_data.index(ord("{")) + 1 : received_data.rindex(ord("}"))
         ].split(b",")
         data = parse_emergency_data(base_data, main_data)
-    return packet_type, object_number, data
+    return packet_type, object_number, datetime_from_ctr, data
