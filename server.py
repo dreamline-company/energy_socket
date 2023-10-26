@@ -129,8 +129,8 @@ def multi_threaded_client(connection, address):
                 cmd = tx_config.read_unsended_tx_config(object_id)
                 
                 if cmd:
-                    msg = f'<{cmd[2]}>'
-                    tx_config.update_dt_2_tx_config(cmd[0])
+                    msg = f'<{cm[0][2]}>'
+                    tx_config.update_dt_2_tx_config(cmd[0][0])
                 # Отпраляем ответ контроллеру
                 logger.info("Sending : %s", msg)
                 connection.sendall(msg.encode())
