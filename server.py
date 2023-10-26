@@ -104,7 +104,7 @@ def multi_threaded_client(connection, address):
                     received_data
                 )
 
-                data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data})
+                print(data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data}))
 
                 logger.info(
                     "Packet from object with id:%s, type of packet is %s, data is %s",
@@ -127,8 +127,12 @@ def multi_threaded_client(connection, address):
                 # # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
                 cmd = tx_config.read_unsended_tx_config(object_id)
-                if cmd:
-                    pass
+                print()
+                print(cmd)
+                print()
+                # if cmd:
+                    
+                    # msg = f'<{cmd}>'
                     # change_state_to(msg, object_id, 0)
                 # Отпраляем ответ контроллеру
                 logger.info("Sending : %s", msg)

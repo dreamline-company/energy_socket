@@ -92,6 +92,26 @@ def update_tx_config(new_data, row_id):
 
     return cursor.rowcount
 
+def update_dt_2_tx_config(row_id):
+    """
+    update_tx_config
+    """
+
+    params = [f"{i}={new_data[i]}" for i in new_data.keys()]
+    params = ",".join(params)
+    
+    cursor = cnx.cursor()
+    cursor.execute(f"UPDATE tx_config SET dt_2 = NOW() WHERE id = {row_id}")
+
+    cnx.commit()
+
+    cursor.close()
+
+    if cursor.rowcount >= 1:
+        logger.info("Update data to database table 'tx_config'")
+
+    return cursor.rowcount
+
 
 def delete_tx_config_by_id(row_id):
     """
