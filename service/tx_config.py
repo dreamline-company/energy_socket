@@ -96,9 +96,6 @@ def update_dt_2_tx_config(row_id):
     """
     update_tx_config
     """
-
-    params = [f"{i}={new_data[i]}" for i in new_data.keys()]
-    params = ",".join(params)
     
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE tx_config SET dt_2 = NOW() WHERE id = {row_id}")
