@@ -8,6 +8,7 @@ COPY requirements.txt /server/requirements.txt
 RUN pip3 install -r /server/requirements.txt
 
 COPY server.py /server
+COPY .env /server
 COPY /service /server/service
 COPY /database /server/database
 EXPOSE 8070
