@@ -7,7 +7,8 @@ WORKDIR /server/
 COPY requirements.txt /server/requirements.txt
 RUN pip3 install -r /server/requirements.txt
 
-COPy logging.conf /server/
+COPY socket_data_parser.py /server/
+COPY logging.conf /server/
 COPY server.py /server/
 COPY .env /server/
 COPY /service /server/service
