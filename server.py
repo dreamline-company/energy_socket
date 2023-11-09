@@ -22,6 +22,7 @@ Date: 02.06.2023
 """
 
 from _thread import start_new_thread
+from datetime import datetime, timezone, timedelta
 
 import socket
 import logging
@@ -50,19 +51,6 @@ CMD_PACKET_TYPE = 3
 GENERAL_TABLE_ID = 0
 REGULAR_TABLE_ID = 1
 EMERGENCY_TABLE_ID = 2
-
-
-# def mark_as_sended(object_id):
-#     now = datetime.now(timezone(timedelta(hours=+6), "ALA"))
-#     cursor = cnx.cursor()
-#     # запускаем SQL запрос
-
-#     cursor.execute(f"UPDATE states SET sended_time = {now} WHERE id = {object_id}")
-
-#     cnx.commit()
-
-#     cursor.close()
-
 
 def insert_table_data(data, table_id):
     """
@@ -127,10 +115,20 @@ def multi_threaded_client(connection, address):
                 # # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
                 cmd = tx_config.read_unsended_tx_config(object_id)
-                
-                if cmd:
+
+                if abs((dt - datetime.now()).days) > 1:
+                    now = str(datetime.now(timezone(timedelta(hours=5), "GUW")))
+                    year = now[2:4]
+                    month = now[5:7]
+                    day = now[8:10]
+                    hour = now[11:13]
+                    minu = now[14:16]
+                    sec = now[17:19]
+                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
+                elif cmd:
                     msg = f'<{cmd[0][2]}>'
                     tx_config.update_dt_2_tx_config(cmd[0][0])
+
                 # Отпраляем ответ контроллеру
                 logger.info("Sending : %s", msg)
                 connection.sendall(msg.encode())
