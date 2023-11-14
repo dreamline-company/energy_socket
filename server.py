@@ -22,7 +22,8 @@ Date: 02.06.2023
 """
 
 from _thread import start_new_thread
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+import pytz
 
 import socket
 import logging
@@ -117,7 +118,7 @@ def multi_threaded_client(connection, address):
                 cmd = tx_config.read_unsended_tx_config(object_id)
 
                 if abs((dt - datetime.now()).days) > 1:
-                    now = str(datetime.now(timezone(timedelta(hours=5), "GUW")))
+                    now = datetime.now(pytz.timezone('Asia/Almaty'))
                     year = now[2:4]
                     month = now[5:7]
                     day = now[8:10]
