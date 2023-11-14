@@ -118,7 +118,7 @@ def multi_threaded_client(connection, address):
                 cmd = tx_config.read_unsended_tx_config(object_id)
 
                 if abs((dt - datetime.now()).days) > 1:
-                    now = datetime.now(pytz.timezone('Asia/Almaty'))
+                    now = str(datetime.now(pytz.timezone('Asia/Almaty')))
                     year = now[2:4]
                     month = now[5:7]
                     day = now[8:10]
