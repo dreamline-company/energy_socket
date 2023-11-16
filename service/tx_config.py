@@ -6,7 +6,6 @@ import logging
 import logging.config
 import database.db as db
 
-cnx = db.create_server_connection()
 
 logging.config.fileConfig("logging.conf")
 
@@ -18,6 +17,7 @@ def read_tx_config():
     """
     read_tx_config
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM tx_config")
     tx_config_data = cursor.fetchall()
@@ -34,6 +34,7 @@ def read_unsended_tx_config(obj_id):
     """
     read_unsended_tx_config
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     # запускаем SQL запрос
     cursor.execute(
@@ -53,6 +54,7 @@ def create_tx_config(new_data):
     """
     create_tx_config
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     params_tuple = ",".join(tuple(new_data.keys()))
     values_tuple = tuple(new_data.values())
@@ -79,7 +81,7 @@ def update_tx_config(new_data, row_id):
 
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
-    
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE tx_config SET {params}  WHERE id = {row_id}")
 
@@ -96,7 +98,7 @@ def update_dt_2_tx_config(row_id):
     """
     update_tx_config
     """
-    
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE tx_config SET dt_2 = NOW() WHERE id = {row_id}")
 
@@ -114,7 +116,7 @@ def delete_tx_config_by_id(row_id):
     """
     delete_tx_config_by_id
     """
-
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"DELETE FROM tx_config WHERE id={row_id}")
 

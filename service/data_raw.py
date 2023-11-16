@@ -6,8 +6,6 @@ import logging
 import logging.config
 import database.db as db
 
-cnx = db.create_server_connection()
-
 logging.config.fileConfig("logging.conf")
 
 # create logger
@@ -18,6 +16,7 @@ def read_data_raw():
     """
     read_data_raw
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM data_raw")
     data_raw_data = cursor.fetchall()
@@ -34,6 +33,7 @@ def create_data_raw(new_data):
     """
     create_data_raw
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     params_tuple = ",".join(tuple(new_data.keys()))
     values_tuple = tuple(new_data.values())
@@ -61,6 +61,7 @@ def update_data_raw(new_data, row_id):
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
     
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE data_raw SET {params}  WHERE id = {row_id}")
 
@@ -78,7 +79,7 @@ def delete_data_raw_by_id(row_id):
     """
     delete_data_raw_by_id
     """
-
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"DELETE FROM data_raw WHERE id={row_id}")
 

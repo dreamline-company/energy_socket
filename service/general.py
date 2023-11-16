@@ -5,8 +5,6 @@ import logging
 import logging.config
 import database.db as db
 
-cnx = db.create_server_connection()
-
 logging.config.fileConfig("logging.conf")
 
 # create logger
@@ -17,6 +15,7 @@ def read_general():
     """
     read_general
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM general")
     general_data = cursor.fetchall()
@@ -33,6 +32,7 @@ def create_general(new_data):
     """
     create_general
     """
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     params_tuple = ",".join(tuple(new_data.keys()))
     values_tuple = tuple(new_data.values())
@@ -60,6 +60,7 @@ def update_general(new_data, row_id):
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
     
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE general SET {params}  WHERE id = {row_id}")
 
@@ -78,6 +79,7 @@ def delete_general_by_id(row_id):
     delete_general_by_id
     """
 
+    cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"DELETE FROM general WHERE id={row_id}")
 
