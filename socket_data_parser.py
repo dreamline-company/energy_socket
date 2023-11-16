@@ -102,7 +102,8 @@ def parse_emergency_data(base_data, main_data):
     data = {}
     data.update(base_data)
     for index, cell in enumerate(main_data, 1):
-        data["c" + str(index)] = cell.decode()
+        s = cell.decode().split(":")
+        data["c" + s[0]] = int(s[1])
     return data
 
 
