@@ -116,7 +116,7 @@ def parse_socket_data(received_data):
     # object_number = received_data[1] - ord("0")
     object_number = int(received_data[2:4].decode("utf-8"))
     # байт под индексов 3 тип пакета
-    packet_type = received_data[5] - ord("0")
+    packet_type = received_data[4] - ord("0")
     # вырезаем данные с индекса 4 до символа '{' между данным промежутке находиться время с контроллера
     datetime_from_ctr = datetime.fromtimestamp(
         int(str(received_data[5 : received_data.index(ord("{"))].decode()))
