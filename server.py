@@ -171,6 +171,7 @@ logger = logging.getLogger("server")
 try:
     # создаем серверный сокет
     ServerSideSocket = socket.socket()
+    ServerSideSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # связываем серверный сокет и адрес, порт хоста
     ServerSideSocket.bind((HOST, PORT))
 except socket.error as e:
