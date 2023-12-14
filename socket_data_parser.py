@@ -21,6 +21,7 @@ def is_packet_valid(received_data):
     - длина меньше MAX_LEN_PACKET
     """
     # проверяем начальный и конечный символ
+    print(received_data)
     is_start_and_end_symbol = (
         received_data[0] == START_CHARACTER
         and received_data[LAST_INDEX] == END_CHARACTER
