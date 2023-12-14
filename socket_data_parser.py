@@ -26,7 +26,7 @@ def is_packet_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    is_valid_type_packet = received_data[2] - ord("0") in [
+    is_valid_type_packet = received_data[4] - ord("0") in [
         REGULAR_PACKET_TYPE,
         EMERGENCY_PACKET_TYPE,
         CMD_PACKET_TYPE,
