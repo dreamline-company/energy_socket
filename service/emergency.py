@@ -45,6 +45,19 @@ def create_emergency(new_data):
     )
 
     cnx.commit()
+    print(new_data)
+    for key in new_data.keys():
+        print(key, new_data[key])
+        if new_data[key] != 0:
+            signal = "{0:b}".format(new_data[key])
+            ind = 1
+            print(signal)
+            for c in signal[::-1]:
+                if c == '1':
+                    print('ind -- ', ind)
+        else:
+            pass
+            cursor.execute()
 
     cursor.close()
 
