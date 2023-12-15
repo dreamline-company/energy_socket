@@ -45,7 +45,14 @@ def create_emergency(new_data):
     )
 
     cnx.commit()
+    obj_num = new_data['obj_num']
+    dt = new_data['dt']
+    print(obj_num, dt)
+    
+    del new_data['obj_num']
+    del new_data['dt']
     print(new_data)
+
     for key in new_data.keys():
         print(key, new_data[key])
         if new_data[key] != 0:
