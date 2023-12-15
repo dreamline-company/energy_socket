@@ -64,7 +64,7 @@ def create_emergency(new_data):
                     print('ind -- ', ind)
         else:
             pass
-            cursor.execute()
+            # cursor.execute()
 
     cursor.close()
 
