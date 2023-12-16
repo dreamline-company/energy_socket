@@ -47,25 +47,45 @@ def create_emergency(new_data):
     cnx.commit()
     obj_num = new_data['obj_num']
     dt = new_data['dt']
-    print(obj_num, dt)
-    
+
     del new_data['obj_num']
     del new_data['dt']
-    print(new_data)
+    working = True
+    cursor.execute('select oil_field from emg-eme.n_object_num where object_num={0}'.format(str(obj_num)))
+    oil_field = cursor.fetchone()[0]
 
     for key in new_data.keys():
         print(key, new_data[key])
-        if new_data[key] != 0:
+        if int(new_data[key]) != 0:
+            working = False
+            if 'c' in key:
+                cell = key.replace('c', '')
+            else:
+                cell = key
+
             signal = "{0:b}".format(new_data[key])
-            ind = 1
+            ind = 0
             print(signal)
+            alarms = [0, 0, 0, 0, 0]
             for c in signal[::-1]:
                 if c == '1':
-                    print('ind -- ', ind)
-        else:
-            pass
-            # cursor.execute()
+                    alarms[ind] = 1
+                    print('ind -- ', ind)                    
+                ind++
+            print(alarms)
+            cursor.execute('update emg-eme.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))    
+            cnx.commit()
 
+        else:                    
+            cursor.execute('update emg-eme.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+            cnx.commit()
+    
+    if working:
+        cursor.execute('update emg-eme.n_oil_fields set working=1 where oil_field="{0}"'.format(oil_field))
+    else:
+        cursor.execute('update emg-eme.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
+
+    cnx.commit()
     cursor.close()
 
     logger.info("Insert data to database table 'emergency'")
