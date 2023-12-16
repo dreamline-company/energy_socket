@@ -56,13 +56,12 @@ def create_emergency(new_data):
 
     for key in new_data.keys():
         print(key, new_data[key])
+        if 'c' in key:
+            cell = key.replace('c', '')
+        else:
+            cell = key
         if int(new_data[key]) != 0:
             working = False
-            if 'c' in key:
-                cell = key.replace('c', '')
-            else:
-                cell = key
-
             signal = "{0:b}".format(new_data[key])
             ind = 0
             print(signal)
