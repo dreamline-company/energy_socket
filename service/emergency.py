@@ -51,7 +51,7 @@ def create_emergency(new_data):
     del new_data['obj_num']
     del new_data['dt']
     working = True
-    cursor.execute('select oil_field from emg-eme.n_object_num where object_num={0}'.format(str(obj_num)))
+    cursor.execute('select oil_field from `emg-eme`.n_object_num where object_num={0}'.format(str(obj_num)))
     oil_field = cursor.fetchone()[0]
 
     for key in new_data.keys():
