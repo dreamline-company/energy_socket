@@ -73,17 +73,17 @@ def create_emergency(new_data):
                     print('ind -- ', ind)                    
                 ind += 1
             print(alarms)
-            cursor.execute('update emg-eme.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))    
+            cursor.execute('update `emg-eme`.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))    
             cnx.commit()
 
         else:                    
-            cursor.execute('update emg-eme.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+            cursor.execute('update `emg-eme`.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
             cnx.commit()
     
     if working:
-        cursor.execute('update emg-eme.n_oil_fields set working=1 where oil_field="{0}"'.format(oil_field))
+        cursor.execute('update `emg-eme`.n_oil_fields set working=1 where oil_field="{0}"'.format(oil_field))
     else:
-        cursor.execute('update emg-eme.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
+        cursor.execute('update `emg-eme`.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
 
     cnx.commit()
     cursor.close()
