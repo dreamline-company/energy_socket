@@ -55,7 +55,6 @@ def create_emergency(new_data):
     oil_field = cursor.fetchone()[0]
 
     for key in new_data.keys():
-        print(key, new_data[key])
         if 'c' in key:
             cell = key.replace('c', '')
         else:
@@ -64,14 +63,11 @@ def create_emergency(new_data):
             working = False
             signal = "{0:b}".format(new_data[key])
             ind = 0
-            print(signal)
             alarms = [0, 0, 0, 0, 0]
             for c in signal[::-1]:
                 if c == '1':
                     alarms[ind] = 1
-                    print('ind -- ', ind)                    
                 ind += 1
-            print(alarms)
             cursor.execute('update `emg-eme`.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))    
             cnx.commit()
 
