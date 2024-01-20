@@ -19,7 +19,8 @@ fl_data_raw = False
 # * * * * * * * * * * * * * * * * * * * * * * ФУНКЦИИ * * * * * * * * * * * * * * * * * * * * * *
 # Строка текущего времени
 def do_sTime():
-    dt = datetime.now() + timedelta(hours=6)
+    # dt = datetime.now() + timedelta(hours=6)
+    dt = datetime.now()
     return dt.strftime('%Y-%m-%d %H:%M:%S')
      
 # Запись подтверждения отправки команды контроллеру
@@ -142,7 +143,7 @@ def multi_threaded_client(connection, address):
             receiv_data += connection.recv(1024)
             if not receiv_data: break
             if is_data_valid(receiv_data):
-                #print("rx data:", receiv_data)
+                print("rx data:", receiv_data)
                 receiv_data = receiv_data[1:-1]
                 sDan = receiv_data.decode()
                 receiv_data = b""
