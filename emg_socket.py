@@ -198,9 +198,9 @@ CONTENTOFTHEFILE = {}
 line_index = {}
 
 # Подключаемся к базе данных
-DB_SERVER = "185.146.1.107"     #"194.87.238.61"	#"127.0.0.1"
-DB_USERNAME = "ivp"             #"root"  
-DB_PASSWORD = "Qwert123!"      #""
+DB_SERVER = "192.168.17.158"     #"194.87.238.61"	#"127.0.0.1"
+DB_USERNAME = "eme_user"             #"root"  
+DB_PASSWORD = "Eme2023*"      #""
 DB_NAME = "emg_skv"
 DB_PORT = 3306
 cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
@@ -211,6 +211,7 @@ print(f"IP Address: {IP}")
 # Создаем серверный сокет
 try:
     ServerSocket = socket.socket()
+    ServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ServerSocket.bind((HOST, PORT))
     print("Socket started")
 except socket.error as e:
