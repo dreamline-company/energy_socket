@@ -73,9 +73,8 @@ def create_emergency(new_data):
             cnx.commit()
 
             event = 'Дифференциальная защита'
-            cursor.execute('insert into `emg-eme`.n_lenta ' 
-                + '(criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num))
+            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
             cnx.commit()
 
         else:                    
