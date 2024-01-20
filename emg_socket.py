@@ -146,9 +146,7 @@ def multi_threaded_client(connection, address):
             if is_data_valid(receiv_data):
                 print("rx data:", receiv_data)
                 receiv_data = receiv_data[1:-1]
-                print("receiv_data:", receiv_data)
                 sDan = receiv_data.decode()
-                print("sDan:", sDan)
                 receiv_data = b""
                 arDan = sDan.split()
                 if sql_data(arDan) == True:
