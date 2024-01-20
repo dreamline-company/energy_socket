@@ -46,8 +46,10 @@ def create_emergency(new_data):
     del new_data['obj_num']
     del new_data['dt']
     working = True
-    cursor.execute('select oil_field from `emg-eme`.n_object_num where object_num={0}'.format(str(obj_num)))
-    oil_field = cursor.fetchone()[0]
+    cursor.execute('select oil_field, name from `emg-eme`.n_object_num where object_num={0}'.format(str(obj_num)))
+    tmp_data = cursor.fetchone()
+    oil_field = tmp_data[0]
+    oil_field_name = tmp_data[1]
 
     for key in new_data.keys():
         print(key, new_data[key])
@@ -69,8 +71,12 @@ def create_emergency(new_data):
             print(alarms)
             cursor.execute('update `emg-eme`.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
             cnx.commit()
-            # cursor.execute('insert into `emg-eme`.n_lenta () values (0, {2}, {3}, {4}, {5}, {6})'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
 
+            event = 'Дифференциальная защита'
+            cursor.execute('insert into `emg-eme`.n_lenta ' 
+                + '(criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num))
+            cnx.commit()
 
         else:                    
             cursor.execute('update `emg-eme`.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
