@@ -39,12 +39,12 @@ def create_data_raw(new_data):
     values_tuple = tuple(new_data.values())
     insert_symbols = ",".join(tuple((["%s"] * len(new_data.keys()))))
 
-    cursor.execute(
-        f"INSERT INTO data_raw ({params_tuple}) VALUES ({insert_symbols})",
-        values_tuple,
-    )
+    # cursor.execute(
+    #     f"INSERT INTO data_raw ({params_tuple}) VALUES ({insert_symbols})",
+    #     values_tuple,
+    # )
 
-    cnx.commit()
+    # cnx.commit()
 
     cursor.close()
 

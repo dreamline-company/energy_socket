@@ -67,8 +67,10 @@ def create_emergency(new_data):
                     print('ind -- ', ind)                    
                 ind += 1
             print(alarms)
-            cursor.execute('update `emg-eme`.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))    
+            cursor.execute('update `emg-eme`.n_cell_matrix set working=0, alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
             cnx.commit()
+            # cursor.execute('insert into `emg-eme`.n_lenta () values (0, {2}, {3}, {4}, {5}, {6})'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
+
 
         else:                    
             cursor.execute('update `emg-eme`.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
