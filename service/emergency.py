@@ -39,12 +39,7 @@ def create_emergency(new_data):
     values_tuple = tuple(new_data.values())
     insert_symbols = ",".join(tuple((["%s"] * len(new_data.keys()))))
 
-    cursor.execute(
-        f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
-        values_tuple,
-    )
-
-    cnx.commit()
+        
     obj_num = new_data['obj_num']
     dt = new_data['dt']
 
@@ -81,10 +76,17 @@ def create_emergency(new_data):
     
     if working:
         cursor.execute('update `emg-eme`.n_oil_fields set working=1 where oil_field="{0}"'.format(oil_field))
+        cnx.commit()
     else:
         cursor.execute('update `emg-eme`.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
+        cnx.commit()
+        cursor.execute(
+            f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
+            values_tuple,
+        )
+        cnx.commit()
 
-    cnx.commit()
+    # cnx.commit()
     cursor.close()
 
     logger.info("Insert data to database table 'emergency'")
