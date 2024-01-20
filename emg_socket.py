@@ -97,7 +97,8 @@ def sql_data(arD):
     skv_n = int(arD[1])
     if pak_type == 1:
         sTable = 'skv_onoff'
-        dt = datetime.now() + timedelta(hours=6)
+        # dt = datetime.now() + timedelta(hours=6)
+        dt = datetime.now()
         dan = int(arD[2])
         insert_sql = (f"INSERT INTO skv_onoff (skv_num, dan, dt) VALUES ('{skv_n}', '{dan}','{dt}')")
     elif pak_type == 2:
