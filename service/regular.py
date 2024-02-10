@@ -80,13 +80,6 @@ def create_regular(new_data):
     if '`003B`' in new_data:
         freq = new_data['`003B`'] / 100
 
-    print('currentA', currentA)
-    print('currentB', currentB)
-    print('currentC', currentC)
-    print('currentD', currentD)
-    print('freq', freq)
-
-    
 
     # print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
     cursor.execute(
