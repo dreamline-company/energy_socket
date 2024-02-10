@@ -38,6 +38,7 @@ def create_regular(new_data):
     params_tuple = ",".join(tuple(new_data.keys()))
     values_tuple = tuple(new_data.values())
     insert_symbols = ",".join(tuple((["%s"] * len(new_data.keys()))))
+    print('new_data', new_data)
     print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
     cursor.execute(
         f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})",
