@@ -38,8 +38,24 @@ def create_regular(new_data):
     params_tuple = ",".join(tuple(new_data.keys()))
     values_tuple = tuple(new_data.values())
     insert_symbols = ",".join(tuple((["%s"] * len(new_data.keys()))))
-    print('new_data', new_data)
-    print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
+
+    currentA = 0
+    currentB = 0
+    currentC = 0
+
+    if '`0030`' in new_data and '`0031`' in new_data:
+        regs = [new_data['`0030`'], new_data['`0031`']]
+        tmp = ""
+        for i in range(0, 16 - len(bin(regs[0])[2:])):
+            tmp += "0"
+        tmp += bin(regs[0])[2:]
+        currentA = (int(bin(regs[1])[2:] + tmp, 2))
+
+    print('currentA', currentA)
+    print('regs', regs)
+    
+
+    # print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
     cursor.execute(
         f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})",
         values_tuple,
