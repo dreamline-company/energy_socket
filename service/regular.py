@@ -42,6 +42,8 @@ def create_regular(new_data):
     currentA = 0
     currentB = 0
     currentC = 0
+    currentD = 0
+    freq = 0
 
     if '`0030`' in new_data and '`0031`' in new_data:
         regs = [new_data['`0030`'], new_data['`0031`']]
@@ -49,10 +51,41 @@ def create_regular(new_data):
         for i in range(0, 16 - len(bin(regs[0])[2:])):
             tmp += "0"
         tmp += bin(regs[0])[2:]
-        currentA = (int(bin(regs[1])[2:] + tmp, 2))
+        currentA = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+
+    if '`0032`' in new_data and '`0033`' in new_data:
+        regs = [new_data['`0032`'], new_data['`0033`']]
+        tmp = ""
+        for i in range(0, 16 - len(bin(regs[0])[2:])):
+            tmp += "0"
+        tmp += bin(regs[0])[2:]
+        currentB = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+
+    if '`0034`' in new_data and '`0035`' in new_data:
+        regs = [new_data['`0034`'], new_data['`0035`']]
+        tmp = ""
+        for i in range(0, 16 - len(bin(regs[0])[2:])):
+            tmp += "0"
+        tmp += bin(regs[0])[2:]
+        currentC = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+
+    if '`0036`' in new_data and '`0037`' in new_data:
+        regs = [new_data['`0036`'], new_data['`0037`']]
+        tmp = ""
+        for i in range(0, 16 - len(bin(regs[0])[2:])):
+            tmp += "0"
+        tmp += bin(regs[0])[2:]
+        currentD = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+
+    if '`003B`' in new_data:
+        freq = new_data['`003B`'] / 100
 
     print('currentA', currentA)
-    print('regs', regs)
+    print('currentB', currentB)
+    print('currentC', currentC)
+    print('currentD', currentD)
+    print('freq', freq)
+
     
 
     # print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
