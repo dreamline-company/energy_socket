@@ -81,9 +81,10 @@ def create_regular(new_data):
         freq = new_data['`003B`'] / 100
 
 
-    print('new_data', new_data)
-    # cursor.execute('update `emg-eme`.n_cell_matrix set micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
-    # cnx.commit()
+    obj_num = new_data['obj_num']
+    cell = new_data['cell_number']
+    cursor.execute('update `emg-eme`.n_cell_matrix set micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, freq, currentA, currentB, currentC, currentD))
+    cnx.commit()
 
     # print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
     cursor.execute(
