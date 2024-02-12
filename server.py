@@ -86,8 +86,8 @@ def multi_threaded_client(connection, address):
                 break
             # проверям валдиность данных
             if socket_data_parser.is_packet_valid(received_data):
-                logger.info("Raw view of data: %s", received_data)
-                logger.info("Data with length of %s", len(received_data))
+                # logger.info("Raw view of data: %s", received_data)
+                # logger.info("Data with length of %s", len(received_data))
 
                 packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
                     received_data

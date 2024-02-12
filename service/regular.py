@@ -46,53 +46,60 @@ def create_regular(new_data):
     freq = 0
 
     if '`0030`' in new_data and '`0031`' in new_data:
-        regs = [new_data['`0030`'], new_data['`0031`']]
-        tmp = ""
-        for i in range(0, 16 - len(bin(regs[0])[2:])):
-            tmp += "0"
-        tmp += bin(regs[0])[2:]
-        currentA = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+        if new_data['`0030`'] == 32768 or new_data['`0031`'] == 32768:
+            currentA = -1
+        else:
+            regs = [new_data['`0030`'], new_data['`0031`']]
+            tmp = ""
+            for i in range(0, 16 - len(bin(regs[0])[2:])):
+                tmp += "0"
+            tmp += bin(regs[0])[2:]
+            currentA = (int(bin(regs[1])[2:] + tmp, 2)) / 100
 
     if '`0032`' in new_data and '`0033`' in new_data:
-        regs = [new_data['`0032`'], new_data['`0033`']]
-        tmp = ""
-        for i in range(0, 16 - len(bin(regs[0])[2:])):
-            tmp += "0"
-        tmp += bin(regs[0])[2:]
-        currentB = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+        if new_data['`0032`'] == 32768 or new_data['`0033`'] == 32768:
+            currentB = -1
+        else:
+            regs = [new_data['`0032`'], new_data['`0033`']]
+            tmp = ""
+            for i in range(0, 16 - len(bin(regs[0])[2:])):
+                tmp += "0"
+            tmp += bin(regs[0])[2:]
+            currentB = (int(bin(regs[1])[2:] + tmp, 2)) / 100
 
     if '`0034`' in new_data and '`0035`' in new_data:
-        regs = [new_data['`0034`'], new_data['`0035`']]
-        tmp = ""
-        for i in range(0, 16 - len(bin(regs[0])[2:])):
-            tmp += "0"
-        tmp += bin(regs[0])[2:]
-        currentC = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+        if new_data['`0034`'] == 32768 or new_data['`0035`'] == 32768:
+            currentC = -1
+        else:
+            regs = [new_data['`0034`'], new_data['`0035`']]
+            tmp = ""
+            for i in range(0, 16 - len(bin(regs[0])[2:])):
+                tmp += "0"
+            tmp += bin(regs[0])[2:]
+            currentC = (int(bin(regs[1])[2:] + tmp, 2)) / 100
 
     if '`0036`' in new_data and '`0037`' in new_data:
-        regs = [new_data['`0036`'], new_data['`0037`']]
-        tmp = ""
-        for i in range(0, 16 - len(bin(regs[0])[2:])):
-            tmp += "0"
-        tmp += bin(regs[0])[2:]
-        currentD = (int(bin(regs[1])[2:] + tmp, 2)) / 100
+        if new_data['`0036`'] == 32768 or new_data['`0037`'] == 32768:
+            currentD = -1
+        else:
+            regs = [new_data['`0036`'], new_data['`0037`']]
+            tmp = ""
+            for i in range(0, 16 - len(bin(regs[0])[2:])):
+                tmp += "0"
+            tmp += bin(regs[0])[2:]
+            currentD = (int(bin(regs[1])[2:] + tmp, 2)) / 100
 
     if '`003B`' in new_data:
-        freq = new_data['`003B`'] / 100
+        if new_data['`003B`'] == 32768:
+            freq = -1
+        else:
+            freq = new_data['`003B`'] / 100
 
 
     obj_num = new_data['obj_num']
     cell = new_data['cell_number']
     cursor.execute('update `emg-eme`.n_cell_matrix set micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, freq, currentA, currentB, currentC, currentD))
     cnx.commit()
-
-    # print('currentA', currentA)
-    # print('currentB', currentB)
-    # print('currentC', currentC)
-    # print('currentD', currentD)
-    # print('freq', freq)
-    # print('obj_num', obj_num)
-    # print('cell', cell)
 
 
     # print(f"INSERT INTO regular ({params_tuple}) VALUES ({insert_symbols})", values_tuple,)
