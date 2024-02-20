@@ -59,7 +59,7 @@ def insert_table_data(data, table_id):
     Он динамически строит SQL запрос на основе полученных данных.
     """
 
-    logger.info("Inserted data into %s - %s", table_id, data)
+    # logger.info("Inserted data into %s - %s", table_id, data)
 
     if table_id == GENERAL_TABLE_ID:
         general.create_general(data)
