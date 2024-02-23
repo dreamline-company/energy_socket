@@ -95,6 +95,14 @@ def create_regular(new_data):
         else:
             freq = new_data['`003B`'] / 100
 
+    if '`003D`' in new_data:
+        if currentA > 1000:
+            if new_data['`003D`'] == 32768:
+                freq = -1
+            else:
+                freq = new_data['`003D`'] / 100
+
+
 
     obj_num = new_data['obj_num']
     cell = new_data['cell_number']
