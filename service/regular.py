@@ -96,16 +96,11 @@ def create_regular(new_data):
             freq = new_data['`003B`'] / 100
 
     if '`003D`' in new_data:
-        print('!!!!!!', new_data['`003D`'])
-        print('currentA', currentA)
         if currentA > 1000:
-            print('freq', freq)
             if new_data['`003D`'] == 32768:
                 freq = -1
             else:
                 freq = new_data['`003D`'] / 100
-        else:
-            print('error')
 
 
 
