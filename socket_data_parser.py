@@ -21,7 +21,7 @@ def is_packet_valid(received_data):
     - длина меньше MAX_LEN_PACKET
     """
     # проверяем начальный и конечный символ
-    tmp = int(received_data[1:4].decode("utf-8"))
+    tmp = int(received_data[1:5].decode("utf-8"))
     if tmp != 1128:
         print("is_packet_valid", received_data)
     is_start_and_end_symbol = (
