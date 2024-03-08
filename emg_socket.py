@@ -34,11 +34,11 @@ def cmd_ok(id):
         insert_sql = f"UPDATE tx_config SET dt2 = '{dt}' WHERE id = {id}"
         #print('id',id,insert_sql)
         cursor.execute(insert_sql)
+        cnx.commit()
     except () as e:
         print(e,'bad') 
         res = False   
     finally:
-        cnx.commit()
         cursor.close()
     return res
 
@@ -52,10 +52,10 @@ def get_cmd(skv_num):
         cursor.execute(insert_sql)
         cmd = cursor.fetchone()
         #print('cmd rx ->:',cmd)
+        cnx.commit()
     except:
         print('NO Comand:',cmd,skv_num)
     finally:
-        cnx.commit()
         cursor.close()
     return cmd
 
@@ -113,16 +113,14 @@ def sql_data(arD):
     try:
         cursor.execute(insert_sql)
         print(f"Insert data into {sTable}: {arD}")
-        res = True
         cnx.commit()
-        cursor.close()
+        res = True
     except:
-        cursor.close()
         res = False
         print('Данные в БД не записаны!!!!!!!!!!!!!!!!!')
-    # finally:    
+    finally:    
     #     cnx.commit()
-    #     cursor.close()
+        cursor.close()
     return res
 
 # Проверка валидности принятого пакета
