@@ -114,11 +114,14 @@ def sql_data(arD):
         cursor.execute(insert_sql)
         print(f"Insert data into {sTable}: {arD}")
         res = True
-    except:
-        print('Данные в БД не записаны')
-    finally:    
         cnx.commit()
         cursor.close()
+    except:
+        cursor.close()
+        print('Данные в БД не записаны')
+    # finally:    
+    #     cnx.commit()
+    #     cursor.close()
     return res
 
 # Проверка валидности принятого пакета
