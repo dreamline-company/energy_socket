@@ -228,7 +228,7 @@ ServerSocket.listen()
 # Цикл, где принимаем все соединения
 while True:
     # принимаем соединение от клиента
-    sleep(randint(1, 10))
+    sleep(randint(1, 5))
     Client, new_socket = ServerSocket.accept()
     Client.settimeout(60)
     print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
