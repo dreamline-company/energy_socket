@@ -118,6 +118,7 @@ def sql_data(arD):
         cursor.close()
     except:
         cursor.close()
+        res = False
         print('Данные в БД не записаны!!!!!!!!!!!!!!!!!')
     # finally:    
     #     cnx.commit()
