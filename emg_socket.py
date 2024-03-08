@@ -7,6 +7,8 @@ from datetime import datetime, timezone, timedelta
 from _thread import start_new_thread
 import mysql.connector
 from mysql.connector import Error
+from random import randint
+from time import sleep
 
 THREAD_COUNT = 0
 CHAR_1 = 60
@@ -226,6 +228,7 @@ ServerSocket.listen()
 # Цикл, где принимаем все соединения
 while True:
     # принимаем соединение от клиента
+    sleep(randint(1, 10))
     Client, new_socket = ServerSocket.accept()
     Client.settimeout(60)
     print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
