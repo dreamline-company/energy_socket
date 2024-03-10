@@ -100,7 +100,7 @@ def sql_data(arD):
     working = 1
 
     try:
-        cursor.execute('select dt0 from skv_dan where skv_num={0}'.format(str(skv_n)))
+        cursor.execute('select dt0 from skv_dan where skv_num={0} order by dt0 desc'.format(str(skv_n)))
         tmp = cursor.fetchone()
 
         if tmp:
