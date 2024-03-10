@@ -97,6 +97,19 @@ def sql_data(arD):
     skv_dan = ''
     pak_type = int(arD[0])
     skv_n = int(arD[1])
+    working = 1
+
+    try:
+        cursor.execute('select dt0 from skv_dan where skv_num={0}'.format(str(skv_n)))
+        tmp = cursor.fetchone()
+        if tmp:
+            if (datetime.now() - timedelta(minutes=15)) > tmp[0]:
+                working = 0
+    except Exception as e:
+        print(e)
+        pass
+
+
     if pak_type == 1:
         sTable = 'skv_onoff'
         # dt = datetime.now() + timedelta(hours=6)
@@ -109,9 +122,19 @@ def sql_data(arD):
             dt = datetime.fromtimestamp(int(arD[2]))
             avr = int(arD[3])
             insert_sql = (f"INSERT INTO skv_dan (skv_num, dt, avr, dan0, dan1) VALUES ('{skv_n}', '{dt}', '{avr}', '{arD[4]}', '{arD[5]}')")
-        else: 
-            insert_sql = (f"INSERT INTO data_raw (skv_num, skv_bytes) VALUES ('{skv_n}', '{arD}')")
-    else: pass    
+        else:
+            pass
+            # insert_sql = (f"INSERT INTO data_raw (skv_num, skv_bytes) VALUES ('{skv_n}', '{arD}')")
+    else: pass
+
+    try:
+        print('---------', skv_n, working)
+        cursor.execute('update chrp_well set working={1} where object_num={0}'.format(str(skv_n), str(working)))
+        cnx.commit()
+    except Exception as e:
+        print(e)
+        pass
+
     try:
         cursor.execute(insert_sql)
         print(f"Insert data into {sTable}: {arD}")
@@ -121,7 +144,6 @@ def sql_data(arD):
         res = False
         print('Данные в БД не записаны!!!!!!!!!!!!!!!!!')
     finally:    
-    #     cnx.commit()
         cursor.close()
     return res
 
