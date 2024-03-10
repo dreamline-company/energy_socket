@@ -109,6 +109,8 @@ def sql_data(arD):
         print(e)
         pass
 
+    cursor.reset()
+
 
     if pak_type == 1:
         sTable = 'skv_onoff'
@@ -129,7 +131,7 @@ def sql_data(arD):
 
     try:
         print('---------', skv_n, working)
-        cursor.execute('update `emg-skv`chrp_well set working={1} where skv_num={0}'.format(str(skv_n), str(working)))
+        cursor.execute('update chrp_well set working={1} where skv_num={0}'.format(str(skv_n), str(working)))
         cnx.commit()
     except Exception as e:
         print(e)
