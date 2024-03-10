@@ -102,11 +102,11 @@ def sql_data(arD):
     try:
         cursor.execute('select dt0 from skv_dan where skv_num={0}'.format(str(skv_n)))
         tmp = cursor.fetchone()
-        print(type(datetime.now()))
-        print(type(tmp[0]))
         print(datetime.now())
+        print(datetime.now() - timedelta(minutes=15))
         print(tmp[0])
-        print(datetime(tmp[0]))
+        print(datetime.now() - timedelta(minutes=15) > tmp[0])
+
         if tmp:
             if (datetime.now() - timedelta(minutes=15)) > tmp[0]:
                 working = 0
