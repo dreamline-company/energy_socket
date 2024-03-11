@@ -152,7 +152,7 @@ def sql_data(arD):
 
 # Проверка валидности принятого пакета
 def is_data_valid(bdata):
-    if bdata[0] == CHAR_1 and bdata[-1] == CHAR_END  and (bdata[1] in [49,50]):
+    if bdata[0] == CHAR_1 and bdata[-1] == CHAR_END  and (bdata[1] in [48,49,50]):
         return True
     else: return False
 
