@@ -162,11 +162,9 @@ def multi_threaded_client(connection, address):
                 sDan = receiv_data.decode()
                 receiv_data = b""
                 arDan = sDan.split()
-                
-                print('----------', arDan)
-                if int(arDan[1]) == 0:
+
+                if int(arDan[0]) == 0:
                     break
-                print('????????', int(arDan[1]) == 0)
 
                 if sql_data(arDan) == True:
                     ar_cmd = get_cmd(int(arDan[1]))
