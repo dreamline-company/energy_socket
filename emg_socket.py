@@ -97,21 +97,6 @@ def sql_data(arD):
     skv_dan = ''
     pak_type = int(arD[0])
     skv_n = int(arD[1])
-    working = 1
-
-    try:
-        cursor.execute('select dt0 from skv_dan where skv_num={0} order by dt0 desc'.format(str(skv_n)))
-        tmp = cursor.fetchone()
-
-        if tmp:
-            if (datetime.now() - timedelta(minutes=15)) > tmp[0]:
-                working = 0
-    except Exception as e:
-        print(e)
-        pass
-
-    cursor.reset()
-
 
     if pak_type == 1:
         sTable = 'skv_onoff'
@@ -131,8 +116,7 @@ def sql_data(arD):
     else: pass
 
     try:
-        print('---------', skv_n, working)
-        cursor.execute('update chrp_well set working={1}, update_date=now() where skv_num={0}'.format(str(skv_n), str(working)))
+        cursor.execute('update chrp_well set update_date=now() where skv_num={0}'.format(str(skv_n)))
         cnx.commit()
     except Exception as e:
         print(e)
@@ -178,8 +162,12 @@ def multi_threaded_client(connection, address):
                 sDan = receiv_data.decode()
                 receiv_data = b""
                 arDan = sDan.split()
+                
+                print('----------', arDan)
                 if int(arDan[1]) == 0:
                     break
+                print('????????', int(arDan[1]) == 0)
+
                 if sql_data(arDan) == True:
                     ar_cmd = get_cmd(int(arDan[1]))
                     print('ar_cmd',ar_cmd,type(ar_cmd))
