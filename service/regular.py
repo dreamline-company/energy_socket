@@ -106,7 +106,12 @@ def create_regular(new_data):
 
     obj_num = new_data['obj_num']
     cell = new_data['cell_number']
-    cursor.execute('update `emg-eme`.n_cell_matrix set micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, freq, currentA, currentB, currentC, currentD))
+
+    if currentA == -1 or currentB == -1 or currentC == -1 or currentD == -1 or freq == -1:
+        cursor.execute('update `emg-eme`.n_cell_matrix set working=2, micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, freq, currentA, currentB, currentC, currentD))    
+    else:
+        cursor.execute('update `emg-eme`.n_cell_matrix set working=1, micom_frequency_val={2}, micom_a_val={3}, micom_b_val={4}, micom_c_val={5}, micom_reserv_val={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, freq, currentA, currentB, currentC, currentD))
+    
     cnx.commit()
 
 
