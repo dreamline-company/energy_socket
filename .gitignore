@@ -1,2 +1,8 @@
 vnev/
 new/
+
+greetings.log
+
+.idea/
+__pycache__/
+database/__pycache__/

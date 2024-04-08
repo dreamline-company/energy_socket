@@ -24,7 +24,7 @@ Date: 02.06.2023
 from _thread import start_new_thread
 from datetime import datetime
 import pytz
-
+import os
 import socket
 import logging
 import logging.config
@@ -53,6 +53,8 @@ GENERAL_TABLE_ID = 0
 REGULAR_TABLE_ID = 1
 EMERGENCY_TABLE_ID = 2
 
+GREETINGS_LOG_FILE = "greetings.log"
+
 def insert_table_data(data, table_id):
     """
     Функция insert_regular_table_data() вставляет полученные данные в таблицу базы данных,
@@ -69,6 +71,27 @@ def insert_table_data(data, table_id):
         emergency.create_emergency(data)
 
     return -1
+
+
+def check_for_greeting_message(bytes_message: bytes):
+    message = bytes_message.decode()
+    greeting_message = message[message.rindex("{") + 1: message.rindex("}")]
+    greetings = greeting_message.split(':')
+    if len(greetings) == 2:
+        if greetings[0].strip() == "Hello from":
+            log_text = "[{} - {}]".format(
+                datetime.now(pytz.timezone('Asia/Atyrau')),
+                greeting_message,
+            )
+            if os.path.exists(GREETINGS_LOG_FILE):
+                with open(GREETINGS_LOG_FILE, "r+") as file:
+                    content = file.read()
+                    file.seek(0)
+                    file.write(log_text + "\n" + content)
+            else:
+                with open(GREETINGS_LOG_FILE, "w+") as file:
+                    file.write(log_text + "\n")
+
 
 
 def multi_threaded_client(connection, address):
@@ -88,7 +111,7 @@ def multi_threaded_client(connection, address):
             if socket_data_parser.is_packet_valid(received_data):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
-
+                check_for_greeting_message(received_data)
                 packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
                     received_data
                 )
@@ -157,7 +180,7 @@ def multi_threaded_client(connection, address):
 # По имени хоста получаем хоста
 HOST = "0.0.0.0"
 # Порт который будет слушиться
-PORT = 8070
+PORT = 8075
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
 # подключаемся к базе данных
