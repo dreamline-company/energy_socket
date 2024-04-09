@@ -29,6 +29,16 @@ def read_emergency():
     return emergency_data
 
 
+def check_for_last_emergency_data(cnx, cursor, event):  # Needs to test
+    SELECT_EVENT_COUNT = "SELECT COUNT(*) FROM `emg-eme`.n_lenta WHERE opened >= NOW() - INTERVAL 30 MINUTE AND event = {};".format(event)
+    cursor.execute(SELECT_EVENT_COUNT)
+    res = cursor.fetchone()
+    count = res[0]
+    if count > 0:
+        return True
+    return False
+
+
 def create_emergency(new_data):
     """
     create_emergency
@@ -80,55 +90,65 @@ def create_emergency(new_data):
                 if kvt_type == 10:
                     if alarms[0] == 1:
                         event = 'Состояние выключателя'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[1] == 1:
                         event = 'Дифференциальная защита'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[2] == 1:
                         event = 'МТЗ'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[3] == 1:
                         event = 'Газовая защита трансформатора'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[4] == 1:
                         event = 'Тест'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                 else:
                     if alarms[0] == 1:
                         event = 'Состояние выключателя'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[1] == 1:
                         event = 'АПВ'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[2] == 1:
                         event = 'АВР'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[3] == 1:
                         event = 'Земля в сети'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
                     if alarms[4] == 1:
                         event = 'Тест'
-                        cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) ' 
-                            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
-                        cnx.commit()
+                        if not check_for_last_emergency_data(cnx, cursor, event):
+                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cnx.commit()
 
         else:                    
             cursor.execute('update `emg-eme`.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
