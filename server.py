@@ -180,7 +180,7 @@ def multi_threaded_client(connection, address):
 # По имени хоста получаем хоста
 HOST = "0.0.0.0"
 # Порт который будет слушиться
-PORT = 8075
+PORT = 8070
 # По хосту получаем IP адрес
 IP = socket.gethostbyname(HOST)
 # подключаемся к базе данных
