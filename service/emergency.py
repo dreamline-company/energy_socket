@@ -37,7 +37,7 @@ def check_for_last_emergency_data(
         oil_field,
         obj_num,
 ):
-    SELECT_EVENT_COUNT = "SELECT COUNT(*) FROM `emg-eme`.n_lenta WHERE opened >= NOW() - INTERVAL 30 MINUTE AND event = {} AND well = {} AND oil_field = {} AND otvod = {};".format(
+    SELECT_EVENT_COUNT = 'SELECT COUNT(*) FROM `emg-eme`.n_lenta WHERE opened >= NOW() - INTERVAL 30 MINUTE AND event = "{}" AND well = {} AND oil_field = "{}" AND otvod = {}'.format(
         event,
         cell,
         oil_field,
