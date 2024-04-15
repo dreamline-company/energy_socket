@@ -222,7 +222,7 @@ def create_emergency(new_data):
                             cnx.commit()
 
         else:                    
-            cursor.execute('update `emg-eme`.n_cell_matrix set working=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+            cursor.execute('update `emg-eme`.n_cell_matrix set working=1, on_off=1, alarm_1=0, alarm_2=0, alarm_3=0, alarm_4=0, alarm_5=0 where object_num={0} and cell={1}'.format(str(obj_num), cell))
             cnx.commit()
     
     if working:
