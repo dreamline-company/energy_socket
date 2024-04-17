@@ -217,7 +217,7 @@ CONTENTOFTHEFILE = {}
 line_index = {}
 
 # Подключаемся к базе данных
-DB_SERVER = "192.168.17.158"     #"194.87.238.61"	#"127.0.0.1"
+DB_SERVER = "10.32.10.98"
 DB_USERNAME = "eme_user"             #"root"  
 DB_PASSWORD = "Eme2023*"      #""
 DB_NAME = "emg_skv"
