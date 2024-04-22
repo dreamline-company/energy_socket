@@ -9,6 +9,7 @@ import mysql.connector
 from mysql.connector import Error
 from random import randint
 from time import sleep
+import json
 
 THREAD_COUNT = 0
 CHAR_1 = 60
@@ -114,7 +115,7 @@ def sql_data(arD):
 
             chrp_sql += "update chrp_well set "
 
-            chrp_data = arD[5]
+            chrp_data = json.loads(arD[5].replace('None', 'null'))
             if chrp_data:
                 if chrp_data["IR"]:
                     chrp_sql += "motor_current_ir=" + str(chrp_data["IR"])
@@ -150,7 +151,7 @@ def sql_data(arD):
         print(e)
         pass
 
-    if len(chrp_sql) > 0:
+    if len(chrp_sql) > 0 and 'set  where' not in chrp_sql:
         try:
             cursor.execute(chrp_sql)
             cnx.commit()
@@ -254,8 +255,10 @@ line_index = {}
 
 # Подключаемся к базе данных
 DB_SERVER = "10.32.10.98"
-DB_USERNAME = "eme_user"             #"root"  
-DB_PASSWORD = "Eme2023*"      #""
+# DB_USERNAME = "eme_user"
+# DB_PASSWORD = "Eme2023*"
+DB_USERNAME = "root"
+DB_PASSWORD = "1234"
 DB_NAME = "emg_skv"
 DB_PORT = 3306
 cnx = create_server_connection(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME)
