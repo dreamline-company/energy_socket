@@ -92,10 +92,11 @@ def check_for_greeting_message(bytes_message: bytes):
             else:
                 with open(GREETINGS_LOG_FILE, "w+") as file:
                     file.write(log_text + "\n")
-    return bytes(
-        message[:message.rindex("{")] + message[message.rindex("}") + 1:],
-        "utf-8",
-    )
+            return bytes(
+                message[:message.rindex("{")] + message[message.rindex("}") + 1:],
+                "utf-8",
+            )
+    return bytes_message
 
 
 def make_dict_from_string(string_data):
@@ -119,18 +120,29 @@ def make_dict_from_string(string_data):
     return data
 
 
-def get_ce303_params(packet: bytes):
-    message = packet.decode()
-    json_data = message[message.rindex('{"power'): message.rindex("}") + 1]
-    received_data = bytes(
-        message[:message.rindex('{"power')] + message[message.rindex("}")],
-        "utf-8",
-    )
+def get_counters_params(packet: bytes):
+    """
+    :return: packet and list of param dictionaries
+    """
     try:
-        return received_data, json.loads(json_data)
-    except json.decoder.JSONDecodeError:
-        print("No data for ce303 params")
-        return received_data, None
+        message = packet.decode()
+        json_data = message[message.rindex('[') + 1: message.rindex("]")]
+        received_data = bytes(
+            message[:message.rindex('[')] + message[message.rindex("]") + 1:],
+            "utf-8",
+        )
+        try:
+            params_string = json_data.strip('\'').split('\', \'')
+            params = []
+            for param in params_string:
+                param_dict = json.loads(param)
+                params.append(param_dict)
+            return received_data, json.loads(json_data)
+        except json.decoder.JSONDecodeError:
+            print("No data for ce303 params")
+            return received_data, None
+    except ValueError:
+        return packet, None
 
 
 def multi_threaded_client(connection, address):
@@ -151,7 +163,7 @@ def multi_threaded_client(connection, address):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
                 received_data = check_for_greeting_message(received_data)
-                received_data, ce303_params = get_ce303_params(received_data)
+                received_data, counters_params = get_counters_params(received_data)
                 packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
                     received_data
                 )
