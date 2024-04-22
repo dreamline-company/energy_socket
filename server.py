@@ -20,7 +20,7 @@ close connections properly, and implement a way to stop the server gracefully.
 Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
-
+import json
 from _thread import start_new_thread
 from datetime import datetime
 import pytz
@@ -54,6 +54,7 @@ REGULAR_TABLE_ID = 1
 EMERGENCY_TABLE_ID = 2
 
 GREETINGS_LOG_FILE = "greetings.log"
+
 
 def insert_table_data(data, table_id):
     """
@@ -91,7 +92,45 @@ def check_for_greeting_message(bytes_message: bytes):
             else:
                 with open(GREETINGS_LOG_FILE, "w+") as file:
                     file.write(log_text + "\n")
+    return bytes(
+        message[:message.rindex("{")] + message[message.rindex("}") + 1:],
+        "utf-8",
+    )
 
+
+def make_dict_from_string(string_data):
+    string_data = string_data.strip("{}")
+    params = string_data.split(",")
+    data = {}
+    for param in params:
+        key, value = param.split(":")
+        key = key.strip()
+        value = value.strip()
+        if value.isdigit():
+            if value == "-1":
+                value = -1
+            else:
+                value = float(value)
+        else:
+            if "{" in value and "}" in value:
+                value = make_dict_from_string(value)
+
+        data[key] = value
+    return data
+
+
+def get_ce303_params(packet: bytes):
+    message = packet.decode()
+    json_data = message[message.rindex('{"power'): message.rindex("}") + 1]
+    received_data = bytes(
+        message[:message.rindex('{"power')] + message[message.rindex("}")],
+        "utf-8",
+    )
+    try:
+        return received_data, json.loads(json_data)
+    except json.decoder.JSONDecodeError:
+        print("No data for ce303 params")
+        return received_data, None
 
 
 def multi_threaded_client(connection, address):
@@ -111,7 +150,8 @@ def multi_threaded_client(connection, address):
             if socket_data_parser.is_packet_valid(received_data):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
-                check_for_greeting_message(received_data)
+                received_data = check_for_greeting_message(received_data)
+                received_data, ce303_params = get_ce303_params(received_data)
                 packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
                     received_data
                 )
