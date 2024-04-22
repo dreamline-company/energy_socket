@@ -151,7 +151,7 @@ def sql_data(arD):
         print(e)
         pass
 
-    if len(chrp_sql) > 0:
+    if len(chrp_sql) > 0 and 'set  where' not in chrp_sql:
         try:
             cursor.execute(chrp_sql)
             cnx.commit()
