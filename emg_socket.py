@@ -97,6 +97,7 @@ def sql_data(arD):
     skv_dan = ''
     pak_type = int(arD[0])
     skv_n = int(arD[1])
+    chrp_sql = ''
 
     if pak_type == 1:
         sTable = 'skv_onoff'
@@ -110,6 +111,33 @@ def sql_data(arD):
             dt = datetime.fromtimestamp(int(arD[2]))
             avr = int(arD[3])
             insert_sql = (f"INSERT INTO skv_dan (skv_num, dt, avr, dan0, dan1) VALUES ('{skv_n}', '{dt}', '{avr}', '{arD[4]}', '{arD[5]}')")
+
+            chrp_sql += "update chrp_well set "
+
+            chrp_data = arD[5]
+            if chrp_data:
+                if chrp_data["IR"]:
+                    chrp_sql += "motor_current_ir=" + str(chrp_data["IR"])
+                    motor_current_ir = chrp_data["IR"]
+                if chrp_data["KW"]:
+                    chrp_sql += ",kwt_day_kw=" + str(chrp_data["KW"])
+                    kwt_day_kw = chrp_data["KW"]
+                if chrp_data["SW"]:
+                    chrp_sql += ",state_word_sw=" + str(chrp_data["SW"])
+                    state_word_sw = chrp_data["SW"]
+                if chrp_data["P"]:
+                    chrp_sql += ",pump_fullness_p=" + str(chrp_data["P"])
+                    pump_fullness_p = chrp_data["P"]
+                if chrp_data["SH"]:
+                    chrp_sql += ",pump_speed_sh=" + str(chrp_data["SH"])
+                    pump_speed_sh = chrp_data["SH"]
+                if chrp_data["KM"]:
+                    chrp_sql += ",motor_torque_km=" + str(chrp_data["KM"])
+                    motor_torque_km = chrp_data["KM"]
+
+            chrp_sql += ' where skv_num={0}'.format(str(skv_n))
+
+
         else:
             pass
             # insert_sql = (f"INSERT INTO data_raw (skv_num, skv_bytes) VALUES ('{skv_n}', '{arD}')")
@@ -121,6 +149,14 @@ def sql_data(arD):
     except Exception as e:
         print(e)
         pass
+
+    if len(chrp_sql) > 0:
+        try:
+            cursor.execute(chrp_sql)
+            cnx.commit()
+        except Exception as e:
+            print(e)
+            pass
 
     try:
         cursor.execute(insert_sql)
@@ -217,7 +253,7 @@ CONTENTOFTHEFILE = {}
 line_index = {}
 
 # Подключаемся к базе данных
-DB_SERVER = "192.168.17.158"     #"194.87.238.61"	#"127.0.0.1"
+DB_SERVER = "10.32.10.98"
 DB_USERNAME = "eme_user"             #"root"  
 DB_PASSWORD = "Eme2023*"      #""
 DB_NAME = "emg_skv"
