@@ -26,6 +26,7 @@ from datetime import datetime
 import pytz
 import os
 import socket
+import ast
 import logging
 import logging.config
 import service.general as general
@@ -126,19 +127,27 @@ def get_counters_params(packet: bytes):
     """
     try:
         message = packet.decode()
-        json_data = message[message.rindex('[') + 1: message.rindex("]")]
+        string_list = message[message.index('['): message.rindex("]") + 1]
         received_data = bytes(
-            message[:message.rindex('[')] + message[message.rindex("]") + 1:],
+            message[:message.index('[')] + message[message.rindex("]") + 1:],
             "utf-8",
         )
         try:
-            params_string = json_data.strip('\'').split('\', \'')
-            params = []
-            for param in params_string:
-                param_dict = json.loads(param)
-                params.append(param_dict)
-            return received_data, json.loads(json_data)
-        except json.decoder.JSONDecodeError:
+            params_list = ast.literal_eval(string_list)
+            params = dict(
+                counter_id=params_list[0],
+                cell=params_list[1],
+                current_a_volt=params_list[2],
+                current_b_volt=params_list[3],
+                current_c_volt=params_list[4],
+                current_a_amper=params_list[5],
+                current_b_amper=params_list[6],
+                current_c_amper=params_list[7],
+                frequency=params_list[8],
+                power=params_list[9],
+            )
+            return received_data, params
+        except Exception:
             print("No data for ce303 params")
             return received_data, None
     except ValueError:
