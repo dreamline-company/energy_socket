@@ -77,27 +77,30 @@ def insert_table_data(data, table_id):
 
 def check_for_greeting_message(bytes_message: bytes):
     message = bytes_message.decode()
-    greeting_message = message[message.rindex("{") + 1: message.rindex("}")]
-    greetings = greeting_message.split(':')
-    if len(greetings) == 2:
-        if greetings[0].strip() == "Hello from":
-            log_text = "[{} - {}]".format(
-                datetime.now(pytz.timezone('Asia/Atyrau')),
-                greeting_message,
-            )
-            if os.path.exists(GREETINGS_LOG_FILE):
-                with open(GREETINGS_LOG_FILE, "r+") as file:
-                    content = file.read()
-                    file.seek(0)
-                    file.write(log_text + "\n" + content)
-            else:
-                with open(GREETINGS_LOG_FILE, "w+") as file:
-                    file.write(log_text + "\n")
-            return bytes(
-                message[:message.rindex("{")] + message[message.rindex("}") + 1:],
-                "utf-8",
-            )
-    return bytes_message
+    try:
+        greeting_message = message[message.rindex("{") + 1: message.rindex("}")]
+        greetings = greeting_message.split(':')
+        if len(greetings) == 2:
+            if greetings[0].strip() == "Hello from":
+                log_text = "[{} - {}]".format(
+                    datetime.now(pytz.timezone('Asia/Atyrau')),
+                    greeting_message,
+                )
+                if os.path.exists(GREETINGS_LOG_FILE):
+                    with open(GREETINGS_LOG_FILE, "r+") as file:
+                        content = file.read()
+                        file.seek(0)
+                        file.write(log_text + "\n" + content)
+                else:
+                    with open(GREETINGS_LOG_FILE, "w+") as file:
+                        file.write(log_text + "\n")
+                return bytes(
+                    message[:message.rindex("{")] + message[message.rindex("}") + 1:],
+                    "utf-8",
+                )
+        return bytes_message
+    except ValueError:
+        return bytes_message
 
 
 def make_dict_from_string(string_data):
@@ -151,7 +154,7 @@ def multi_threaded_client(connection, address):
             is_valid, is_packet, is_counter_packet = socket_data_parser.is_packet_valid(
                 received_data
             )
-            if is_packet and (is_packet or is_counter_packet):
+            if is_valid and (is_packet or is_counter_packet):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
 

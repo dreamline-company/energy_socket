@@ -29,11 +29,11 @@ def is_packet_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    is_valid_type_packet = received_data[4] - ord("0") in [
-        REGULAR_PACKET_TYPE,
-        EMERGENCY_PACKET_TYPE,
-        CMD_PACKET_TYPE,
-    ]
+    is_valid_type_packet = len(received_data) >= 5 and received_data[4] - ord("0") in [
+            REGULAR_PACKET_TYPE,
+            EMERGENCY_PACKET_TYPE,
+            CMD_PACKET_TYPE,
+        ]
 
     # In case if packet from counters
     is_valid_counter_packet = received_data[1] == ord("[") and received_data[-2] == ord("]")
