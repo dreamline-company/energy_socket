@@ -128,30 +128,10 @@ def get_counters_params(packet: bytes):
     try:
         message = packet.decode()
         string_list = message[message.index('['): message.rindex("]") + 1]
-        received_data = bytes(
-            message[:message.index('[')] + message[message.rindex("]") + 1:],
-            "utf-8",
-        )
-        try:
-            params_list = ast.literal_eval(string_list)
-            params = dict(
-                counter_id=params_list[0],
-                cell=params_list[1],
-                current_a_volt=params_list[2],
-                current_b_volt=params_list[3],
-                current_c_volt=params_list[4],
-                current_a_amper=params_list[5],
-                current_b_amper=params_list[6],
-                current_c_amper=params_list[7],
-                frequency=params_list[8],
-                power=params_list[9],
-            )
-            return received_data, params
-        except Exception:
-            print("No data for ce303 params")
-            return received_data, None
-    except ValueError:
-        return packet, None
+        return ast.literal_eval(string_list)
+    except Exception:
+        print("No data for ce303 params")
+        return None
 
 
 def multi_threaded_client(connection, address):
@@ -168,51 +148,59 @@ def multi_threaded_client(connection, address):
             if not received_data:
                 break
             # проверям валдиность данных
-            if socket_data_parser.is_packet_valid(received_data):
+            is_valid, is_packet, is_counter_packet = socket_data_parser.is_packet_valid(
+                received_data
+            )
+            if is_packet and (is_packet or is_counter_packet):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
-                received_data = check_for_greeting_message(received_data)
-                received_data, counters_params = get_counters_params(received_data)
-                packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
-                    received_data
-                )
-
-                print(data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data}))
-
-                logger.info(
-                    "Packet from object with id:%s, type of packet is %s, data is %s",
-                    str(object_id),
-                    str(packet_type),
-                    data,
-                )
-
-                # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
-                if packet_type == REGULAR_PACKET_TYPE:
-                    for entry in data[:LAST_INDEX]:
-                        insert_table_data(entry, REGULAR_TABLE_ID)
-                    insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
-                # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
-                elif packet_type == EMERGENCY_PACKET_TYPE:
-                    insert_table_data(data, EMERGENCY_TABLE_ID)
-
-                received_data = b""
 
                 # # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                cmd = tx_config.read_unsended_tx_config(object_id)
 
-                if abs((dt - datetime.now()).days) > 1:
-                    now = str(datetime.now(pytz.timezone('Asia/Almaty')))
-                    year = now[2:4]
-                    month = now[5:7]
-                    day = now[8:10]
-                    hour = now[11:13]
-                    minu = now[14:16]
-                    sec = now[17:19]
-                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
-                elif cmd:
-                    msg = f'<{cmd[0][2]}>'
-                    tx_config.update_dt_2_tx_config(cmd[0][0])
+                if is_counter_packet:
+                    counters_params = get_counters_params(received_data)
+                    print(counters_params)
+                elif is_packet:
+                    received_data = check_for_greeting_message(received_data)
+                    packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
+                        received_data
+                    )
+
+                    print(data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data}))
+
+                    logger.info(
+                        "Packet from object with id:%s, type of packet is %s, data is %s",
+                        str(object_id),
+                        str(packet_type),
+                        data,
+                    )
+
+                    # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
+                    if packet_type == REGULAR_PACKET_TYPE:
+                        for entry in data[:LAST_INDEX]:
+                            insert_table_data(entry, REGULAR_TABLE_ID)
+                        insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
+                    # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
+                    elif packet_type == EMERGENCY_PACKET_TYPE:
+                        insert_table_data(data, EMERGENCY_TABLE_ID)
+
+                    received_data = b""
+
+                    cmd = tx_config.read_unsended_tx_config(object_id)
+
+                    if abs((dt - datetime.now()).days) > 1:
+                        now = str(datetime.now(pytz.timezone('Asia/Almaty')))
+                        year = now[2:4]
+                        month = now[5:7]
+                        day = now[8:10]
+                        hour = now[11:13]
+                        minu = now[14:16]
+                        sec = now[17:19]
+                        msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
+                    elif cmd:
+                        msg = f'<{cmd[0][2]}>'
+                        tx_config.update_dt_2_tx_config(cmd[0][0])
 
                 # Отпраляем ответ контроллеру
                 logger.info("Sending : %s", msg)
