@@ -130,6 +130,48 @@ def create_regular(new_data):
     return cursor.lastrowid
 
 
+def insert_ce303_counter_data(counters_params):
+    """
+    Insert counters data into database
+    :param counters_params: list of counters parameters. Example [
+        counter_id, object_id, cell, a_voltage, b_voltage, c_voltage,
+        a_amperage, b_amperage, c_amperage, frequency, power
+    ]
+    """
+    cnx = db.create_server_connection()
+    cursor = cnx.cursor()
+    for counter_param in counters_params:
+        if len(counter_param) >= 11:
+            object_id = counter_param[1]
+            cell = counter_param[2]
+            a_voltage = counter_param[3]
+            b_voltage = counter_param[4]
+            c_voltage = counter_param[5]
+            a_current = counter_param[6]
+            b_current = counter_param[7]
+            c_current = counter_param[8]
+            frequency = counter_param[9]
+            power = counter_param[10]
+            cursor.execute(
+                'update n_cell_matrix set working=1, counter_frequency={3}, power={4}, voltage_a={5}, voltage_b={6}, voltage_c={7}, current_a={8}, current_b={9}, current_c={10}} where object_num={1} and cell={2}'.format(
+                    str(object_id),
+                    cell,
+                    frequency,
+                    power,
+                    a_voltage,
+                    b_voltage,
+                    c_voltage,
+                    a_current,
+                    b_current,
+                    c_current,
+                )
+            )
+
+    cnx.commit()
+
+    cursor.close()
+
+
 def update_regular(new_data, row_id):
     """
     update_regular

@@ -75,6 +75,11 @@ def insert_table_data(data, table_id):
     return -1
 
 
+def insert_counters_parameters(params):
+    # if there are several counters, then need to add a division by counters
+    regular.insert_ce303_counter_data(params)
+
+
 def check_for_greeting_message(bytes_message: bytes):
     message = bytes_message.decode()
     try:
