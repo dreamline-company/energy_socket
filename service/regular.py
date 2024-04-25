@@ -142,7 +142,10 @@ def insert_ce303_counter_data(counters_params):
     cursor = cnx.cursor()
     for counter_param in counters_params:
         if len(counter_param) >= 11:
-            object_id = counter_param[1]
+            object_id = (
+                counter_param[1][1:] if len(counters_params[1]) > 1
+                else counter_param[1]
+            )
             cell = counter_param[2]
             a_voltage = counter_param[3]
             b_voltage = counter_param[4]
