@@ -143,8 +143,8 @@ def insert_ce303_counter_data(counters_params):
     for counter_param in counters_params:
         if len(counter_param) >= 11:
             object_id = (
-                counter_param[1][1:] if len(counters_params[1]) > 1
-                else counter_param[1]
+                str(counter_param[1])[1:] if len(str(counters_params[1])) > 1
+                else str(counter_param[1])
             )
             cell = counter_param[2]
             a_voltage = counter_param[3]
@@ -158,7 +158,7 @@ def insert_ce303_counter_data(counters_params):
             cursor.execute(
                 'update `emg-eme`.n_cell_matrix set working=1, counter_frequency={2}, counter_power={3}, voltage_a={4}, voltage_b={5}, voltage_c={6}, current_a={7}, current_b={8}, current_c={9} where object_num={0} and cell={1}'.format(
                     object_id,
-                    str(cell),
+                    cell,
                     frequency,
                     power,
                     a_voltage,
