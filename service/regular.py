@@ -153,7 +153,7 @@ def insert_ce303_counter_data(counters_params):
             frequency = counter_param[9]
             power = counter_param[10]
             cursor.execute(
-                'update n_cell_matrix set working=1, counter_frequency={3}, power={4}, voltage_a={5}, voltage_b={6}, voltage_c={7}, current_a={8}, current_b={9}, current_c={10}} where object_num={1} and cell={2}'.format(
+                'update n_cell_matrix set working=1, counter_frequency={2}, power={3}, voltage_a={4}, voltage_b={5}, voltage_c={6}, current_a={7}, current_b={8}, current_c={9} where object_num={0} and cell={1}'.format(
                     str(object_id),
                     cell,
                     frequency,
