@@ -169,7 +169,8 @@ def multi_threaded_client(connection, address):
                 if is_counter_packet:
                     counters_params = get_counters_params(received_data)
                     print(counters_params)
-                    insert_counters_parameters(counters_params)
+                    if counters_params:
+                        insert_counters_parameters(counters_params)
                 elif is_packet:
                     received_data = check_for_greeting_message(received_data)
                     packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
