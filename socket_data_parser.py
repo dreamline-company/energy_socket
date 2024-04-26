@@ -29,16 +29,19 @@ def is_packet_valid(received_data):
         and received_data[LAST_INDEX] == END_CHARACTER
     )
     # проверяем правильность типа пакета
-    is_valid_type_packet = received_data[4] - ord("0") in [
-        REGULAR_PACKET_TYPE,
-        EMERGENCY_PACKET_TYPE,
-        CMD_PACKET_TYPE,
-    ]
+    is_valid_type_packet = len(received_data) >= 5 and received_data[4] - ord("0") in [
+            REGULAR_PACKET_TYPE,
+            EMERGENCY_PACKET_TYPE,
+            CMD_PACKET_TYPE,
+        ]
+
+    # In case if packet from counters
+    is_valid_counter_packet = received_data[1] == ord("[") and received_data[-2] == ord("]")
 
     is_valid_length = True
 
     # на основе всех критериев возвращем ответ
-    return is_start_and_end_symbol and is_valid_type_packet and is_valid_length
+    return is_start_and_end_symbol, is_valid_type_packet, is_valid_counter_packet
 
 
 def parse_regular_registers(base_data, main_data):

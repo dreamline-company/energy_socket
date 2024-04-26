@@ -130,6 +130,51 @@ def create_regular(new_data):
     return cursor.lastrowid
 
 
+def insert_ce303_counter_data(counters_params):
+    """
+    Insert counters data into database
+    :param counters_params: list of counters parameters. Example [
+        counter_id, object_id, cell, a_voltage, b_voltage, c_voltage,
+        a_amperage, b_amperage, c_amperage, frequency, power
+    ]
+    """
+    cnx = db.create_server_connection()
+    cursor = cnx.cursor()
+    for counter_param in counters_params:
+        if len(counter_param) >= 11:
+            object_id = (
+                str(counter_param[1])[1:] if len(str(counters_params[1])) > 1
+                else str(counter_param[1])
+            )
+            cell = counter_param[2]
+            a_voltage = counter_param[3]
+            b_voltage = counter_param[4]
+            c_voltage = counter_param[5]
+            a_current = counter_param[6]
+            b_current = counter_param[7]
+            c_current = counter_param[8]
+            frequency = counter_param[9]
+            power = counter_param[10]
+            cursor.execute(
+                'update `emg-eme`.n_cell_matrix set working=1, counter_frequency={2}, counter_power={3}, voltage_a={4}, voltage_b={5}, voltage_c={6}, current_a={7}, current_b={8}, current_c={9} where object_num={0} and cell={1}'.format(
+                    object_id,
+                    cell,
+                    frequency,
+                    power,
+                    a_voltage,
+                    b_voltage,
+                    c_voltage,
+                    a_current,
+                    b_current,
+                    c_current,
+                )
+            )
+
+    cnx.commit()
+
+    cursor.close()
+
+
 def update_regular(new_data, row_id):
     """
     update_regular

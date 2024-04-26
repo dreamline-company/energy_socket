@@ -20,12 +20,13 @@ close connections properly, and implement a way to stop the server gracefully.
 Author: Amirkhan Orazbay
 Date: 02.06.2023
 """
-
+import json
 from _thread import start_new_thread
 from datetime import datetime
 import pytz
 import os
 import socket
+import ast
 import logging
 import logging.config
 import service.general as general
@@ -55,6 +56,7 @@ EMERGENCY_TABLE_ID = 2
 
 GREETINGS_LOG_FILE = "greetings.log"
 
+
 def insert_table_data(data, table_id):
     """
     Функция insert_regular_table_data() вставляет полученные данные в таблицу базы данных,
@@ -73,25 +75,71 @@ def insert_table_data(data, table_id):
     return -1
 
 
+def insert_counters_parameters(params):
+    # if there are several counters, then need to add a division by counters
+    regular.insert_ce303_counter_data(params)
+
+
 def check_for_greeting_message(bytes_message: bytes):
     message = bytes_message.decode()
-    greeting_message = message[message.rindex("{") + 1: message.rindex("}")]
-    greetings = greeting_message.split(':')
-    if len(greetings) == 2:
-        if greetings[0].strip() == "Hello from":
-            log_text = "[{} - {}]".format(
-                datetime.now(pytz.timezone('Asia/Atyrau')),
-                greeting_message,
-            )
-            if os.path.exists(GREETINGS_LOG_FILE):
-                with open(GREETINGS_LOG_FILE, "r+") as file:
-                    content = file.read()
-                    file.seek(0)
-                    file.write(log_text + "\n" + content)
-            else:
-                with open(GREETINGS_LOG_FILE, "w+") as file:
-                    file.write(log_text + "\n")
+    try:
+        greeting_message = message[message.rindex("{") + 1: message.rindex("}")]
+        greetings = greeting_message.split(':')
+        if len(greetings) == 2:
+            if greetings[0].strip() == "Hello from":
+                log_text = "[{} - {}]".format(
+                    datetime.now(pytz.timezone('Asia/Atyrau')),
+                    greeting_message,
+                )
+                if os.path.exists(GREETINGS_LOG_FILE):
+                    with open(GREETINGS_LOG_FILE, "r+") as file:
+                        content = file.read()
+                        file.seek(0)
+                        file.write(log_text + "\n" + content)
+                else:
+                    with open(GREETINGS_LOG_FILE, "w+") as file:
+                        file.write(log_text + "\n")
+                return bytes(
+                    message[:message.rindex("{")] + message[message.rindex("}") + 1:],
+                    "utf-8",
+                )
+        return bytes_message
+    except ValueError:
+        return bytes_message
 
+
+def make_dict_from_string(string_data):
+    string_data = string_data.strip("{}")
+    params = string_data.split(",")
+    data = {}
+    for param in params:
+        key, value = param.split(":")
+        key = key.strip()
+        value = value.strip()
+        if value.isdigit():
+            if value == "-1":
+                value = -1
+            else:
+                value = float(value)
+        else:
+            if "{" in value and "}" in value:
+                value = make_dict_from_string(value)
+
+        data[key] = value
+    return data
+
+
+def get_counters_params(packet: bytes):
+    """
+    :return: packet and list of param dictionaries
+    """
+    try:
+        message = packet.decode()
+        string_list = message[message.index('['): message.rindex("]") + 1]
+        return ast.literal_eval(string_list)
+    except Exception:
+        print("No data for ce303 params")
+        return None
 
 
 def multi_threaded_client(connection, address):
@@ -108,50 +156,61 @@ def multi_threaded_client(connection, address):
             if not received_data:
                 break
             # проверям валдиность данных
-            if socket_data_parser.is_packet_valid(received_data):
+            is_valid, is_packet, is_counter_packet = socket_data_parser.is_packet_valid(
+                received_data
+            )
+            if is_valid and (is_packet or is_counter_packet):
                 # logger.info("Raw view of data: %s", received_data)
                 # logger.info("Data with length of %s", len(received_data))
-                check_for_greeting_message(received_data)
-                packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
-                    received_data
-                )
-
-                print(data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data}))
-
-                logger.info(
-                    "Packet from object with id:%s, type of packet is %s, data is %s",
-                    str(object_id),
-                    str(packet_type),
-                    data,
-                )
-
-                # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
-                if packet_type == REGULAR_PACKET_TYPE:
-                    for entry in data[:LAST_INDEX]:
-                        insert_table_data(entry, REGULAR_TABLE_ID)
-                    insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
-                # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
-                elif packet_type == EMERGENCY_PACKET_TYPE:
-                    insert_table_data(data, EMERGENCY_TABLE_ID)
-
-                received_data = b""
 
                 # # Формируем ответ контроллеру
                 msg = f"<OK{THREAD_COUNT}>"
-                cmd = tx_config.read_unsended_tx_config(object_id)
 
-                if abs((dt - datetime.now()).days) > 1:
-                    now = str(datetime.now(pytz.timezone('Asia/Almaty')))
-                    year = now[2:4]
-                    month = now[5:7]
-                    day = now[8:10]
-                    hour = now[11:13]
-                    minu = now[14:16]
-                    sec = now[17:19]
-                    msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
-                elif cmd:
-                    msg = f'<{cmd[0][2]}>'
-                    tx_config.update_dt_2_tx_config(cmd[0][0])
+                if is_counter_packet:
+                    counters_params = get_counters_params(received_data)
+                    print(counters_params)
+                    if counters_params:
+                        insert_counters_parameters(counters_params)
+                elif is_packet:
+                    received_data = check_for_greeting_message(received_data)
+                    packet_type, object_id, dt, data = socket_data_parser.parse_socket_data(
+                        received_data
+                    )
+
+                    print(data_raw.create_data_raw({'obj_num': object_id, 'dt': dt, 'text': received_data}))
+
+                    logger.info(
+                        "Packet from object with id:%s, type of packet is %s, data is %s",
+                        str(object_id),
+                        str(packet_type),
+                        data,
+                    )
+
+                    # если тип пакета REGULAR_PACKET_TYPE данные вставляем в таблицы REGULAR_TABLE_ID и GENERAL_TABLE_ID
+                    if packet_type == REGULAR_PACKET_TYPE:
+                        for entry in data[:LAST_INDEX]:
+                            insert_table_data(entry, REGULAR_TABLE_ID)
+                        insert_table_data(data[LAST_INDEX], GENERAL_TABLE_ID)
+                    # если тип пакета EMERGENCY_PACKET_TYPE данные вставляем в таблицу EMERGENCY_TABLE_ID
+                    elif packet_type == EMERGENCY_PACKET_TYPE:
+                        insert_table_data(data, EMERGENCY_TABLE_ID)
+
+                    received_data = b""
+
+                    cmd = tx_config.read_unsended_tx_config(object_id)
+
+                    if abs((dt - datetime.now()).days) > 1:
+                        now = str(datetime.now(pytz.timezone('Asia/Almaty')))
+                        year = now[2:4]
+                        month = now[5:7]
+                        day = now[8:10]
+                        hour = now[11:13]
+                        minu = now[14:16]
+                        sec = now[17:19]
+                        msg = f"<SETTIME:+CCLK:  {year}/{month}/{day},{hour}:{minu}:{sec}>"
+                    elif cmd:
+                        msg = f'<{cmd[0][2]}>'
+                        tx_config.update_dt_2_tx_config(cmd[0][0])
 
                 # Отпраляем ответ контроллеру
                 logger.info("Sending : %s", msg)
