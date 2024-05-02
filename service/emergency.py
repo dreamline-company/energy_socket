@@ -4,7 +4,7 @@ emergency
 import logging
 import logging.config
 import database.db as db
-
+from service.objects_cell_data import objects_cells
 
 logging.config.fileConfig("logging.conf")
 
@@ -61,7 +61,6 @@ def create_emergency(new_data):
     values_tuple = tuple(new_data.values())
     insert_symbols = ",".join(tuple((["%s"] * len(new_data.keys()))))
 
-        
     obj_num = new_data['obj_num']
     dt = new_data['dt']
 
@@ -242,6 +241,55 @@ def create_emergency(new_data):
     logger.info("Insert data to database table 'emergency'")
 
     return cursor.lastrowid
+
+
+def create_flex_emergency(data):
+    cnx = db.create_server_connection()
+    cursor = cnx.cursor()
+    params_tuple = ",".join(tuple(data.keys()))
+    values_tuple = tuple(data.values())
+    object_num = data['obj_num']
+    insert_symbols = ",".join(tuple((["%s"] * len(data.keys()))))
+    if "c0" in params_tuple:
+        cell_values = values_tuple[3:]
+    else:
+        cell_values = values_tuple[2:]
+    bin_values = []
+    for cell in cell_values:
+        bin_values.append(bin(cell).replace("0b", ""))
+
+    bin_list = []
+    for b in bin_values:
+        old_cell = ["0", "0", "0", "0", "0"]
+        reversed_bin = b[::-1]
+        counter = len(old_cell) - 1
+        for i, n in enumerate(reversed_bin):
+            old_cell[i] = str(n)
+            counter -= 1
+        bin_list.append("".join(old_cell))
+    joined_list = "".join(bin_list)
+    new_cell_values = []
+    for cell, data in objects_cells[object_num].items():
+        reversed_cell_bin = joined_list[:data["len"]]
+        joined_list = joined_list[data["len"]:]
+        cell_bin = reversed_cell_bin[::-1]
+        new_cell_values.append(int(cell_bin, 2))
+    new_values_tuple = (
+        (
+            values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
+        ) + tuple(new_cell_values)
+    )
+    cursor.execute(
+        f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
+        new_values_tuple,
+    )
+    cnx.commit()
+    cursor.close()
+
+    logger.info("Insert data to database table 'emergency'")
+
+    return cursor.lastrowid
+
 
 
 def update_emergency(new_data, row_id):

@@ -37,6 +37,7 @@ import service.data_raw as data_raw
 
 import socket_data_parser
 import sys
+from service.objects_cell_data import objects_cells
 
 sys.path.append("database")
 sys.path.append("service")
@@ -70,7 +71,10 @@ def insert_table_data(data, table_id):
     elif table_id == REGULAR_TABLE_ID:
         regular.create_regular(data)
     elif table_id == EMERGENCY_TABLE_ID:
-        emergency.create_emergency(data)
+        if data['obj_num'] in objects_cells.keys():
+            emergency.create_flex_emergency(data)
+        else:
+            emergency.create_emergency(data)
 
     return -1
 
