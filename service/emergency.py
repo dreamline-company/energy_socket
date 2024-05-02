@@ -230,11 +230,12 @@ def create_emergency(new_data):
     else:
         cursor.execute('update `emg-eme`.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
         cnx.commit()
-        cursor.execute(
-            f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
-            values_tuple,
-        )
-        cnx.commit()
+    
+    cursor.execute(
+        f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
+        values_tuple,
+    )
+    cnx.commit()
 
     cursor.close()
 
