@@ -4,7 +4,7 @@ emergency
 import logging
 import logging.config
 import database.db as db
-from service.objects_cell_data import objects_cells
+from service.objects_cell_data import objects_cells, CellDIValueTypes
 
 logging.config.fileConfig("logging.conf")
 
@@ -257,6 +257,8 @@ def create_flex_emergency(data):
         cell_values = values_tuple[2:]
     bin_values = []
     for cell in cell_values:
+        if cell == 128 or cell == 256:
+            cell = 0
         bin_values.append(bin(cell).replace("0b", ""))
 
     bin_list = []
@@ -271,10 +273,49 @@ def create_flex_emergency(data):
     joined_list = "".join(bin_list)
     new_cell_values = []
     for cell, data in objects_cells[object_num].items():
-        reversed_cell_bin = joined_list[:data["len"]]
-        joined_list = joined_list[data["len"]:]
+        reversed_cell_bin = ""
+        cell_status = dict(
+            working=0,
+            on_off=0,
+            alarm_1=0,
+            alarm_2=0,
+            alarm_3=0,
+            alarm_4=0,
+            alarm_5=0,
+        )
+        for di_id, type_ in data["values"].items():
+            bin_value = joined_list[di_id - 1]
+            if bin_value == "1":
+                if type_ == CellDIValueTypes.On:
+                    cell_status["working"] = 1
+                    cell_status["on_off"] = 1
+                if type_ == CellDIValueTypes.Off:
+                    cell_status["working"] = 1
+                    cell_status["on_off"] = 0
+                if type_ == CellDIValueTypes.MTZ:
+                    cell_status["alarm_3"] = 1
+                if type_ == CellDIValueTypes.APV:
+                    cell_status["alarm_2"] = 1
+                if type_ == CellDIValueTypes.AVR:
+                    cell_status["alarm_3"] = 1
+            reversed_cell_bin += bin_value
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
+        cursor.execute(
+            'update `emg-eme`.n_cell_matrix set working={7}, on_off={8},  alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(
+                str(object_num),
+                cell,
+                cell_status["alarm_1"],
+                cell_status["alarm_2"],
+                cell_status["alarm_3"],
+                cell_status["alarm_4"],
+                cell_status["alarm_5"],
+                cell_status["working"],
+                cell_status["on_off"],
+            )
+        )
+        cnx.commit()
+
     new_values_tuple = (
         (
             values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
