@@ -257,7 +257,7 @@ def create_flex_emergency(data):
         cell_values = values_tuple[2:]
     bin_values = []
     for cell in cell_values:
-        if cell == 128 or cell == 256:
+        if cell >= 128:
             cell = 0
         bin_values.append(bin(cell).replace("0b", ""))
 
