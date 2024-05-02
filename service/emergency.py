@@ -265,10 +265,8 @@ def create_flex_emergency(data):
     for b in bin_values:
         old_cell = ["0", "0", "0", "0", "0"]
         reversed_bin = b[::-1]
-        counter = len(old_cell) - 1
         for i, n in enumerate(reversed_bin):
             old_cell[i] = str(n)
-            counter -= 1
         bin_list.append("".join(old_cell))
     joined_list = "".join(bin_list)
     new_cell_values = []
