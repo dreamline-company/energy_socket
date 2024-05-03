@@ -273,43 +273,31 @@ def create_flex_emergency(data):
     for cell, data in objects_cells[object_num].items():
         reversed_cell_bin = ""
         cell_status = dict(
-            working=0,
+            working=1,
             on_off=0,
-            alarm_1=0,
-            alarm_2=0,
-            alarm_3=0,
-            alarm_4=0,
-            alarm_5=0,
         )
+        alarms = []
         for di_id, type_ in data["values"].items():
             bin_value = joined_list[di_id - 1]
             if bin_value == "1":
                 if type_ == CellDIValueTypes.On:
-                    cell_status["working"] = 1
                     cell_status["on_off"] = 1
                 if type_ == CellDIValueTypes.Off:
-                    cell_status["working"] = 1
                     cell_status["on_off"] = 0
-                if type_ == CellDIValueTypes.MTZ:
-                    cell_status["alarm_3"] = 1
-                if type_ == CellDIValueTypes.APV:
-                    cell_status["alarm_2"] = 1
-                if type_ == CellDIValueTypes.AVR:
-                    cell_status["alarm_3"] = 1
+                if type_ != CellDIValueTypes.On or type_ != CellDIValueTypes.Off:
+                    alarms.append(type_.value)
             reversed_cell_bin += bin_value
+        if len(alarms) >= data["max_alarms"]:
+            cell_status["working"] = 0
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
         cursor.execute(
-            'update `emg-eme`.n_cell_matrix set working={7}, on_off={8},  alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(
+            'update `emg-eme`.n_cell_matrix set working={2}, on_off={3}, alarms={4} where object_num={0} and cell={1}'.format(
                 str(object_num),
                 cell,
-                cell_status["alarm_1"],
-                cell_status["alarm_2"],
-                cell_status["alarm_3"],
-                cell_status["alarm_4"],
-                cell_status["alarm_5"],
                 cell_status["working"],
                 cell_status["on_off"],
+                ", ".join(alarms),
             )
         )
         cnx.commit()
