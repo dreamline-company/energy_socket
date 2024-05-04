@@ -4,7 +4,7 @@ emergency
 import logging
 import logging.config
 import database.db as db
-from service.objects_cell_data import objects_cells, CellDIValueTypes
+from service.objects_cell_data import FLEX_DI_OBJECTS, CellDIValueTypes
 
 logging.config.fileConfig("logging.conf")
 
@@ -270,7 +270,7 @@ def create_flex_emergency(data):
         bin_list.append("".join(old_cell))
     joined_list = "".join(bin_list)
     new_cell_values = []
-    for cell, data in objects_cells[object_num].items():
+    for cell, data in FLEX_DI_OBJECTS[object_num].items():
         reversed_cell_bin = ""
         cell_status = dict(
             working=1,

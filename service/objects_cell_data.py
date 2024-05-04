@@ -12,7 +12,11 @@ class CellDIValueTypes(Enum):
     ZMN = "ЗМН"
 
 
-objects_cells = {
+FLEX_DI_OBJECTS = {
+    # Dictionary of objects that have unordered DI inputs
+    # Type: dict[object_num, dict[cell_num, cell_data]];
+    # The `values` dict of cell_data is a dict of available alarms,
+    # where the key is DI-input's serial ID and the value is Alarm type.
     18: {
         3: {
             "max_alarms": 2,
@@ -262,5 +266,119 @@ objects_cells = {
                 36: CellDIValueTypes.MTO,
             }
         },
-    }
+    },
+    21: {
+            14: {
+                "max_alarms": 2,
+                "values": {
+                    1: CellDIValueTypes.On,
+                    2: CellDIValueTypes.Off,
+                    3: CellDIValueTypes.MTZ,
+                    4: CellDIValueTypes.MTO,
+                }
+            },
+            12: {
+                "max_alarms": 3,
+                "values": {
+                    5: CellDIValueTypes.On,
+                    6: CellDIValueTypes.Off,
+                    7: CellDIValueTypes.MTZ,
+                    8: CellDIValueTypes.MTO,
+                    9: CellDIValueTypes.ZMN,
+                }
+            },
+            10: {
+                "max_alarms": 2,
+                "values": {
+                    10: CellDIValueTypes.On,
+                    11: CellDIValueTypes.Off,
+                    12: CellDIValueTypes.MTZ,
+                    13: CellDIValueTypes.MTO,
+                }
+            },
+            8: {
+                "max_alarms": 2,
+                "values": {
+                    14: CellDIValueTypes.On,
+                    15: CellDIValueTypes.Off,
+                    16: CellDIValueTypes.MTZ,
+                    17: CellDIValueTypes.MTO,
+                }
+            },
+            6: {
+                "max_alarms": 1,
+                "values": {
+                    18: CellDIValueTypes.ZMN,
+                }
+            },
+            4: {
+                "max_alarms": 2,
+                "values": {
+                    19: CellDIValueTypes.On,
+                    20: CellDIValueTypes.Off,
+                    21: CellDIValueTypes.MTZ,
+                    22: CellDIValueTypes.AVR,
+                }
+            },
+            2: {
+                "max_alarms": 2,
+                "values": {
+                    23: CellDIValueTypes.On,
+                    24: CellDIValueTypes.Off,
+                    25: CellDIValueTypes.MTZ,
+                    26: CellDIValueTypes.AVR,
+                }
+            },
+            3: {
+                "max_alarms": 2,
+                "values": {
+                    27: CellDIValueTypes.On,
+                    28: CellDIValueTypes.Off,
+                    29: CellDIValueTypes.MTZ,
+                    30: CellDIValueTypes.AVR,
+                }
+            },
+            5: {
+                "max_alarms": 1,
+                "values": {
+                    46: CellDIValueTypes.ZMN,
+                }
+            },
+            7: {
+                "max_alarms": 2,
+                "values": {
+                    47: CellDIValueTypes.On,
+                    31: CellDIValueTypes.Off,
+                    32: CellDIValueTypes.MTZ,
+                    33: CellDIValueTypes.MTO,
+                }
+            },
+            13: {
+                "max_alarms": 2,
+                "values": {
+                    34: CellDIValueTypes.On,
+                    35: CellDIValueTypes.Off,
+                    36: CellDIValueTypes.MTZ,
+                    37: CellDIValueTypes.MTO,
+                }
+            },
+            9: {
+                "max_alarms": 2,
+                "values": {
+                    38: CellDIValueTypes.On,
+                    39: CellDIValueTypes.Off,
+                    40: CellDIValueTypes.MTZ,
+                    41: CellDIValueTypes.MTO,
+                }
+            },
+            11: {
+                "max_alarms": 2,
+                "values": {
+                    42: CellDIValueTypes.On,
+                    43: CellDIValueTypes.Off,
+                    44: CellDIValueTypes.MTZ,
+                    45: CellDIValueTypes.MTO,
+                }
+            },
+        },
 }
