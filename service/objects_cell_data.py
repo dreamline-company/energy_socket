@@ -10,6 +10,9 @@ class CellDIValueTypes(Enum):
     MTO = "МТО"
     APV = "АПВ"
     ZMN = "ЗМН"
+    DIFF = "Дифференциальная защита"
+    GAS = "Газовая защита трансформатора"
+    GROUND = "Земля в сети"
 
 
 FLEX_DI_OBJECTS = {
@@ -176,7 +179,7 @@ FLEX_DI_OBJECTS = {
     },
     20: {
         11: {
-            "max_alarmss": 2,
+            "max_alarms": 2,
             "values": {
                 1: CellDIValueTypes.On,
                 2: CellDIValueTypes.Off,
@@ -381,4 +384,97 @@ FLEX_DI_OBJECTS = {
                 }
             },
         },
+    22: {
+        11: {
+            "max_alarms": 2,
+            "values": {
+                1: CellDIValueTypes.On,
+                2: CellDIValueTypes.Off,
+                3: CellDIValueTypes.MTZ,
+                4: CellDIValueTypes.MTO,
+            }
+        },
+        9: {
+            "max_alarms": 2,
+            "values": {
+                5: CellDIValueTypes.On,
+                6: CellDIValueTypes.Off,
+                7: CellDIValueTypes.MTZ,
+                8: CellDIValueTypes.MTO,
+            }
+        },
+        7: {
+            "max_alarms": 2,
+            "values": {
+                9: CellDIValueTypes.On,
+                10: CellDIValueTypes.Off,
+                11: CellDIValueTypes.MTZ,
+                12: CellDIValueTypes.MTO,
+            }
+        },
+        5: {
+            "max_alarms": 1,
+            "values": {
+                13: CellDIValueTypes.ZMN,
+            }
+        },
+        3: {
+            "max_alarms": 2,
+            "values": {
+                14: CellDIValueTypes.On,
+                15: CellDIValueTypes.Off,
+                16: CellDIValueTypes.MTZ,
+                17: CellDIValueTypes.AVR,
+            }
+        },
+        1: {
+            "max_alarms": 2,
+            "values": {
+                18: CellDIValueTypes.On,
+                19: CellDIValueTypes.Off,
+                20: CellDIValueTypes.MTZ,
+                21: CellDIValueTypes.AVR,
+            }
+        },
+        4: {
+            "max_alarms": 2,
+            "values": {
+                22: CellDIValueTypes.On,
+                23: CellDIValueTypes.Off,
+                24: CellDIValueTypes.MTZ,
+                25: CellDIValueTypes.AVR,
+            }
+        },
+        6: {
+            "max_alarms": 1,
+            "values": {
+                26: CellDIValueTypes.ZMN,
+            }
+        },
+        8: {
+            "max_alarms": 2,
+            "values": {
+                27: CellDIValueTypes.On,
+                28: CellDIValueTypes.Off,
+                29: CellDIValueTypes.MTZ,
+                30: CellDIValueTypes.AVR,
+            }
+        },
+        10: {  # can't read 31 and 32 DI ports
+            "max_alarms": 2,
+            "values": {
+                31: CellDIValueTypes.MTZ,
+                32: CellDIValueTypes.MTO,
+            }
+        },
+        12: {
+            "max_alarms": 2,
+            "values": {
+                33: CellDIValueTypes.On,
+                34: CellDIValueTypes.Off,
+                35: CellDIValueTypes.MTZ,
+                36: CellDIValueTypes.MTO,
+            }
+        },
+    },
 }
