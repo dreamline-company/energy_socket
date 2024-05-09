@@ -381,7 +381,11 @@ def create_flex_emergency(data):
                 if type_ != CellAlarmTypesEnum.On or type_ != CellAlarmTypesEnum.Off:
                     alarms.append(type_.value)
             reversed_cell_bin += bin_value
-        if len(alarms) >= data["max_alarms"]:
+        if (
+                (CellAlarmTypesEnum.AVR.value in alarms and len(alarms) > 1)
+                or
+                (CellAlarmTypesEnum.AVR.value not in alarms and len(alarms) > 0)
+        ):
             cell_status["working"] = 0
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
