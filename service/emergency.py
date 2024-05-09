@@ -342,6 +342,8 @@ def create_flex_emergency(data):
         )
     )
     tmp_data = cursor.fetchone()
+    oil_field = tmp_data[0]
+    oil_field_working = True
     oil_field_name = tmp_data[1]
     insert_symbols = ",".join(tuple((["%s"] * len(data.keys()))))
     if "c0" in params_tuple:
@@ -383,6 +385,7 @@ def create_flex_emergency(data):
             reversed_cell_bin += bin_value
         if alarms:
             cell_status["working"] = 0
+            oil_field_working = False
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
         cursor.execute(
@@ -406,6 +409,13 @@ def create_flex_emergency(data):
     cursor.execute(
         f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
         new_values_tuple,
+    )
+    cnx.commit()
+    cursor.execute(
+        'update `emg-eme`.n_oil_fields set working={1} where oil_field="{0}"'.format(
+            oil_field,
+            1 if oil_field_working else 0,
+        )
     )
     cnx.commit()
     cursor.close()
