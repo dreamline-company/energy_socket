@@ -378,7 +378,7 @@ def create_flex_emergency(data):
                     cell_status["on_off"] = 1
                 if type_ == CellAlarmTypesEnum.Off:
                     cell_status["on_off"] = 0
-                if type_ != CellAlarmTypesEnum.On or type_ != CellAlarmTypesEnum.Off:
+                if type_ != CellAlarmTypesEnum.On and type_ != CellAlarmTypesEnum.Off:
                     alarms.append(type_.value)
             reversed_cell_bin += bin_value
         if (
@@ -390,12 +390,12 @@ def create_flex_emergency(data):
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
         cursor.execute(
-            'update `emg-eme`.n_cell_matrix set working={2}, on_off={3}, alarms={4} where object_num={0} and cell={1}'.format(
+            'update `emg-eme`.n_cell_matrix set working={2}, on_off={3}, alarms="{4}" where object_num={0} and cell={1}'.format(
                 str(object_num),
                 cell,
                 cell_status["working"],
                 cell_status["on_off"],
-                ", ".join(alarms),
+                ", ".join(alarms) if alarms else "",
             )
         )
         cnx.commit()
