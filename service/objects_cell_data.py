@@ -1,19 +1,4 @@
-from enum import Enum
-
-
-class CellDIValueTypes(Enum):
-    On = "Вкл"
-    Off = "Откл"
-    MTZ = "МТ3"
-    AVR = "АВР"
-    ZNZ = "ЗНЗ"
-    MTO = "МТО"
-    APV = "АПВ"
-    ZMN = "ЗМН"
-    DIFF = "Дифференциальная защита"
-    GAS = "Газовая защита трансформатора"
-    GROUND = "Земля в сети"
-
+from service.enums.objects import CellAlarmTypesEnum
 
 FLEX_DI_OBJECTS = {
     # Dictionary of objects that have unordered DI inputs
@@ -24,156 +9,156 @@ FLEX_DI_OBJECTS = {
         3: {
             "max_alarms": 2,
             "values": {
-                1: CellDIValueTypes.On,
-                2: CellDIValueTypes.Off,
-                3: CellDIValueTypes.MTZ,
-                4: CellDIValueTypes.AVR,
+                1: CellAlarmTypesEnum.On,
+                2: CellAlarmTypesEnum.Off,
+                3: CellAlarmTypesEnum.MTZ,
+                4: CellAlarmTypesEnum.AVR,
             }
         },
         5: {
             "max_alarms": 1,
             "values": {
-                5: CellDIValueTypes.ZNZ,
+                5: CellAlarmTypesEnum.ZNZ,
             }
         },
         7: {
             "max_alarms": 3,
             "values": {
-                6: CellDIValueTypes.On,
-                7: CellDIValueTypes.Off,
-                8: CellDIValueTypes.MTZ,
-                9: CellDIValueTypes.MTO,
-                10: CellDIValueTypes.APV,
+                6: CellAlarmTypesEnum.On,
+                7: CellAlarmTypesEnum.Off,
+                8: CellAlarmTypesEnum.MTZ,
+                9: CellAlarmTypesEnum.MTO,
+                10: CellAlarmTypesEnum.APV,
             }
         },
         9: {
             "max_alarms": 3,
             "values": {
-                11: CellDIValueTypes.On,
-                12: CellDIValueTypes.Off,
-                13: CellDIValueTypes.MTZ,
-                14: CellDIValueTypes.MTO,
-                15: CellDIValueTypes.ZNZ,
+                11: CellAlarmTypesEnum.On,
+                12: CellAlarmTypesEnum.Off,
+                13: CellAlarmTypesEnum.MTZ,
+                14: CellAlarmTypesEnum.MTO,
+                15: CellAlarmTypesEnum.ZNZ,
             }
         },
         11: {
             "max_alarms": 3,
             "values": {
-                16: CellDIValueTypes.On,
-                17: CellDIValueTypes.Off,
-                18: CellDIValueTypes.MTZ,
-                19: CellDIValueTypes.MTO,
-                20: CellDIValueTypes.APV,
+                16: CellAlarmTypesEnum.On,
+                17: CellAlarmTypesEnum.Off,
+                18: CellAlarmTypesEnum.MTZ,
+                19: CellAlarmTypesEnum.MTO,
+                20: CellAlarmTypesEnum.APV,
             }
         },
         13: {
             "max_alarms": 3,
             "values": {
-                21: CellDIValueTypes.On,
-                22: CellDIValueTypes.Off,
-                23: CellDIValueTypes.MTZ,
-                24: CellDIValueTypes.MTO,
-                25: CellDIValueTypes.APV,
+                21: CellAlarmTypesEnum.On,
+                22: CellAlarmTypesEnum.Off,
+                23: CellAlarmTypesEnum.MTZ,
+                24: CellAlarmTypesEnum.MTO,
+                25: CellAlarmTypesEnum.APV,
             }
         },
         15: {
             "max_alarms": 3,
             "values": {
-                26: CellDIValueTypes.On,
-                27: CellDIValueTypes.Off,
-                28: CellDIValueTypes.MTZ,
-                29: CellDIValueTypes.MTO,
-                30: CellDIValueTypes.ZNZ,
+                26: CellAlarmTypesEnum.On,
+                27: CellAlarmTypesEnum.Off,
+                28: CellAlarmTypesEnum.MTZ,
+                29: CellAlarmTypesEnum.MTO,
+                30: CellAlarmTypesEnum.ZNZ,
             }
         },
         17: {
             "max_alarms": 3,
             "values": {
-                31: CellDIValueTypes.On,
-                32: CellDIValueTypes.Off,
-                33: CellDIValueTypes.MTZ,
-                34: CellDIValueTypes.MTO,
-                35: CellDIValueTypes.ZNZ,
+                31: CellAlarmTypesEnum.On,
+                32: CellAlarmTypesEnum.Off,
+                33: CellAlarmTypesEnum.MTZ,
+                34: CellAlarmTypesEnum.MTO,
+                35: CellAlarmTypesEnum.ZNZ,
             }
         },
         20: {
             "max_alarms": 2,
             "values": {
-                36: CellDIValueTypes.On,
-                37: CellDIValueTypes.Off,
-                38: CellDIValueTypes.MTZ,
-                39: CellDIValueTypes.AVR,
+                36: CellAlarmTypesEnum.On,
+                37: CellAlarmTypesEnum.Off,
+                38: CellAlarmTypesEnum.MTZ,
+                39: CellAlarmTypesEnum.AVR,
             }
         },
         18: {
             "max_alarms": 2,
             "values": {
-                40: CellDIValueTypes.On,
-                41: CellDIValueTypes.Off,
-                42: CellDIValueTypes.MTZ,
-                43: CellDIValueTypes.MTO,
+                40: CellAlarmTypesEnum.On,
+                41: CellAlarmTypesEnum.Off,
+                42: CellAlarmTypesEnum.MTZ,
+                43: CellAlarmTypesEnum.MTO,
             }
         },
         16: {
             "max_alarms": 3,
             "values": {
-                44: CellDIValueTypes.On,
-                45: CellDIValueTypes.Off,
-                46: CellDIValueTypes.MTZ,
-                47: CellDIValueTypes.MTO,
-                48: CellDIValueTypes.ZNZ,
+                44: CellAlarmTypesEnum.On,
+                45: CellAlarmTypesEnum.Off,
+                46: CellAlarmTypesEnum.MTZ,
+                47: CellAlarmTypesEnum.MTO,
+                48: CellAlarmTypesEnum.ZNZ,
             }
         },
         14: {
             "max_alarms": 2,
             "values": {
-                49: CellDIValueTypes.On,
-                50: CellDIValueTypes.Off,
-                51: CellDIValueTypes.MTZ,
-                52: CellDIValueTypes.MTO,
+                49: CellAlarmTypesEnum.On,
+                50: CellAlarmTypesEnum.Off,
+                51: CellAlarmTypesEnum.MTZ,
+                52: CellAlarmTypesEnum.MTO,
             }
         },
         12: {
             "max_alarms": 3,
             "values": {
-                53: CellDIValueTypes.On,
-                54: CellDIValueTypes.Off,
-                55: CellDIValueTypes.MTZ,
-                56: CellDIValueTypes.MTO,
-                57: CellDIValueTypes.APV,
+                53: CellAlarmTypesEnum.On,
+                54: CellAlarmTypesEnum.Off,
+                55: CellAlarmTypesEnum.MTZ,
+                56: CellAlarmTypesEnum.MTO,
+                57: CellAlarmTypesEnum.APV,
             }
         },
         10: {  # Can't read 31 and 32 values from DI
             "max_alarms": 1,
             "values": {
-                58: CellDIValueTypes.On,
-                59: CellDIValueTypes.Off,
-                60: CellDIValueTypes.MTZ,
+                58: CellAlarmTypesEnum.On,
+                59: CellAlarmTypesEnum.Off,
+                60: CellAlarmTypesEnum.MTZ,
             }
         },
         8: {
             "max_alarms": 3,
             "values": {
-                61: CellDIValueTypes.On,
-                62: CellDIValueTypes.Off,
-                63: CellDIValueTypes.MTZ,
-                64: CellDIValueTypes.MTO,
-                65: CellDIValueTypes.APV,
+                61: CellAlarmTypesEnum.On,
+                62: CellAlarmTypesEnum.Off,
+                63: CellAlarmTypesEnum.MTZ,
+                64: CellAlarmTypesEnum.MTO,
+                65: CellAlarmTypesEnum.APV,
             }
         },
         6: {
             "max_alarms": 1,
             "values": {
-                66: CellDIValueTypes.ZNZ,
+                66: CellAlarmTypesEnum.ZNZ,
             }
         },
         4: {
             "max_alarms": 2,
             "values": {
-                67: CellDIValueTypes.On,
-                68: CellDIValueTypes.Off,
-                69: CellDIValueTypes.MTZ,
-                70: CellDIValueTypes.AVR,
+                67: CellAlarmTypesEnum.On,
+                68: CellAlarmTypesEnum.Off,
+                69: CellAlarmTypesEnum.MTZ,
+                70: CellAlarmTypesEnum.AVR,
             }
         },
     },
@@ -181,92 +166,92 @@ FLEX_DI_OBJECTS = {
         11: {
             "max_alarms": 2,
             "values": {
-                1: CellDIValueTypes.On,
-                2: CellDIValueTypes.Off,
-                3: CellDIValueTypes.MTZ,
-                4: CellDIValueTypes.MTO,
+                1: CellAlarmTypesEnum.On,
+                2: CellAlarmTypesEnum.Off,
+                3: CellAlarmTypesEnum.MTZ,
+                4: CellAlarmTypesEnum.MTO,
             }
         },
         9: {
             "max_alarms": 2,
             "values": {
-                5: CellDIValueTypes.On,
-                6: CellDIValueTypes.Off,
-                7: CellDIValueTypes.MTZ,
-                8: CellDIValueTypes.MTO,
+                5: CellAlarmTypesEnum.On,
+                6: CellAlarmTypesEnum.Off,
+                7: CellAlarmTypesEnum.MTZ,
+                8: CellAlarmTypesEnum.MTO,
             }
         },
         7: {
             "max_alarms": 2,
             "values": {
-                9: CellDIValueTypes.On,
-                10: CellDIValueTypes.Off,
-                11: CellDIValueTypes.MTZ,
-                12: CellDIValueTypes.MTO,
+                9: CellAlarmTypesEnum.On,
+                10: CellAlarmTypesEnum.Off,
+                11: CellAlarmTypesEnum.MTZ,
+                12: CellAlarmTypesEnum.MTO,
             }
         },
         5: {
             "max_alarms": 1,
             "values": {
-                13: CellDIValueTypes.ZMN,
+                13: CellAlarmTypesEnum.ZMN,
             }
         },
         3: {
             "max_alarms": 2,
             "values": {
-                14: CellDIValueTypes.On,
-                15: CellDIValueTypes.Off,
-                16: CellDIValueTypes.MTZ,
-                17: CellDIValueTypes.AVR,
+                14: CellAlarmTypesEnum.On,
+                15: CellAlarmTypesEnum.Off,
+                16: CellAlarmTypesEnum.MTZ,
+                17: CellAlarmTypesEnum.AVR,
             }
         },
         1: {
             "max_alarms": 2,
             "values": {
-                18: CellDIValueTypes.On,
-                19: CellDIValueTypes.Off,
-                20: CellDIValueTypes.MTZ,
-                21: CellDIValueTypes.AVR,
+                18: CellAlarmTypesEnum.On,
+                19: CellAlarmTypesEnum.Off,
+                20: CellAlarmTypesEnum.MTZ,
+                21: CellAlarmTypesEnum.AVR,
             }
         },
         4: {
             "max_alarms": 2,
             "values": {
-                22: CellDIValueTypes.On,
-                23: CellDIValueTypes.Off,
-                24: CellDIValueTypes.MTZ,
-                25: CellDIValueTypes.AVR,
+                22: CellAlarmTypesEnum.On,
+                23: CellAlarmTypesEnum.Off,
+                24: CellAlarmTypesEnum.MTZ,
+                25: CellAlarmTypesEnum.AVR,
             }
         },
         6: {
             "max_alarms": 1,
             "values": {
-                26: CellDIValueTypes.ZMN,
+                26: CellAlarmTypesEnum.ZMN,
             }
         },
         8: {
             "max_alarms": 2,
             "values": {
-                27: CellDIValueTypes.On,
-                28: CellDIValueTypes.Off,
-                29: CellDIValueTypes.MTZ,
-                30: CellDIValueTypes.AVR,
+                27: CellAlarmTypesEnum.On,
+                28: CellAlarmTypesEnum.Off,
+                29: CellAlarmTypesEnum.MTZ,
+                30: CellAlarmTypesEnum.AVR,
             }
         },
         10: {  # can't read 31 and 32 DI ports
             "max_alarms": 2,
             "values": {
-                31: CellDIValueTypes.MTZ,
-                32: CellDIValueTypes.MTO,
+                31: CellAlarmTypesEnum.MTZ,
+                32: CellAlarmTypesEnum.MTO,
             }
         },
         12: {
             "max_alarms": 2,
             "values": {
-                33: CellDIValueTypes.On,
-                34: CellDIValueTypes.Off,
-                35: CellDIValueTypes.MTZ,
-                36: CellDIValueTypes.MTO,
+                33: CellAlarmTypesEnum.On,
+                34: CellAlarmTypesEnum.Off,
+                35: CellAlarmTypesEnum.MTZ,
+                36: CellAlarmTypesEnum.MTO,
             }
         },
     },
@@ -274,113 +259,113 @@ FLEX_DI_OBJECTS = {
             14: {
                 "max_alarms": 2,
                 "values": {
-                    1: CellDIValueTypes.On,
-                    2: CellDIValueTypes.Off,
-                    3: CellDIValueTypes.MTZ,
-                    4: CellDIValueTypes.MTO,
+                    1: CellAlarmTypesEnum.On,
+                    2: CellAlarmTypesEnum.Off,
+                    3: CellAlarmTypesEnum.MTZ,
+                    4: CellAlarmTypesEnum.MTO,
                 }
             },
             12: {
                 "max_alarms": 3,
                 "values": {
-                    5: CellDIValueTypes.On,
-                    6: CellDIValueTypes.Off,
-                    7: CellDIValueTypes.MTZ,
-                    8: CellDIValueTypes.MTO,
-                    9: CellDIValueTypes.ZMN,
+                    5: CellAlarmTypesEnum.On,
+                    6: CellAlarmTypesEnum.Off,
+                    7: CellAlarmTypesEnum.MTZ,
+                    8: CellAlarmTypesEnum.MTO,
+                    9: CellAlarmTypesEnum.ZMN,
                 }
             },
             10: {
                 "max_alarms": 2,
                 "values": {
-                    10: CellDIValueTypes.On,
-                    11: CellDIValueTypes.Off,
-                    12: CellDIValueTypes.MTZ,
-                    13: CellDIValueTypes.MTO,
+                    10: CellAlarmTypesEnum.On,
+                    11: CellAlarmTypesEnum.Off,
+                    12: CellAlarmTypesEnum.MTZ,
+                    13: CellAlarmTypesEnum.MTO,
                 }
             },
             8: {
                 "max_alarms": 2,
                 "values": {
-                    14: CellDIValueTypes.On,
-                    15: CellDIValueTypes.Off,
-                    16: CellDIValueTypes.MTZ,
-                    17: CellDIValueTypes.MTO,
+                    14: CellAlarmTypesEnum.On,
+                    15: CellAlarmTypesEnum.Off,
+                    16: CellAlarmTypesEnum.MTZ,
+                    17: CellAlarmTypesEnum.MTO,
                 }
             },
             6: {
                 "max_alarms": 1,
                 "values": {
-                    18: CellDIValueTypes.ZMN,
+                    18: CellAlarmTypesEnum.ZMN,
                 }
             },
             4: {
                 "max_alarms": 2,
                 "values": {
-                    19: CellDIValueTypes.On,
-                    20: CellDIValueTypes.Off,
-                    21: CellDIValueTypes.MTZ,
-                    22: CellDIValueTypes.AVR,
+                    19: CellAlarmTypesEnum.On,
+                    20: CellAlarmTypesEnum.Off,
+                    21: CellAlarmTypesEnum.MTZ,
+                    22: CellAlarmTypesEnum.AVR,
                 }
             },
             2: {
                 "max_alarms": 2,
                 "values": {
-                    23: CellDIValueTypes.On,
-                    24: CellDIValueTypes.Off,
-                    25: CellDIValueTypes.MTZ,
-                    26: CellDIValueTypes.AVR,
+                    23: CellAlarmTypesEnum.On,
+                    24: CellAlarmTypesEnum.Off,
+                    25: CellAlarmTypesEnum.MTZ,
+                    26: CellAlarmTypesEnum.AVR,
                 }
             },
             3: {
                 "max_alarms": 2,
                 "values": {
-                    27: CellDIValueTypes.On,
-                    28: CellDIValueTypes.Off,
-                    29: CellDIValueTypes.MTZ,
-                    30: CellDIValueTypes.AVR,
+                    27: CellAlarmTypesEnum.On,
+                    28: CellAlarmTypesEnum.Off,
+                    29: CellAlarmTypesEnum.MTZ,
+                    30: CellAlarmTypesEnum.AVR,
                 }
             },
             5: {
                 "max_alarms": 1,
                 "values": {
-                    46: CellDIValueTypes.ZMN,
+                    46: CellAlarmTypesEnum.ZMN,
                 }
             },
             7: {
                 "max_alarms": 2,
                 "values": {
-                    47: CellDIValueTypes.On,
-                    31: CellDIValueTypes.Off,
-                    32: CellDIValueTypes.MTZ,
-                    33: CellDIValueTypes.MTO,
+                    47: CellAlarmTypesEnum.On,
+                    31: CellAlarmTypesEnum.Off,
+                    32: CellAlarmTypesEnum.MTZ,
+                    33: CellAlarmTypesEnum.MTO,
                 }
             },
             13: {
                 "max_alarms": 2,
                 "values": {
-                    34: CellDIValueTypes.On,
-                    35: CellDIValueTypes.Off,
-                    36: CellDIValueTypes.MTZ,
-                    37: CellDIValueTypes.MTO,
+                    34: CellAlarmTypesEnum.On,
+                    35: CellAlarmTypesEnum.Off,
+                    36: CellAlarmTypesEnum.MTZ,
+                    37: CellAlarmTypesEnum.MTO,
                 }
             },
             9: {
                 "max_alarms": 2,
                 "values": {
-                    38: CellDIValueTypes.On,
-                    39: CellDIValueTypes.Off,
-                    40: CellDIValueTypes.MTZ,
-                    41: CellDIValueTypes.MTO,
+                    38: CellAlarmTypesEnum.On,
+                    39: CellAlarmTypesEnum.Off,
+                    40: CellAlarmTypesEnum.MTZ,
+                    41: CellAlarmTypesEnum.MTO,
                 }
             },
             11: {
                 "max_alarms": 2,
                 "values": {
-                    42: CellDIValueTypes.On,
-                    43: CellDIValueTypes.Off,
-                    44: CellDIValueTypes.MTZ,
-                    45: CellDIValueTypes.MTO,
+                    42: CellAlarmTypesEnum.On,
+                    43: CellAlarmTypesEnum.Off,
+                    44: CellAlarmTypesEnum.MTZ,
+                    45: CellAlarmTypesEnum.MTO,
                 }
             },
         },
@@ -388,92 +373,92 @@ FLEX_DI_OBJECTS = {
         11: {
             "max_alarms": 2,
             "values": {
-                1: CellDIValueTypes.On,
-                2: CellDIValueTypes.Off,
-                3: CellDIValueTypes.MTZ,
-                4: CellDIValueTypes.MTO,
+                1: CellAlarmTypesEnum.On,
+                2: CellAlarmTypesEnum.Off,
+                3: CellAlarmTypesEnum.MTZ,
+                4: CellAlarmTypesEnum.MTO,
             }
         },
         9: {
             "max_alarms": 2,
             "values": {
-                5: CellDIValueTypes.On,
-                6: CellDIValueTypes.Off,
-                7: CellDIValueTypes.MTZ,
-                8: CellDIValueTypes.MTO,
+                5: CellAlarmTypesEnum.On,
+                6: CellAlarmTypesEnum.Off,
+                7: CellAlarmTypesEnum.MTZ,
+                8: CellAlarmTypesEnum.MTO,
             }
         },
         7: {
             "max_alarms": 2,
             "values": {
-                9: CellDIValueTypes.On,
-                10: CellDIValueTypes.Off,
-                11: CellDIValueTypes.MTZ,
-                12: CellDIValueTypes.MTO,
+                9: CellAlarmTypesEnum.On,
+                10: CellAlarmTypesEnum.Off,
+                11: CellAlarmTypesEnum.MTZ,
+                12: CellAlarmTypesEnum.MTO,
             }
         },
         5: {
             "max_alarms": 1,
             "values": {
-                13: CellDIValueTypes.ZMN,
+                13: CellAlarmTypesEnum.ZMN,
             }
         },
         3: {
             "max_alarms": 2,
             "values": {
-                14: CellDIValueTypes.On,
-                15: CellDIValueTypes.Off,
-                16: CellDIValueTypes.MTZ,
-                17: CellDIValueTypes.AVR,
+                14: CellAlarmTypesEnum.On,
+                15: CellAlarmTypesEnum.Off,
+                16: CellAlarmTypesEnum.MTZ,
+                17: CellAlarmTypesEnum.AVR,
             }
         },
         1: {
             "max_alarms": 2,
             "values": {
-                18: CellDIValueTypes.On,
-                19: CellDIValueTypes.Off,
-                20: CellDIValueTypes.MTZ,
-                21: CellDIValueTypes.AVR,
+                18: CellAlarmTypesEnum.On,
+                19: CellAlarmTypesEnum.Off,
+                20: CellAlarmTypesEnum.MTZ,
+                21: CellAlarmTypesEnum.AVR,
             }
         },
         4: {
             "max_alarms": 2,
             "values": {
-                22: CellDIValueTypes.On,
-                23: CellDIValueTypes.Off,
-                24: CellDIValueTypes.MTZ,
-                25: CellDIValueTypes.AVR,
+                22: CellAlarmTypesEnum.On,
+                23: CellAlarmTypesEnum.Off,
+                24: CellAlarmTypesEnum.MTZ,
+                25: CellAlarmTypesEnum.AVR,
             }
         },
         6: {
             "max_alarms": 1,
             "values": {
-                26: CellDIValueTypes.ZMN,
+                26: CellAlarmTypesEnum.ZMN,
             }
         },
         8: {
             "max_alarms": 2,
             "values": {
-                27: CellDIValueTypes.On,
-                28: CellDIValueTypes.Off,
-                29: CellDIValueTypes.MTZ,
-                30: CellDIValueTypes.AVR,
+                27: CellAlarmTypesEnum.On,
+                28: CellAlarmTypesEnum.Off,
+                29: CellAlarmTypesEnum.MTZ,
+                30: CellAlarmTypesEnum.AVR,
             }
         },
         10: {  # can't read 31 and 32 DI ports
             "max_alarms": 2,
             "values": {
-                31: CellDIValueTypes.MTZ,
-                32: CellDIValueTypes.MTO,
+                31: CellAlarmTypesEnum.MTZ,
+                32: CellAlarmTypesEnum.MTO,
             }
         },
         12: {
             "max_alarms": 2,
             "values": {
-                33: CellDIValueTypes.On,
-                34: CellDIValueTypes.Off,
-                35: CellDIValueTypes.MTZ,
-                36: CellDIValueTypes.MTO,
+                33: CellAlarmTypesEnum.On,
+                34: CellAlarmTypesEnum.Off,
+                35: CellAlarmTypesEnum.MTZ,
+                36: CellAlarmTypesEnum.MTO,
             }
         },
     },

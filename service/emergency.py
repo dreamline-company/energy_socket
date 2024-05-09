@@ -4,7 +4,8 @@ emergency
 import logging
 import logging.config
 import database.db as db
-from service.objects_cell_data import FLEX_DI_OBJECTS, CellDIValueTypes
+from service.objects_cell_data import FLEX_DI_OBJECTS
+from service.enums.objects import CellAlarmTypesEnum
 
 logging.config.fileConfig("logging.conf")
 
@@ -27,6 +28,15 @@ def read_emergency():
     logger.debug("Data from 'emergency' - %s", emergency_data)
 
     return emergency_data
+
+
+def check_is_micom(object_num):
+    cnx = db.create_server_connection()
+    cursor = cnx.cursor()
+    cursor.execute('select  from `emg-eme`.n_cell_matrix where object_num={0}'.format(
+        str(obj_num)))
+    tmp_data = cursor.fetchone()
+    oil_field = tmp_data[0]
 
 
 def check_for_last_emergency_data(
@@ -67,12 +77,16 @@ def create_emergency(new_data):
     del new_data['obj_num']
     del new_data['dt']
     working = True
-    cursor.execute('select oil_field, name from `emg-eme`.n_object_num where object_num={0}'.format(str(obj_num)))
+    cursor.execute(
+        'select oil_field, name from `emg-eme`.n_object_num where object_num={0}'.format(
+            str(obj_num))
+    )
     tmp_data = cursor.fetchone()
     oil_field = tmp_data[0]
     oil_field_name = tmp_data[1]
 
     for key in new_data.keys():
+        cell_alarms = []
         print(key, new_data[key])
         if 'c' in key:
             cell = key.replace('c', '')
@@ -90,27 +104,39 @@ def create_emergency(new_data):
                         print('ind -- ', ind)
                     ind += 1
                 print(alarms)
-                cursor.execute('update `emg-eme`.n_cell_matrix set alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3], alarms[4]))
+                cursor.execute(
+                    'update `emg-eme`.n_cell_matrix set alarm_1={2}, alarm_2={3}, alarm_3={4}, alarm_4={5}, alarm_5={6} where object_num={0} and cell={1}'.format(
+                        str(obj_num), cell, alarms[0], alarms[1], alarms[2], alarms[3],
+                        alarms[4]))
                 cnx.commit()
 
-                cursor.execute('select kvt_type from `emg-eme`.n_cell_matrix where object_num={0} and cell={1}'.format(str(obj_num), str(cell)))
+                cursor.execute(
+                    'select kvt_type from `emg-eme`.n_cell_matrix where object_num={0} and cell={1}'.format(
+                        str(obj_num), str(cell)))
                 kvt_type = cursor.fetchone()[0]
-
 
                 if alarms[1] == 1 or alarms[2] == 1 or alarms[3] == 1 or alarms[4] == 1:
                     working = False
                     if alarms[0] == 1:
-                        cursor.execute('update `emg-eme`.n_cell_matrix set working=0, on_off=0 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+                        cursor.execute(
+                            'update `emg-eme`.n_cell_matrix set working=0, on_off=0 where object_num={0} and cell={1}'.format(
+                                str(obj_num), cell))
                         cnx.commit()
                     else:
-                        cursor.execute('update `emg-eme`.n_cell_matrix set working=0, on_off=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+                        cursor.execute(
+                            'update `emg-eme`.n_cell_matrix set working=0, on_off=1 where object_num={0} and cell={1}'.format(
+                                str(obj_num), cell))
                         cnx.commit()
                 else:
                     if alarms[0] == 1:
-                        cursor.execute('update `emg-eme`.n_cell_matrix set working=1, on_off=0 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+                        cursor.execute(
+                            'update `emg-eme`.n_cell_matrix set working=1, on_off=0 where object_num={0} and cell={1}'.format(
+                                str(obj_num), cell))
                         cnx.commit()
                     else:
-                        cursor.execute('update `emg-eme`.n_cell_matrix set working=1, on_off=1 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+                        cursor.execute(
+                            'update `emg-eme`.n_cell_matrix set working=1, on_off=1 where object_num={0} and cell={1}'.format(
+                                str(obj_num), cell))
                         cnx.commit()
 
                 if kvt_type == 10:
@@ -124,9 +150,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[2] == 1:
                         event = 'МТЗ'
                         if not check_for_last_emergency_data(
@@ -137,9 +166,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[3] == 1:
                         event = 'Газовая защита трансформатора'
                         if not check_for_last_emergency_data(
@@ -150,9 +182,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[4] == 1:
                         event = 'Тест'
                         if not check_for_last_emergency_data(
@@ -163,9 +198,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                 else:
                     if alarms[1] == 1:
                         event = 'АПВ'
@@ -177,9 +215,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[2] == 1:
                         event = 'АВР'
                         if not check_for_last_emergency_data(
@@ -190,9 +231,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[3] == 1:
                         event = 'Земля в сети'
                         if not check_for_last_emergency_data(
@@ -203,9 +247,12 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
                     if alarms[4] == 1:
                         event = 'Тест'
                         if not check_for_last_emergency_data(
@@ -216,21 +263,39 @@ def create_emergency(new_data):
                                 oil_field_name,
                                 str(obj_num)
                         ):
-                            cursor.execute('insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
-                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(event, oil_field_name, str(cell), str(obj_num)))
+                            cursor.execute(
+                                'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+                                + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                                    event, oil_field_name, str(cell), str(obj_num)))
                             cnx.commit()
+                            cell_alarms.append(event)
 
-        else:                    
-            cursor.execute('update `emg-eme`.n_cell_matrix set working=1, on_off=1, alarm_1=0, alarm_2=0, alarm_3=0, alarm_4=0, alarm_5=0 where object_num={0} and cell={1}'.format(str(obj_num), cell))
+        else:
+            cursor.execute(
+                'update `emg-eme`.n_cell_matrix set working=1, on_off=1, alarm_1=0, alarm_2=0, alarm_3=0, alarm_4=0, alarm_5=0 where object_num={0} and cell={1}'.format(
+                    str(obj_num), cell))
             cnx.commit()
-    
+        if cell_alarms:
+            cursor.execute(
+                'update `emg-eme`.n_cell_matrix set alarms={2} where object_num={0} and cell={1}'.format(
+                    str(obj_num),
+                    cell,
+                    ", ".join(cell_alarms),
+                )
+            )
+            cnx.commit()
+
     if working:
-        cursor.execute('update `emg-eme`.n_oil_fields set working=1 where oil_field="{0}"'.format(oil_field))
+        cursor.execute(
+            'update `emg-eme`.n_oil_fields set working=1 where oil_field="{0}"'.format(
+                oil_field))
         cnx.commit()
     else:
-        cursor.execute('update `emg-eme`.n_oil_fields set working=0 where oil_field="{0}"'.format(oil_field))
+        cursor.execute(
+            'update `emg-eme`.n_oil_fields set working=0 where oil_field="{0}"'.format(
+                oil_field))
         cnx.commit()
-    
+
     cursor.execute(
         f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
         values_tuple,
@@ -244,12 +309,40 @@ def create_emergency(new_data):
     return cursor.lastrowid
 
 
+def update_n_lenta(cnx, cursor, event, obj_num, cell, oil_field_name):
+    if not check_for_last_emergency_data(
+            cnx,
+            cursor,
+            event,
+            str(cell),
+            oil_field_name,
+            str(obj_num)
+    ):
+        cursor.execute(
+            'insert into `emg-eme`.n_lenta (criticality,extraction,event,status,oil_field,well,otvod,opened) '
+            + 'values (3, "fluid", "{0}", "open", "{1}", "{2}", "{3}", now())'.format(
+                event,
+                oil_field_name,
+                str(cell),
+                str(obj_num)
+            )
+        )
+        cnx.commit()
+
+
 def create_flex_emergency(data):
     cnx = db.create_server_connection()
     cursor = cnx.cursor()
     params_tuple = ",".join(tuple(data.keys()))
     values_tuple = tuple(data.values())
     object_num = data['obj_num']
+    cursor.execute(
+        'select oil_field, name from `emg-eme`.n_object_num where object_num={0}'.format(
+            str(object_num)
+        )
+    )
+    tmp_data = cursor.fetchone()
+    oil_field_name = tmp_data[1]
     insert_symbols = ",".join(tuple((["%s"] * len(data.keys()))))
     if "c0" in params_tuple:
         cell_values = values_tuple[3:]
@@ -269,6 +362,7 @@ def create_flex_emergency(data):
             old_cell[i] = str(n)
         bin_list.append("".join(old_cell))
     joined_list = "".join(bin_list)
+
     new_cell_values = []
     for cell, data in FLEX_DI_OBJECTS[object_num].items():
         reversed_cell_bin = ""
@@ -280,11 +374,11 @@ def create_flex_emergency(data):
         for di_id, type_ in data["values"].items():
             bin_value = joined_list[di_id - 1]
             if bin_value == "1":
-                if type_ == CellDIValueTypes.On:
+                if type_ == CellAlarmTypesEnum.On:
                     cell_status["on_off"] = 1
-                if type_ == CellDIValueTypes.Off:
+                if type_ == CellAlarmTypesEnum.Off:
                     cell_status["on_off"] = 0
-                if type_ != CellDIValueTypes.On or type_ != CellDIValueTypes.Off:
+                if type_ != CellAlarmTypesEnum.On or type_ != CellAlarmTypesEnum.Off:
                     alarms.append(type_.value)
             reversed_cell_bin += bin_value
         if len(alarms) >= data["max_alarms"]:
@@ -301,11 +395,13 @@ def create_flex_emergency(data):
             )
         )
         cnx.commit()
+        for alarm in alarms:
+            update_n_lenta(cnx, cursor, alarm, object_num, cell, oil_field_name)
 
     new_values_tuple = (
-        (
-            values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
-        ) + tuple(new_cell_values)
+            (
+                values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
+            ) + tuple(new_cell_values)
     )
     cursor.execute(
         f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
@@ -319,7 +415,6 @@ def create_flex_emergency(data):
     return cursor.lastrowid
 
 
-
 def update_emergency(new_data, row_id):
     """
     update_emergency
@@ -327,7 +422,7 @@ def update_emergency(new_data, row_id):
 
     params = [f"{i}={new_data[i]}" for i in new_data.keys()]
     params = ",".join(params)
-    
+
     cnx = db.create_server_connection()
     cursor = cnx.cursor()
     cursor.execute(f"UPDATE emergency SET {params}  WHERE id = {row_id}")
