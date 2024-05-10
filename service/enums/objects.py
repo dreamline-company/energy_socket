@@ -18,4 +18,9 @@ class CellAlarmTypesEnum(Enum):
     DIFF = "Дифференциальная защита"
     GAS = "Газовая защита трансформатора"
     GROUND = "Земля в сети"
+    DugZ = "Дуговая з."
+    GroundProtection = "Земля з."
+    AvarOtkl = "Аварийное откл."
+    MaxProtection = "Макс з."
+
 
