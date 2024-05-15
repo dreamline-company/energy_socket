@@ -117,22 +117,22 @@ def sql_data(arD):
 
             chrp_data = json.loads(arD[5].replace('None', 'null'))
             if chrp_data:
-                if chrp_data["IR"]:
+                if "IR" in chrp_data and chrp_data["IR"]:
                     chrp_sql += "motor_current_ir=" + str(chrp_data["IR"])
                     motor_current_ir = chrp_data["IR"]
-                if chrp_data["KW"]:
+                if "KW" in chrp_data and chrp_data["KW"]:
                     chrp_sql += ",kwt_day_kw=" + str(chrp_data["KW"])
                     kwt_day_kw = chrp_data["KW"]
-                if chrp_data["SW"]:
+                if "SW" in chrp_data and chrp_data["SW"]:
                     chrp_sql += ",state_word_sw=" + str(chrp_data["SW"])
                     state_word_sw = chrp_data["SW"]
-                if chrp_data["P"]:
+                if "P" in chrp_data and chrp_data["P"]:
                     chrp_sql += ",pump_fullness_p=" + str(chrp_data["P"])
                     pump_fullness_p = chrp_data["P"]
-                if chrp_data["SH"]:
+                if "SH" in chrp_data and chrp_data["SH"]:
                     chrp_sql += ",pump_speed_sh=" + str(chrp_data["SH"])
                     pump_speed_sh = chrp_data["SH"]
-                if chrp_data["KM"]:
+                if "KM" in chrp_data and chrp_data["KM"]:
                     chrp_sql += ",motor_torque_km=" + str(chrp_data["KM"])
                     motor_torque_km = chrp_data["KM"]
 
@@ -281,7 +281,7 @@ ServerSocket.listen()
 while True:
     # принимаем соединение от клиента
     # sleep(randint(1, 5))
-    sleep(1)
+    sleep(0.7)
     Client, new_socket = ServerSocket.accept()
     Client.settimeout(60)
     print("Connection from: " + new_socket[0] + ":" + str(new_socket[1]))
