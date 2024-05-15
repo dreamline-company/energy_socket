@@ -20,7 +20,9 @@ class CellAlarmTypesEnum(Enum):
     GROUND = "Земля в сети"
     DugZ = "Дуговая з."
     GroundProtection = "Земля з."
+    GroundOnLine = "Земля на линии"
     AvarOtkl = "Аварийное откл."
     MaxProtection = "Макс з."
+    Cut_Off = "Отсечка"
 
 
