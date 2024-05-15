@@ -4,7 +4,7 @@ regular
 import logging
 import logging.config
 import database.db as db
-
+from service.objects_cell_data import COUNTER_ORDER
 
 logging.config.fileConfig("logging.conf")
 
@@ -146,7 +146,12 @@ def insert_ce303_counter_data(counters_params):
                 str(counter_param[1])[1:] if len(str(counters_params[1])) > 1
                 else str(counter_param[1])
             )
-            cell = counter_param[2]
+            counter_cell = counter_param[2]
+            real_cell = COUNTER_ORDER.get(counter_cell)
+            if real_cell:
+                cell = real_cell
+            else:
+                cell = counter_cell
             a_voltage = counter_param[3]
             b_voltage = counter_param[4]
             c_voltage = counter_param[5]
