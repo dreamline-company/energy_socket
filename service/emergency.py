@@ -375,17 +375,30 @@ def create_flex_emergency(data):
         alarms = []
         for di_id, type_ in data["values"].items():
             bin_value = joined_list[di_id - 1]
+            if object_num == 23:  # TODO: delete this 💩 after fixing DI inputs
+                cell_status["on_off"] = 1
             if bin_value == "1":
-                if type_ == CellAlarmTypesEnum.On:
-                    cell_status["on_off"] = 1
-                if type_ == CellAlarmTypesEnum.Off:
-                    cell_status["on_off"] = 0
+                if object_num in [23, 30]:  # TODO: in future need to correct DI inputs in that Shkaf then we can remove that check logic
+                    if object_num == 30:
+                        if type_ == CellAlarmTypesEnum.Off:
+                            cell_status["on_off"] = 1
+                        if type_ == CellAlarmTypesEnum.On:
+                            cell_status["on_off"] = 0
+                    if object_num == 23:
+                        if type_ == CellAlarmTypesEnum.Off:
+                            cell_status["on_off"] = 0
+                else:
+                    if type_ == CellAlarmTypesEnum.On:
+                        cell_status["on_off"] = 1
+                    if type_ == CellAlarmTypesEnum.Off:
+                        cell_status["on_off"] = 0
                 if type_ != CellAlarmTypesEnum.On and type_ != CellAlarmTypesEnum.Off:
                     alarms.append(type_.value)
             reversed_cell_bin += bin_value
         if alarms:
             cell_status["working"] = 0
             oil_field_working = False
+        print(cell, alarms, cell_status)
         cell_bin = reversed_cell_bin[::-1]
         new_cell_values.append(int(cell_bin, 2))
         cursor.execute(
