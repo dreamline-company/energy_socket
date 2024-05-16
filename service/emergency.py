@@ -404,7 +404,7 @@ def create_flex_emergency(data):
     new_values_tuple = (
             (
                 values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
-            ) + tuple(new_cell_values)
+            ) + tuple(new_cell_values) + tuple(["0"] * (len(insert_symbols.split(',')) - len(new_values_tuple)))
     )
     cursor.execute(
         f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
