@@ -697,6 +697,85 @@ FLEX_DI_OBJECTS = {
             }
         },
     },
+    30: {
+        12: {
+            "max_alarms": 1,
+            "values": {
+                3: CellAlarmTypesEnum.MTZ,
+                4: CellAlarmTypesEnum.Cut_Off,
+                5: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        10: {
+            "max_alarms": 1,
+            "values": {
+                8: CellAlarmTypesEnum.MTZ,
+                9: CellAlarmTypesEnum.Cut_Off,
+                10: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        8: {
+            "max_alarms": 2,
+            "values": {
+                13: CellAlarmTypesEnum.MTZ,
+                14: CellAlarmTypesEnum.Cut_Off,
+                15: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        6: {
+            "max_alarms": 2,
+            "values": {
+                16: CellAlarmTypesEnum.GROUND,
+            }
+        },
+        4: {
+            "max_alarms": 2,
+            "values": {
+                19: CellAlarmTypesEnum.AVR,
+                20: CellAlarmTypesEnum.MTZ_boost,
+                21: CellAlarmTypesEnum.ZFZ,
+            }
+        },
+        1: {
+            "max_alarms": 2,
+            "values": {
+                24: CellAlarmTypesEnum.AVR,
+                25: CellAlarmTypesEnum.ZFZ_sec_1,
+                26: CellAlarmTypesEnum.ZFZ_sec_2,
+            }
+        },
+        3: {
+            "max_alarms": 2,
+            "values": {
+                29: CellAlarmTypesEnum.AVR,
+                30: CellAlarmTypesEnum.MTZ_boost,
+            }
+        },
+        5: {
+            "max_alarms": 2,
+            "values": {
+                33: CellAlarmTypesEnum.MTZ,
+                34: CellAlarmTypesEnum.Cut_Off,
+                35: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        9: {
+            "max_alarms": 2,
+            "values": {
+                38: CellAlarmTypesEnum.MTZ,
+                39: CellAlarmTypesEnum.Cut_Off,
+                40: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        11: {
+            "max_alarms": 1,
+            "values": {
+                43: CellAlarmTypesEnum.MTZ,
+                44: CellAlarmTypesEnum.Cut_Off,
+                45: CellAlarmTypesEnum.DugZ,
+            }
+        },
+    },
 }
 
 COUNTER_ORDER = {

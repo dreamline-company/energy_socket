@@ -24,5 +24,13 @@ class CellAlarmTypesEnum(Enum):
     AvarOtkl = "Аварийное откл."
     MaxProtection = "Макс з."
     Cut_Off = "Отсечка"
+    MTZ_boost = "Ускорение МТЗ"
+    ZFZ = "ЗФЗ"
+    ZFZ_sec_1 = "ЗФЗ 1 сек."
+    ZFZ_sec_2 = "ЗФЗ 2 сек."
+
+
+
+
 
 
