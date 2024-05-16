@@ -463,7 +463,7 @@ FLEX_DI_OBJECTS = {
         },
     },
     23: {
-        12: {
+        22: {
             "max_alarms": 4,
             "values": {
                 1: CellAlarmTypesEnum.Off,
