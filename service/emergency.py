@@ -401,10 +401,16 @@ def create_flex_emergency(data):
         for alarm in alarms:
             update_n_lenta(cnx, cursor, alarm, object_num, cell, oil_field_name)
 
+    tmp_tuple = (
+            (
+                values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
+            ) + tuple(new_cell_values)
+    )
+
     new_values_tuple = (
             (
                 values_tuple[:3] if "c0" in params_tuple else values_tuple[:2]
-            ) + tuple(new_cell_values) + tuple(["0"] * (len(insert_symbols.split(',')) - len(new_values_tuple)))
+            ) + tuple(new_cell_values) + tuple(["0"] * (len(insert_symbols.split(',')) - len(tmp_tuple)))
     )
     cursor.execute(
         f"INSERT INTO emergency ({params_tuple}) VALUES ({insert_symbols})",
