@@ -466,17 +466,17 @@ FLEX_DI_OBJECTS = {
         22: {
             "max_alarms": 4,
             "values": {
-                1: CellAlarmTypesEnum.Off,
+                1: CellAlarmTypesEnum.On,
                 2: CellAlarmTypesEnum.DugZ,
                 3: CellAlarmTypesEnum.Cut_Off,
                 4: CellAlarmTypesEnum.MTZ,
-                5: CellAlarmTypesEnum.Off,
+                5: CellAlarmTypesEnum.On,
             }
         },
         20: {
             "max_alarms": 5,
             "values": {
-                6: CellAlarmTypesEnum.Off,
+                6: CellAlarmTypesEnum.On,
                 7: CellAlarmTypesEnum.Cut_Off,
                 8: CellAlarmTypesEnum.GroundOnLine,
                 9: CellAlarmTypesEnum.DugZ,
@@ -486,7 +486,7 @@ FLEX_DI_OBJECTS = {
         18: {
             "max_alarms": 3,
             "values": {
-                11: CellAlarmTypesEnum.Off,
+                11: CellAlarmTypesEnum.On,
                 12: CellAlarmTypesEnum.MTZ,
                 13: CellAlarmTypesEnum.Cut_Off,
                 14: CellAlarmTypesEnum.DugZ,
@@ -495,7 +495,7 @@ FLEX_DI_OBJECTS = {
         16: {
             "max_alarms": 3,
             "values": {
-                16: CellAlarmTypesEnum.Off,
+                16: CellAlarmTypesEnum.On,
                 17: CellAlarmTypesEnum.Cut_Off,
                 18: CellAlarmTypesEnum.GROUND,
                 19: CellAlarmTypesEnum.MTZ,
@@ -504,16 +504,16 @@ FLEX_DI_OBJECTS = {
         14: {
             "max_alarms": 3,
             "values": {
-                21: CellAlarmTypesEnum.Off,
+                21: CellAlarmTypesEnum.On,
                 22: CellAlarmTypesEnum.MaxProtection,
                 23: CellAlarmTypesEnum.AVR,
-                25: CellAlarmTypesEnum.Off,
+                25: CellAlarmTypesEnum.On,
             }
         },
         10: {
             "max_alarms": 4,
             "values": {
-                26: CellAlarmTypesEnum.Off,
+                26: CellAlarmTypesEnum.On,
                 27: CellAlarmTypesEnum.MaxProtection,
                 28: CellAlarmTypesEnum.Cut_Off,
                 29: CellAlarmTypesEnum.DugZ,
@@ -530,7 +530,7 @@ FLEX_DI_OBJECTS = {
         6: {
             "max_alarms": 4,
             "values": {
-                34: CellAlarmTypesEnum.Off,
+                34: CellAlarmTypesEnum.On,
                 35: CellAlarmTypesEnum.MaxProtection,
                 36: CellAlarmTypesEnum.Cut_Off,
                 37: CellAlarmTypesEnum.DugZ,
@@ -540,16 +540,16 @@ FLEX_DI_OBJECTS = {
         3: {
             "max_alarms": 2,
             "values": {
-                39: CellAlarmTypesEnum.Off,
+                39: CellAlarmTypesEnum.On,
                 40: CellAlarmTypesEnum.MaxProtection,
                 41: CellAlarmTypesEnum.AVR,
-                43: CellAlarmTypesEnum.Off,
+                43: CellAlarmTypesEnum.On,
             }
         },
         5: {
             "max_alarms": 4,
             "values": {
-                44: CellAlarmTypesEnum.Off,
+                44: CellAlarmTypesEnum.On,
                 45: CellAlarmTypesEnum.MaxProtection,
                 46: CellAlarmTypesEnum.Cut_Off,
                 47: CellAlarmTypesEnum.DugZ,
@@ -559,17 +559,17 @@ FLEX_DI_OBJECTS = {
         7: {
             "max_alarms": 2,
             "values": {
-                49: CellAlarmTypesEnum.Off,
+                49: CellAlarmTypesEnum.On,
                 50: CellAlarmTypesEnum.Cut_Off,
                 51: CellAlarmTypesEnum.MaxProtection,
                 52: CellAlarmTypesEnum.GROUND,
-                53: CellAlarmTypesEnum.Off,
+                53: CellAlarmTypesEnum.On,
             }
         },
         9: {
             "max_alarms": 2,
             "values": {
-                54: CellAlarmTypesEnum.Off,
+                54: CellAlarmTypesEnum.On,
                 55: CellAlarmTypesEnum.MaxProtection,
                 56: CellAlarmTypesEnum.Cut_Off,
                 57: CellAlarmTypesEnum.DugZ,
@@ -579,35 +579,35 @@ FLEX_DI_OBJECTS = {
         13: {
             "max_alarms": 2,
             "values": {
-                59: CellAlarmTypesEnum.Off,
+                59: CellAlarmTypesEnum.On,
                 60: CellAlarmTypesEnum.MaxProtection,
-                61: CellAlarmTypesEnum.Off,
+                61: CellAlarmTypesEnum.On,
             }
         },
         15: {
             "max_alarms": 2,
             "values": {
-                62: CellAlarmTypesEnum.Off,
+                62: CellAlarmTypesEnum.On,
                 63: CellAlarmTypesEnum.MaxProtection,
                 64: CellAlarmTypesEnum.Cut_Off,
                 65: CellAlarmTypesEnum.DugZ,
-                66: CellAlarmTypesEnum.Off,
+                66: CellAlarmTypesEnum.On,
             }
         },
         17: {
             "max_alarms": 2,
             "values": {
-                67: CellAlarmTypesEnum.Off,
+                67: CellAlarmTypesEnum.On,
                 68: CellAlarmTypesEnum.MTZ,
                 69: CellAlarmTypesEnum.Cut_Off,
                 70: CellAlarmTypesEnum.DugZ,
-                71: CellAlarmTypesEnum.Off,
+                71: CellAlarmTypesEnum.On,
             }
         },
         19: {
             "max_alarms": 2,
             "values": {
-                72: CellAlarmTypesEnum.Off,
+                72: CellAlarmTypesEnum.On,
                 73: CellAlarmTypesEnum.MTZ,
                 74: CellAlarmTypesEnum.Cut_Off,
                 75: CellAlarmTypesEnum.DugZ,
@@ -617,7 +617,7 @@ FLEX_DI_OBJECTS = {
         21: {
             "max_alarms": 2,
             "values": {
-                77: CellAlarmTypesEnum.Off,
+                77: CellAlarmTypesEnum.On,
                 78: CellAlarmTypesEnum.MTZ,
                 79: CellAlarmTypesEnum.Cut_Off,
                 80: CellAlarmTypesEnum.DugZ,
