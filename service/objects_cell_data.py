@@ -610,6 +610,104 @@ FLEX_DI_OBJECTS = {
             }
         },
     },
+    29: {
+        4: {
+            "values": {
+                1: CellAlarmTypesEnum.Off,
+                2: CellAlarmTypesEnum.MTZ,
+                3: CellAlarmTypesEnum.Cut_Off,
+                4: CellAlarmTypesEnum.ZFZ,
+                5: CellAlarmTypesEnum.FZ,
+            }
+        },
+        8: {
+            "values": {
+                6: CellAlarmTypesEnum.Off,
+                7: CellAlarmTypesEnum.MTZ,
+                8: CellAlarmTypesEnum.Cut_Off,
+                9: CellAlarmTypesEnum.ZFZ,
+                10: CellAlarmTypesEnum.FZ,
+            }
+        },
+        10: {
+            "values": {
+                11: CellAlarmTypesEnum.Off,
+                12: CellAlarmTypesEnum.MTZ,
+                13: CellAlarmTypesEnum.Work_Permit,
+                14: CellAlarmTypesEnum.ZFZ,
+                15: CellAlarmTypesEnum.FZ,
+            }
+        },
+        12: {
+            "values": {
+                16: CellAlarmTypesEnum.Off,
+                17: CellAlarmTypesEnum.MTZ,
+                18: CellAlarmTypesEnum.Cut_Off,
+                19: CellAlarmTypesEnum.ZFZ,
+                20: CellAlarmTypesEnum.FZ,
+            }
+        },
+        14: {
+            "values": {
+                21: CellAlarmTypesEnum.Off,
+                22: CellAlarmTypesEnum.MTZ,
+                23: CellAlarmTypesEnum.Cut_Off,
+                24: CellAlarmTypesEnum.ZFZ,
+                25: CellAlarmTypesEnum.FZ,
+            }
+        },
+        15: {
+            "values": {
+                26: CellAlarmTypesEnum.Off,
+                27: CellAlarmTypesEnum.MTZ,
+                28: CellAlarmTypesEnum.ZFZ,
+                29: CellAlarmTypesEnum.AVR,
+            }
+        },
+        13: {
+            "values": {
+                31: CellAlarmTypesEnum.ZFZ,
+                32: CellAlarmTypesEnum.FZ,
+                33: CellAlarmTypesEnum.Cut_Off,
+            }
+        },
+        11: {
+            "values": {
+                34: CellAlarmTypesEnum.Off,
+                35: CellAlarmTypesEnum.MTZ,
+                36: CellAlarmTypesEnum.Cut_Off,
+                37: CellAlarmTypesEnum.FZ,
+                38: CellAlarmTypesEnum.AvarOtkl,
+            }
+        },
+        9: {
+            "values": {
+                39: CellAlarmTypesEnum.Off,
+                40: CellAlarmTypesEnum.MTZ,
+                41: CellAlarmTypesEnum.Cut_Off,
+                42: CellAlarmTypesEnum.ZFZ,
+                43: CellAlarmTypesEnum.FZ,
+            }
+        },
+        7: {
+            "values": {
+                44: CellAlarmTypesEnum.Off,
+                45: CellAlarmTypesEnum.MTZ,
+                46: CellAlarmTypesEnum.Cut_Off,
+                47: CellAlarmTypesEnum.ZFZ,
+                48: CellAlarmTypesEnum.FZ,
+            }
+        },
+        3: {
+            "values": {
+                49: CellAlarmTypesEnum.Off,
+                50: CellAlarmTypesEnum.MTZ,
+                51: CellAlarmTypesEnum.Cut_Off,
+                52: CellAlarmTypesEnum.ZFZ,
+                53: CellAlarmTypesEnum.FZ,
+            }
+        },
+    },
     30: {
         12: {
             "values": {

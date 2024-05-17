@@ -28,6 +28,8 @@ class CellAlarmTypesEnum(Enum):
     ZFZ = "ЗФЗ"
     ZFZ_sec_1 = "ЗФЗ 1 сек."
     ZFZ_sec_2 = "ЗФЗ 2 сек."
+    FZ = "ФЗ"
+    Work_Permit = "Разрешение работы ВВ"
 
 
 
