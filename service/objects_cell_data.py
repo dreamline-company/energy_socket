@@ -610,6 +610,99 @@ FLEX_DI_OBJECTS = {
             }
         },
     },
+    28: {
+        3: {
+            "values": {
+                1: CellAlarmTypesEnum.Off,
+                2: CellAlarmTypesEnum.AVR,
+                3: CellAlarmTypesEnum.MTZ,
+            }
+        },
+        7: {
+            "values": {
+                6: CellAlarmTypesEnum.Off,
+                7: CellAlarmTypesEnum.MTZ,
+                8: CellAlarmTypesEnum.MTO,
+                9: CellAlarmTypesEnum.DugZ,
+                10: CellAlarmTypesEnum.APV,
+            }
+        },
+        9: {
+            "values": {
+                11: CellAlarmTypesEnum.Off,
+                12: CellAlarmTypesEnum.MTZ,
+                13: CellAlarmTypesEnum.MTO,
+                14: CellAlarmTypesEnum.Closure_Grounded,
+                15: CellAlarmTypesEnum.DugZ,
+            }
+        },
+        11: {
+            "values": {
+                16: CellAlarmTypesEnum.Off,
+                17: CellAlarmTypesEnum.MTZ,
+                18: CellAlarmTypesEnum.MTO,
+                19: CellAlarmTypesEnum.DugZ,
+                20: CellAlarmTypesEnum.APV,
+            }
+        },
+        13: {
+            "values": {
+                21: CellAlarmTypesEnum.Off,
+                22: CellAlarmTypesEnum.MTO,
+                23: CellAlarmTypesEnum.MTZ,
+                24: CellAlarmTypesEnum.DugZ,
+                25: CellAlarmTypesEnum.APV,
+            }
+        },
+        15: {
+            "values": {
+                26: CellAlarmTypesEnum.Off,
+                27: CellAlarmTypesEnum.MTZ,
+                28: CellAlarmTypesEnum.AVR,
+            }
+        },
+        14: {
+            "values": {
+                31: CellAlarmTypesEnum.MTO,
+                32: CellAlarmTypesEnum.DugZ,
+                33: CellAlarmTypesEnum.APV,
+            }
+        },
+        12: {
+            "values": {
+                34: CellAlarmTypesEnum.Off,
+                35: CellAlarmTypesEnum.MTZ,
+                36: CellAlarmTypesEnum.MTO,
+                37: CellAlarmTypesEnum.APV,
+            }
+        },
+        10: {
+            "values": {
+                39: CellAlarmTypesEnum.Off,
+                40: CellAlarmTypesEnum.MTZ,
+                41: CellAlarmTypesEnum.MTO,
+                42: CellAlarmTypesEnum.DugZ,
+                43: CellAlarmTypesEnum.Closure_Grounded,
+            }
+        },
+        8: {
+            "values": {
+                44: CellAlarmTypesEnum.Off,
+                45: CellAlarmTypesEnum.MTZ,
+                46: CellAlarmTypesEnum.MTO,
+                47: CellAlarmTypesEnum.DugZ,
+                48: CellAlarmTypesEnum.APV,
+            }
+        },
+        4: {
+            "values": {
+                49: CellAlarmTypesEnum.Off,
+                50: CellAlarmTypesEnum.MTZ,
+                51: CellAlarmTypesEnum.DugZ,
+                52: CellAlarmTypesEnum.AVR,
+            }
+        },
+    },
     29: {
         4: {
             "values": {
@@ -817,3 +910,10 @@ COUNTER_ORDER = {
         16: 21
     }
 }
+
+
+OBJECTS_WITH_WRONG_DI_INPUTS = [23, 28, 29, 30]
+
+OBJECTS_WITH_REVERSED_FIRST_BIT = [23, 28, 29]
+
+OBJECTS_WITH_REVERSED_FIRST_AND_SECOND_BIT = [30]

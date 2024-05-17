@@ -30,6 +30,7 @@ class CellAlarmTypesEnum(Enum):
     ZFZ_sec_2 = "ЗФЗ 2 сек."
     FZ = "ФЗ"
     Work_Permit = "Разрешение работы ВВ"
+    Closure_Grounded = "Замыкание наземно"
 
 
 
