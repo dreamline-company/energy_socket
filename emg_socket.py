@@ -164,9 +164,9 @@ def sql_data(arD):
         print(f"Insert data into {sTable}: {arD}")
         cnx.commit()
         res = True
-    except:
+    except Exception as e:
         res = False
-        print('Данные в БД не записаны!!!!!!!!!!!!!!!!!')
+        print('Данные в БД не записаны!!!!!!!!!!!!!!!!!', e)
     finally:    
         cursor.close()
     return res
