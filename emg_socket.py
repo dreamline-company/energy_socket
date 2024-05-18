@@ -93,7 +93,7 @@ def sql_data(arD):
             print('Нет подключения к базе данных!')
             return res
     
-    cursor = cnx.cursor()
+    cursor = cnx.cursor(buffered=True)
     insert_sql = ''
     skv_dan = ''
     pak_type = int(arD[0])
