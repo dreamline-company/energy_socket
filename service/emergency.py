@@ -4,7 +4,10 @@ emergency
 import logging
 import logging.config
 import database.db as db
-from service.objects_cell_data import FLEX_DI_OBJECTS
+from service.objects_cell_data import (
+    FLEX_DI_OBJECTS,
+    OBJECTS_WITH_REVERSED_OFF_ALARM,
+)
 from service.enums.objects import CellAlarmTypesEnum
 
 logging.config.fileConfig("logging.conf")
@@ -375,18 +378,12 @@ def create_flex_emergency(data):
         alarms = []
         for di_id, type_ in data["values"].items():
             bin_value = joined_list[di_id - 1]
-            if object_num == 23:  # TODO: delete this 💩 after fixing DI inputs
+            if object_num in OBJECTS_WITH_REVERSED_OFF_ALARM:  # TODO: delete this 💩 after fixing DI inputs
                 cell_status["on_off"] = 1
             if bin_value == "1":
-                if object_num in [23, 30]:  # TODO: in future need to correct DI inputs in that Shkaf then we can remove that check logic
-                    if object_num == 30:
-                        if type_ == CellAlarmTypesEnum.Off:
-                            cell_status["on_off"] = 1
-                        if type_ == CellAlarmTypesEnum.On:
-                            cell_status["on_off"] = 0
-                    if object_num == 23:
-                        if type_ == CellAlarmTypesEnum.Off:
-                            cell_status["on_off"] = 0
+                if object_num in OBJECTS_WITH_REVERSED_OFF_ALARM:  # TODO: in future need to correct DI inputs in that Shkaf then we can remove that check logic
+                    if type_ == CellAlarmTypesEnum.Off:
+                        cell_status["on_off"] = 0
                 else:
                     if type_ == CellAlarmTypesEnum.On:
                         cell_status["on_off"] = 1
@@ -394,6 +391,8 @@ def create_flex_emergency(data):
                         cell_status["on_off"] = 0
                 if type_ != CellAlarmTypesEnum.On and type_ != CellAlarmTypesEnum.Off:
                     alarms.append(type_.value)
+            if type_ == CellAlarmTypesEnum.Off and bin_value == "0":
+                bin_value = "1"
             reversed_cell_bin += bin_value
         if alarms:
             cell_status["working"] = 0
