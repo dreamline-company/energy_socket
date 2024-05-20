@@ -205,7 +205,7 @@ def multi_threaded_client(connection, address):
 
                 if sql_data(arDan) == True:
                     ar_cmd = get_cmd(int(arDan[1]))
-                    print('ar_cmd',ar_cmd,type(ar_cmd))
+                    # print('ar_cmd',ar_cmd,type(ar_cmd))
                     #if isinstance(ar_cmd, tuple):
                     if ar_cmd != None:
                         id = ar_cmd[0]
