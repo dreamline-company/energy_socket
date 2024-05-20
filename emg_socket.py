@@ -161,7 +161,7 @@ def sql_data(arD):
 
     try:
         cursor.execute(insert_sql)
-        print(f"Insert data into {sTable}: {arD}")
+        #print(f"Insert data into {sTable}: {arD}")
         cnx.commit()
         res = True
     except Exception as e:
