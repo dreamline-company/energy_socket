@@ -152,6 +152,8 @@ def sql_data(arD):
         pass
 
     if len(chrp_sql) > 0 and 'set  where' not in chrp_sql:
+        if 'set ,' in chrp_sql:
+            chrp_sql = chrp_sql.replace('set ,', 'set ')
         try:
             cursor.execute(chrp_sql)
             cnx.commit()
