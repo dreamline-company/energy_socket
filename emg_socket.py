@@ -117,22 +117,22 @@ def sql_data(arD):
 
             chrp_data = json.loads(arD[5].replace('None', 'null'))
             if chrp_data:
-                if "IR" in chrp_data and chrp_data["IR"]:
+                if "IR" in chrp_data and chrp_data["IR"] and chrp_data["IR"] < 65500:
                     chrp_sql += "motor_current_ir=" + str(chrp_data["IR"])
                     motor_current_ir = chrp_data["IR"]
-                if "KW" in chrp_data and chrp_data["KW"]:
+                if "KW" in chrp_data and chrp_data["KW"] and chrp_data["IR"] < 65500:
                     chrp_sql += ",kwt_day_kw=" + str(chrp_data["KW"])
                     kwt_day_kw = chrp_data["KW"]
-                if "SW" in chrp_data and chrp_data["SW"]:
+                if "SW" in chrp_data and chrp_data["SW"] and chrp_data["IR"] < 65500:
                     chrp_sql += ",state_word_sw=" + str(chrp_data["SW"])
                     state_word_sw = chrp_data["SW"]
-                if "P" in chrp_data and chrp_data["P"]:
+                if "P" in chrp_data and chrp_data["P"] and chrp_data["IR"] < 65500:
                     chrp_sql += ",pump_fullness_p=" + str(chrp_data["P"])
                     pump_fullness_p = chrp_data["P"]
-                if "SH" in chrp_data and chrp_data["SH"]:
+                if "SH" in chrp_data and chrp_data["SH"] and chrp_data["IR"] < 65500:
                     chrp_sql += ",pump_speed_sh=" + str(chrp_data["SH"])
                     pump_speed_sh = chrp_data["SH"]
-                if "KM" in chrp_data and chrp_data["KM"]:
+                if "KM" in chrp_data and chrp_data["KM"] and chrp_data["IR"] < 65500:
                     chrp_sql += ",motor_torque_km=" + str(chrp_data["KM"])
                     motor_torque_km = chrp_data["KM"]
 
