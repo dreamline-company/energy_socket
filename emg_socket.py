@@ -31,7 +31,7 @@ def cmd_ok(id):
     global cnx
     res = True
     try:
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(buffered=True)
         dt = datetime.now()
         dt = dt.strftime('%Y-%m-%d %H:%M:%S')
         insert_sql = f"UPDATE tx_config SET dt2 = '{dt}' WHERE id = {id}"
@@ -50,7 +50,7 @@ def get_cmd(skv_num):
     global cnx
     cmd = None
     try:
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(buffered=True)
         insert_sql = f"SELECT id, cmd FROM tx_config WHERE skv_num = {skv_num} AND dt2 IS NULL"
         cursor.execute(insert_sql)
         cmd = cursor.fetchone()
