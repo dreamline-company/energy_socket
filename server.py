@@ -74,8 +74,8 @@ def insert_table_data(data, table_id):
         if data['obj_num'] in FLEX_DI_OBJECTS.keys():
             # check if an object has unordered DI inputs
             emergency.create_flex_emergency(data)
-        # else:
-        #     emergency.create_emergency(data)
+        else:
+            emergency.create_emergency(data)
 
     return -1
 
